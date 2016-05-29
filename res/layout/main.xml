@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent">
+
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/new_media_name"
+        android:onClick="newMediaCounter"/>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/random_button_name"
+            android:onClick="chooseRandomMedia"
+            android:layout_weight="0.5"/>
+        <Button
+            android:id="@+id/lock_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/unlock_inc"
+            android:onClick="changeLockState"
+            android:layout_weight="0.5"/>
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/media_list"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+    </ListView>
+</LinearLayout>
+

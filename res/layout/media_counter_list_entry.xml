@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+    <CheckBox
+        android:id="@+id/done_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"/>
+    <TextView
+        android:id="@+id/name_label"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:onClick="viewMediaInfo"
+        android:text="name"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:paddingLeft="@dimen/edge_padding"/>
+
+    <TextView
+        android:id="@+id/count_label"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:paddingRight="@dimen/edge_padding"/>
+
+    <Button
+        android:id="@+id/inc_button"
+        android:text="@string/increment"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_width="@dimen/view_button_height"
+        android:layout_height="wrap_content"
+        android:onClick="incMediaCount"/>
+    <Button
+        android:id="@+id/dec_button"
+        android:text="@string/decrement"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_width="@dimen/view_button_height"
+        android:layout_height="wrap_content"
+        android:onClick="decMediaCount"
+    />
+</LinearLayout>

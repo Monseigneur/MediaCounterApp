@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Media Counter</string>
+    <string name="media_name_hint">Media Name</string>
+    <string name="increment">+</string>
+    <string name="decrement">-</string>
+    <string name="new_media_name">New Media</string>
+    <string name="unlock_inc">Unlock</string>
+    <string name="lock_inc">Lock</string>
+    <string name="random_button_name">Random Selection</string>
+    <string name="episode_number">Episode Number</string>
+    <string name="episode_date">Date Watched</string>
+    <string name="complete">Complete</string>
+    <string name="not_complete">Not Complete</string>
+    <string name="add_new_media_button">Add</string>
+    <string name="add_new_media_label">Add a New Media Counter</string>
+
+</resources>
