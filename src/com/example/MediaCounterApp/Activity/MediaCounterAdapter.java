@@ -71,8 +71,6 @@ public class MediaCounterAdapter extends BaseAdapter {//implements ListAdapter {
             cb.setVisibility(View.GONE);
         }
 
-        //configComplete(cb, md);
-
         TextView name = (TextView)itemView.findViewById(R.id.name_label);
         name.setText(md.getMediaName());
 
@@ -98,30 +96,6 @@ public class MediaCounterAdapter extends BaseAdapter {//implements ListAdapter {
         {
             checkBoxEnable = enable;
             notifyDataSetChanged();
-        }
-    }
-
-    private void configComplete(CheckBox cb, MediaData md)
-    {
-        boolean checkBoxState = cb.isChecked();
-
-        if (checkBoxState && md.isComplete())
-        {
-            // Box is checked and media is complete. Do nothing.
-        }
-        else if (checkBoxState && !md.isComplete())
-        {
-            // Box is checked, media is not currently complete.
-            md.setComplete(true);
-        }
-        else if (!checkBoxState && md.isComplete())
-        {
-            // Box is not checked and media is complete.
-            cb.setChecked(true);
-        }
-        else
-        {
-            // Box is not checked, and media is not complete. Do nothing.
         }
     }
 }

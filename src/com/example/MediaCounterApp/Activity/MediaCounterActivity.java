@@ -2,38 +2,31 @@ package com.example.MediaCounterApp.Activity;
 
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
-import com.example.MediaCounterApp.Model.MediaData;
+import com.example.MediaCounterApp.Model.MediaCounterDB;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import com.example.MediaCounterApp.Model.MediaData;
 import com.example.MediaCounterApp.R;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Scanner;
 
 public class MediaCounterActivity extends Activity
 {
     public static final int NEW_MEDIA_COUNTER_REQUEST = 1;
     public static final String MEDIA_COUNTER_NAME = "media_name";
-    private static final String DATA_FILENAME = "media_counter_data";
 
     private List<MediaData> mdList;
     private MediaCounterAdapter adapter;
+
+    private MediaCounterDB db;
 
     private ListView lv;
     private boolean incLocked;
@@ -47,7 +40,9 @@ public class MediaCounterActivity extends Activity
 
         defaultButtonBg = findViewById(R.id.lock_button).getBackground();
 
-        mdList = getData();
+        db = new MediaCounterDB(this);
+        mdList = db.getMediaCounters();
+        Log.i("onCreate", "list = " + mdList);
 
         lv = (ListView) findViewById(R.id.media_list);
 
@@ -61,9 +56,7 @@ public class MediaCounterActivity extends Activity
     @Override
     public void onPause()
     {
-        writeData(mdList);
         super.onPause();
-
     }
 
     /**
@@ -96,7 +89,9 @@ public class MediaCounterActivity extends Activity
         LinearLayout ll = (LinearLayout) view.getParent();
         int pos = lv.getPositionForView(ll);
 
-        b.putSerializable(MediaInfoActivity.MEDIA_INFO, mdList.get(pos));
+        MediaData md = mdList.get(pos);
+        md.setEpDates(db.getEpDates(md.getMediaName()));
+        b.putSerializable(MediaInfoActivity.MEDIA_INFO, md);
         intent.putExtras(b);
 
         startActivity(intent);
@@ -109,6 +104,8 @@ public class MediaCounterActivity extends Activity
             if (resultCode == RESULT_OK)
             {
                 String name = data.getStringExtra(MEDIA_COUNTER_NAME);
+
+                db.addMedia(name);
 
                 MediaData md = new MediaData(name);
 
@@ -171,77 +168,21 @@ public class MediaCounterActivity extends Activity
 
             md.adjustCount(increment);
 
+            if (increment)
+            {
+                db.addEpisode(md.getMediaName());
+            }
+            else
+            {
+                db.deleteEpisode(md.getMediaName());
+            }
+
             if (!increment && (md.getCount() < 0))
             {
                 adapter.remove(pos);
             }
 
             adapter.notifyDataSetChanged();
-        }
-    }
-
-    // File stuff
-
-    private List<MediaData> getData()
-    {
-        List<MediaData> mediaDataList = new ArrayList<MediaData>();
-        Scanner input = null;
-        try
-        {
-            File f = new File(getApplicationContext().getFilesDir(), DATA_FILENAME);
-            if (f.exists())
-            {
-                input = new Scanner(openFileInput(DATA_FILENAME));
-
-                while (input.hasNextLine())
-                {
-                    String firstLine = input.nextLine();
-                    String secondLine = input.nextLine();
-
-                    MediaData md = MediaData.parseString(firstLine, secondLine);
-                    Log.i("getData", md.toString());
-                    mediaDataList.add(md);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        finally
-        {
-            if (input != null)
-            {
-                input.close();
-            }
-        }
-
-        return mediaDataList;
-    }
-
-    private void writeData(List<MediaData> mdList)
-    {
-        PrintStream output = null;
-        try
-        {
-            output = new PrintStream(openFileOutput(DATA_FILENAME, Context.MODE_PRIVATE));
-
-            for (MediaData md : mdList)
-            {
-                Log.i("writeData", md.toString());
-                output.println(MediaData.writeOut(md));
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        finally
-        {
-            if (output != null)
-            {
-                output.close();
-            }
         }
     }
 }

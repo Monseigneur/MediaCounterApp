@@ -8,9 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.example.MediaCounterApp.Model.MediaData;
@@ -45,14 +43,9 @@ public class MediaInfoActivity extends Activity
         countLabel.setText(md.getCount() + "");
 
         TextView completeLabel = (TextView)findViewById(R.id.media_info_complete_status);
-        if (md.isComplete())
-        {
-            completeLabel.setText(R.string.complete);
-        }
-        else
-        {
-            completeLabel.setText(R.string.not_complete);
-        }
+
+        completeLabel.setText(R.string.not_complete);
+
 
         ListView listView = (ListView)findViewById(R.id.media_info_ep_list);
         Log.i("before constructor", R.layout.media_info_list_entry + " " + md.getEpDates());
