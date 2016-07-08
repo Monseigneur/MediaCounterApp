@@ -16,7 +16,6 @@ import com.example.MediaCounterApp.Model.MediaData;
 import com.example.MediaCounterApp.R;
 
 import java.util.List;
-import java.util.Random;
 
 public class MediaCounterActivity extends Activity
 {
@@ -60,7 +59,7 @@ public class MediaCounterActivity extends Activity
     }
 
     /**
-        New view methods
+     * New view methods
      */
     public void newMediaCounter(View view)
     {
@@ -73,10 +72,8 @@ public class MediaCounterActivity extends Activity
 
     public void chooseRandomMedia(View view)
     {
-        Random rand = new Random();
-        int index = rand.nextInt(adapter.getCount());
-
-        Toast toast = Toast.makeText(this, mdList.get(index).getMediaName(), Toast.LENGTH_SHORT);
+        String randomMedia = db.getRandomMedia();
+        Toast toast = Toast.makeText(this, randomMedia, Toast.LENGTH_SHORT);
         toast.show();
     }
 

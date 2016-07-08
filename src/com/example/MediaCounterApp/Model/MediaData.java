@@ -74,6 +74,11 @@ public class MediaData implements Serializable
         this.epDates = epDates;
     }
 
+    public boolean isComplete()
+    {
+        return complete;
+    }
+
     public String toString()
     {
         String completeText = (complete) ? " COMPLETE" : "";

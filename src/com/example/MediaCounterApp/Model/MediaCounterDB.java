@@ -10,6 +10,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by Milan on 6/19/2016.
@@ -35,6 +36,11 @@ public class MediaCounterDB extends SQLiteOpenHelper
     private static final String KEY_DATE = "date";
     private static final String[] EPISODES_COLUMNS = {KEY_TID, KEY_EPNUM, KEY_DATE};
 
+    private static final String SQL_PARAMETER = " = ?";
+    private static final String SQL_AND = " and ";
+
+    private static final String UNKNOWN_DATE = "UNKNOWN";
+
     public MediaCounterDB(Context context)
     {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -44,16 +50,16 @@ public class MediaCounterDB extends SQLiteOpenHelper
     public void onCreate(SQLiteDatabase db)
     {
         String createTitleDB = "CREATE TABLE titles ( " +
-                "tid INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "title TEXT, " +
-                "complete_status TEXT )";
+                KEY_TID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                KEY_TITLE + " TEXT, " +
+                KEY_COMPLETE + " TEXT )";
 
         db.execSQL(createTitleDB);
 
         String createEpisodesDB = "CREATE TABLE episodes ( " +
-                "tid INTEGER, " +
-                "epNum INTEGER, " +
-                "date TEXT )";
+                KEY_TID + " INTEGER, " +
+                KEY_EPNUM + " INTEGER, " +
+                KEY_DATE + " TEXT )";
 
         db.execSQL(createEpisodesDB);
     }
@@ -61,8 +67,8 @@ public class MediaCounterDB extends SQLiteOpenHelper
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
     {
-        db.execSQL("DROP TABLE IF EXISTS titles");
-        db.execSQL("DROP TABLE IF EXISTS episodes");
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TITLES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_EPISODES);
 
         this.onCreate(db);
     }
@@ -97,6 +103,11 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
     public void addEpisode(String mediaName)
     {
+        addEpisode(mediaName, true);
+    }
+
+    public void addEpisode(String mediaName, boolean current)
+    {
         int tid = getIdForMedia(mediaName);
 
         if (tid == -1)
@@ -106,18 +117,64 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
 
         // Hack to count
-        List<String> epDates = getEpDates(mediaName);
+        int newEpNumber = getNumEpisodes(mediaName) + 1;
 
         SQLiteDatabase db = this.getWritableDatabase();
 
+        String date;
+        if (current)
+        {
+            date = getCurrentDate();
+        }
+        else
+        {
+            date = UNKNOWN_DATE;
+        }
+
         ContentValues values = new ContentValues();
         values.put(KEY_TID, tid);
-        values.put(KEY_EPNUM, epDates.size() + 1);
-        values.put(KEY_DATE, getCurrentDate());
+        values.put(KEY_EPNUM, newEpNumber);
+        values.put(KEY_DATE, date);
 
         Log.i("addEpisode", values.toString());
 
         db.insert(TABLE_EPISODES, null, values);
+
+        db.close();
+    }
+
+    public void deleteMedia(String mediaName)
+    {
+        int tid = getIdForMedia(mediaName);
+
+        if (tid == -1)
+        {
+            Log.e("deleteMedia", "media does not exist");
+            return;
+        }
+
+        int numEpisodes = getNumEpisodes(mediaName);
+
+        for (int i = 0; i < numEpisodes; i++)
+        {
+            deleteEpisode(mediaName);
+        }
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.beginTransaction();
+        int rowsDeleted = db.delete(TABLE_TITLES, KEY_TID + SQL_PARAMETER, new String[] { String.valueOf(tid) });
+
+        if (rowsDeleted == 1)
+        {
+            db.setTransactionSuccessful();
+        }
+        else
+        {
+            Log.e("deleteMedia", "Deleting media counter removed more than 1 row! rows deleted = " + rowsDeleted);
+        }
+
+        db.endTransaction();
 
         db.close();
     }
@@ -138,13 +195,46 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
         if (!epDates.isEmpty())
         {
-            db.delete(TABLE_EPISODES, KEY_EPNUM + " = ?", new String[] { String.valueOf(epDates.size()) });
-        }
+            db.beginTransaction();
+            int rowsDeleted = db.delete(TABLE_EPISODES, KEY_TID + SQL_PARAMETER + SQL_AND + KEY_EPNUM + SQL_PARAMETER,
+                                        new String[] { String.valueOf(tid), String.valueOf(epDates.size()) });
 
-        if (epDates.size() == 1)
-        {
-            db.delete(TABLE_TITLES, KEY_TID + " = ?", new String[] { String.valueOf(tid) });
+            if (rowsDeleted == 1)
+            {
+                db.setTransactionSuccessful();
+            }
+            else
+            {
+                Log.e("deleteEpisode", "Deleting episode removed more than 1 row! rows deleted = " + rowsDeleted);
+            }
+
+            db.endTransaction();
         }
+        else
+        {
+            // If we didn't have any episodes, just delete the media counter itself.
+            db.beginTransaction();
+            int rowsDeleted = db.delete(TABLE_TITLES, KEY_TID + SQL_PARAMETER, new String[] { String.valueOf(tid) });
+
+            if (rowsDeleted == 1)
+            {
+                db.setTransactionSuccessful();
+            }
+            else
+            {
+                Log.e("deleteEpisode", "Deleting media counter removed more than 1 row! rows deleted = " + rowsDeleted);
+            }
+
+            db.endTransaction();
+        }
+        db.close();
+    }
+
+    public int getNumEpisodes(String mediaName)
+    {
+        List<String> epDates = getEpDates(mediaName);
+
+        return epDates.size();
     }
 
     public List<String> getEpDates(String mediaName)
@@ -160,14 +250,8 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
         List<String> epDates = new ArrayList<>();
 
-        Cursor cursor = db.query(TABLE_EPISODES,
-                EPISODES_COLUMNS,
-                " tid = ?",
-                new String[]{String.valueOf(tid)},
-                null,
-                null,
-                null,
-                null);
+        Cursor cursor = db.query(TABLE_EPISODES, EPISODES_COLUMNS, KEY_TID + SQL_PARAMETER, new String[]{String.valueOf(tid)},
+                                 null, null, null, null);
 
         if (cursor.moveToFirst())
         {
@@ -185,14 +269,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
         List<MediaData> mdList = new ArrayList<>();
 
-        Cursor cursor = db.query(TABLE_TITLES,
-                TITLES_COLUMNS,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
+        Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, null, null, null, null, null, null);
 
         if (cursor.moveToFirst())
         {
@@ -210,25 +287,44 @@ public class MediaCounterDB extends SQLiteOpenHelper
         return mdList;
     }
 
+    public String getRandomMedia()
+    {
+        List<MediaData> mdList = getMediaCounters();
+
+        List<MediaData> incomplete = new ArrayList<>();
+
+        for (MediaData md : mdList)
+        {
+            if (!md.isComplete())
+            {
+                incomplete.add(md);
+            }
+        }
+
+        String randomMediaName;
+        if (!incomplete.isEmpty())
+        {
+            Random rand = new Random();
+            int index = rand.nextInt(incomplete.size());
+
+            randomMediaName = incomplete.get(index).getMediaName();
+        }
+        else
+        {
+            randomMediaName = "No media counters to select from!";
+        }
+
+        return randomMediaName;
+    }
+
     private int getIdForMedia(String mediaName)
     {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.query(TABLE_TITLES,
-                TITLES_COLUMNS,
-                " title = ?",
-                new String[]{mediaName},
-                null,
-                null,
-                null,
-                null);
+        Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, KEY_TITLE + SQL_PARAMETER, new String[]{mediaName},
+                                 null, null, null, null);
 
-        if (cursor != null)
-        {
-            cursor.moveToFirst();
-        }
-
-        if (cursor.getCount() == 0)
+        if ((cursor == null) || (cursor.getCount() == 0))
         {
             return -1;
         }
@@ -238,9 +334,9 @@ public class MediaCounterDB extends SQLiteOpenHelper
             Log.e("getIdForMedia", "More than one media with the name [" + mediaName + "]!");
         }
 
-        int tid = cursor.getInt(cursor.getColumnIndex(KEY_TID));
+        cursor.moveToFirst();
 
-        return tid;
+        return cursor.getInt(cursor.getColumnIndex(KEY_TID));
     }
 
     private String getCurrentDate()
@@ -253,7 +349,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         int hour = rightNow.get(Calendar.HOUR_OF_DAY);
         int minute = rightNow.get(Calendar.MINUTE);
 
-        String dateString = month + "-" + dayOfMonth + "-" + year + " " + hour + ":" + minute;
+        String dateString = String.format("%d-%d-%d %02d:%02d", month, dayOfMonth, year, hour, minute);
 
         return dateString;
     }
