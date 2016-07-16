@@ -253,13 +253,19 @@ public class MediaCounterDB extends SQLiteOpenHelper
         Cursor cursor = db.query(TABLE_EPISODES, EPISODES_COLUMNS, KEY_TID + SQL_PARAMETER, new String[]{String.valueOf(tid)},
                                  null, null, null, null);
 
-        if (cursor.moveToFirst())
+        if (cursor != null)
         {
-            do
+            if (cursor.moveToFirst())
             {
-                epDates.add(cursor.getString(cursor.getColumnIndex(KEY_DATE)));
-            } while (cursor.moveToNext());
+                do
+                {
+                    epDates.add(cursor.getString(cursor.getColumnIndex(KEY_DATE)));
+                } while (cursor.moveToNext());
+            }
+
+            cursor.close();
         }
+
         return epDates;
     }
 
@@ -271,17 +277,22 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
         Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, null, null, null, null, null, null);
 
-        if (cursor.moveToFirst())
+        if (cursor != null)
         {
-            do
+            if (cursor.moveToFirst())
             {
-                String mediaName = cursor.getString(cursor.getColumnIndex(KEY_TITLE));
-                boolean completeStatus = Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(KEY_COMPLETE)));
-                List<String> epDates = getEpDates(mediaName);
+                do
+                {
+                    String mediaName = cursor.getString(cursor.getColumnIndex(KEY_TITLE));
+                    boolean completeStatus = Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(KEY_COMPLETE)));
+                    List<String> epDates = getEpDates(mediaName);
 
-                MediaData md = new MediaData(mediaName, completeStatus, epDates);
-                mdList.add(md);
-            } while (cursor.moveToNext());
+                    MediaData md = new MediaData(mediaName, completeStatus, epDates);
+                    mdList.add(md);
+                } while (cursor.moveToNext());
+            }
+
+            cursor.close();
         }
 
         return mdList;
@@ -324,19 +335,33 @@ public class MediaCounterDB extends SQLiteOpenHelper
         Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, KEY_TITLE + SQL_PARAMETER, new String[]{mediaName},
                                  null, null, null, null);
 
-        if ((cursor == null) || (cursor.getCount() == 0))
+        if (cursor == null)
         {
             return -1;
         }
-        else if (cursor.getCount() > 1)
+
+        int result;
+
+        if (cursor.getCount() == 0)
         {
-            // We have a problem
-            Log.e("getIdForMedia", "More than one media with the name [" + mediaName + "]!");
+            result = -1;
+        }
+        else
+        {
+            if (cursor.getCount() > 1)
+            {
+                // We have a problem
+                Log.e("getIdForMedia", "More than one media with the name [" + mediaName + "]!");
+            }
+
+            cursor.moveToFirst();
+
+            result = cursor.getInt(cursor.getColumnIndex(KEY_TID));
+
+            cursor.close();
         }
 
-        cursor.moveToFirst();
-
-        return cursor.getInt(cursor.getColumnIndex(KEY_TID));
+        return result;
     }
 
     private String getCurrentDate()
