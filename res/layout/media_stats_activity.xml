@@ -3,6 +3,12 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
+    <TextView
+            android:id="@+id/media_stats_total_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|left"
+            android:textAppearance="?android:attr/textAppearanceLarge"/>
     <ListView
             android:id="@+id/media_stats_list"
             android:layout_width="fill_parent"

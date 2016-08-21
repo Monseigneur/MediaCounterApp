@@ -368,6 +368,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
 
         Collections.sort(data);
+        Collections.reverse(data);
 
         return data;
     }
