@@ -6,6 +6,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
+import com.example.MediaCounterApp.Model.EpisodeData;
 import com.example.MediaCounterApp.Model.MediaCounterDB;
 import android.app.Activity;
 import android.content.Intent;
@@ -15,6 +16,7 @@ import android.view.View;
 import com.example.MediaCounterApp.Model.MediaData;
 import com.example.MediaCounterApp.R;
 
+import java.io.Serializable;
 import java.util.List;
 
 public class MediaCounterActivity extends Activity
@@ -89,6 +91,26 @@ public class MediaCounterActivity extends Activity
         MediaData md = mdList.get(pos);
         md.setEpDates(db.getEpDates(md.getMediaName()));
         b.putSerializable(MediaInfoActivity.MEDIA_INFO, md);
+        intent.putExtras(b);
+
+        startActivity(intent);
+    }
+
+    public void showStats(View view)
+    {
+        Log.i("showStats", "start!");
+        List<EpisodeData> epData = db.getEpisodeData();
+
+        for (int i = epData.size() - 10; i < epData.size(); i++)
+        {
+            Log.i("showStats", i + ": " + epData.get(i));
+        }
+
+        Intent intent = new Intent(this, MediaStatsActivity.class);
+
+        Bundle b = new Bundle();
+
+        b.putSerializable(MediaStatsActivity.MEDIA_STATS, (Serializable)epData);
         intent.putExtras(b);
 
         startActivity(intent);

@@ -20,6 +20,12 @@
             android:onClick="chooseRandomMedia"
             android:layout_weight="0.5"/>
         <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Stats"
+            android:onClick="showStats"
+            android:layout_weight="0.5"/>
+        <Button
             android:id="@+id/lock_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

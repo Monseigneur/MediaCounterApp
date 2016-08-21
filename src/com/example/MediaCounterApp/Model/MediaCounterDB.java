@@ -9,6 +9,8 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -39,7 +41,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
     private static final String SQL_PARAMETER = " = ?";
     private static final String SQL_AND = " and ";
 
-    private static final String UNKNOWN_DATE = "UNKNOWN";
+    public static final String UNKNOWN_DATE = "UNKNOWN";
 
     public MediaCounterDB(Context context)
     {
@@ -326,6 +328,48 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
 
         return randomMediaName;
+    }
+
+    public List<EpisodeData> getEpisodeData()
+    {
+        List<EpisodeData> data = new ArrayList<>();
+
+        // Get all media names
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        List<String> names = new ArrayList<>();
+
+        Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, null, null, null, null, null, null);
+
+        if (cursor != null)
+        {
+            if (cursor.moveToFirst())
+            {
+                do
+                {
+                    String mediaName = cursor.getString(cursor.getColumnIndex(KEY_TITLE));
+                    names.add(mediaName);
+                } while (cursor.moveToNext());
+            }
+
+            cursor.close();
+        }
+
+        // For each media, add its episodes to the list.
+        for (String name : names)
+        {
+            List<String> epDates = getEpDates(name);
+
+            for (int i = 0; i < epDates.size(); i++)
+            {
+                EpisodeData ed = new EpisodeData(name, i + 1, epDates.get(i));
+                data.add(ed);
+            }
+        }
+
+        Collections.sort(data);
+
+        return data;
     }
 
     private int getIdForMedia(String mediaName)
