@@ -75,8 +75,7 @@ public class MediaCounterActivity extends Activity
     public void chooseRandomMedia(View view)
     {
         String randomMedia = db.getRandomMedia();
-        Toast toast = Toast.makeText(this, randomMedia, Toast.LENGTH_SHORT);
-        toast.show();
+        showToast(randomMedia);
     }
 
     public void viewMediaInfo(View view)
@@ -124,16 +123,20 @@ public class MediaCounterActivity extends Activity
             {
                 String name = data.getStringExtra(MEDIA_COUNTER_NAME);
 
-                db.addMedia(name);
+                boolean result = db.addMedia(name);
 
-                MediaData md = new MediaData(name);
-
-                if (!mdList.contains(md))
+                if (result)
                 {
+                    MediaData md = new MediaData(name);
                     mdList.add(md);
                 }
-                System.out.println(data.getStringExtra(MEDIA_COUNTER_NAME));
-                Log.i("onActivityResult", data.getStringExtra(MEDIA_COUNTER_NAME));
+                else
+                {
+                    // Media already exists, show a toast
+                    showToast("Media already exists!");
+                }
+                System.out.println(name);
+                Log.i("onActivityResult", name);
             }
         }
     }
@@ -203,5 +206,11 @@ public class MediaCounterActivity extends Activity
 
             adapter.notifyDataSetChanged();
         }
+    }
+
+    private void showToast(String text)
+    {
+        Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
+        toast.show();
     }
 }

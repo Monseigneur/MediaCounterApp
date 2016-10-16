@@ -86,12 +86,12 @@ public class MediaCounterDB extends SQLiteOpenHelper
     // - Delete a media counter
     // - Mark a media counter complete
 
-    public void addMedia(String mediaName)
+    public boolean addMedia(String mediaName)
     {
         if (getIdForMedia(mediaName) != -1)
         {
             Log.e("addMedia", "media already exists!");
-            return;
+            return false;
         }
         SQLiteDatabase  db = this.getWritableDatabase();
 
@@ -101,6 +101,8 @@ public class MediaCounterDB extends SQLiteOpenHelper
         values.put(KEY_COMPLETE, Boolean.FALSE);
 
         db.insert(TABLE_TITLES, null, values);
+
+        return true;
     }
 
     public void addEpisode(String mediaName)
