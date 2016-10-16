@@ -15,4 +15,7 @@
     <string name="add_new_media_button">Add</string>
     <string name="add_new_media_label">Add a New Media Counter</string>
 
+
+    <string name="duplicate_media">Media already exists!</string>
+
 </resources>

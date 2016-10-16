@@ -133,7 +133,7 @@ public class MediaCounterActivity extends Activity
                 else
                 {
                     // Media already exists, show a toast
-                    showToast("Media already exists!");
+                    showToast(getString(R.string.duplicate_media));
                 }
                 System.out.println(name);
                 Log.i("onActivityResult", name);
