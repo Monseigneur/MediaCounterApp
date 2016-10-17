@@ -17,6 +17,7 @@ import com.example.MediaCounterApp.Model.MediaData;
 import com.example.MediaCounterApp.R;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 public class MediaCounterActivity extends Activity
@@ -129,6 +130,8 @@ public class MediaCounterActivity extends Activity
                 {
                     MediaData md = new MediaData(name);
                     mdList.add(md);
+
+                    Collections.sort(mdList);
                 }
                 else
                 {

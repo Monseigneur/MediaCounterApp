@@ -299,6 +299,8 @@ public class MediaCounterDB extends SQLiteOpenHelper
             cursor.close();
         }
 
+        Collections.sort(mdList);
+
         return mdList;
     }
 

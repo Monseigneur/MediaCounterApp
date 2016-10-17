@@ -11,7 +11,7 @@ import java.util.Scanner;
 /**
  * Created by Milan on 5/21/2016.
  */
-public class MediaData implements Serializable
+public class MediaData implements Serializable, Comparable<MediaData>
 {
     private static final long serialVersionUID = 0L;
 
@@ -83,5 +83,14 @@ public class MediaData implements Serializable
     {
         String completeText = (complete) ? " COMPLETE" : "";
         return "[" + mediaName + ": " + count + completeText + "]";
+    }
+
+    @Override
+    public int compareTo(MediaData another)
+    {
+        String thisName = mediaName.toLowerCase();
+        String otherName = another.getMediaName().toLowerCase();
+
+        return thisName.compareTo(otherName);
     }
 }
