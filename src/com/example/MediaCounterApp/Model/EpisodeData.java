@@ -3,8 +3,7 @@ package com.example.MediaCounterApp.Model;
 import android.util.Log;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Calendar;
 
 /**
  * Created by Milan on 8/5/2016.
@@ -13,9 +12,9 @@ public class EpisodeData implements Comparable<EpisodeData>, Serializable
 {
     private String mediaName;
     private int epNum;
-    private String epDate;
+    private long epDate;
 
-    public EpisodeData(String name, int num, String date)
+    public EpisodeData(String name, int num, long date)
     {
         mediaName = name;
         epNum = num;
@@ -32,7 +31,7 @@ public class EpisodeData implements Comparable<EpisodeData>, Serializable
         return epNum;
     }
 
-    public String getEpDate()
+    public long getEpDate()
     {
         return epDate;
     }
@@ -40,29 +39,18 @@ public class EpisodeData implements Comparable<EpisodeData>, Serializable
     @Override
     public int compareTo(EpisodeData another)
     {
+        long delta = epDate - another.epDate;
+
         int result = 0;
-        if (epDate.equals(MediaCounterDB.UNKNOWN_DATE) || another.getEpDate().equals(MediaCounterDB.UNKNOWN_DATE))
+        if (delta < 0)
         {
-            // At least one of them is unknown.
-            if (epDate.equals(MediaCounterDB.UNKNOWN_DATE) && another.getEpDate().equals(MediaCounterDB.UNKNOWN_DATE))
-            {
-                // Both are
-                result = mediaName.compareTo(another.mediaName);
-            }
-            else if (epDate.equals(MediaCounterDB.UNKNOWN_DATE))
-            {
-                result = -1;
-            }
-            else
-            {
-                result = 1;
-            }
+            result = -1;
         }
-        else
+        else if (delta > 0)
         {
-            result = EpisodeData.compareDates(epDate, another.getEpDate());
-            //epDate.compareTo(another.getEpDate());
+            result = 1;
         }
+
         return result;
     }
 
@@ -76,48 +64,19 @@ public class EpisodeData implements Comparable<EpisodeData>, Serializable
                 '}';
     }
 
-    public static int compareDates(String first, String second)
+    public static String dateString(long val)
     {
-        List<Integer> firstInfo = parseDate(first);
-        List<Integer> secondInfo = parseDate(second);
+        Calendar date = Calendar.getInstance();
+        date.setTimeInMillis(val);
 
-        int result = 0;
-        for (int i = 0; i < firstInfo.size(); i++)
-        {
-            if (!firstInfo.get(i).equals(secondInfo.get(i)))
-            {
-                result = firstInfo.get(i) - secondInfo.get(i);
-                break;
-            }
-        }
-        return result;
-    }
+        int dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
+        int month = date.get(Calendar.MONTH) + 1;       // January is 0?
+        int year = date.get(Calendar.YEAR);
+        int hour = date.get(Calendar.HOUR_OF_DAY);
+        int minute = date.get(Calendar.MINUTE);
 
-    private static List<Integer> parseDate(String date)
-    {
-        List<Integer> datePieces = new ArrayList<>();
+        Log.i("dateString", "DATE STRING: M=" + month + " D=" + dayOfMonth + " Y=" + year + " H=" + hour + " M=" + minute);
 
-        try
-        {
-            // Of the form:
-            // <MONTH>-<DAY>-<YEAR> <HOUR>:<MINUTE>
-            String[] dateTime = date.split(" ");
-
-            String[] dateInfo = dateTime[0].split("-");
-            String[] timeInfo = dateTime[1].split(":");
-
-            datePieces.add(Integer.parseInt(dateInfo[2]));
-            datePieces.add(Integer.parseInt(dateInfo[0]));
-            datePieces.add(Integer.parseInt(dateInfo[1]));
-
-
-            datePieces.add(Integer.parseInt(timeInfo[0]));
-            datePieces.add(Integer.parseInt(timeInfo[1]));
-        }
-        catch (Exception e)
-        {
-            Log.i("parseDate", "Bad parse! Date is of form [" + date + "]");
-        }
-        return datePieces;
+        return String.format("%d-%d-%d %02d:%02d", month, dayOfMonth, year, hour, minute);
     }
 }

@@ -5,10 +5,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
 import android.widget.TextView;
 import com.example.MediaCounterApp.Model.EpisodeData;
-import com.example.MediaCounterApp.Model.MediaData;
 import com.example.MediaCounterApp.R;
 
 import java.util.List;
@@ -68,7 +66,7 @@ public class MediaStatsAdapter extends BaseAdapter {
         name.setText(ed.getMediaName());
 
         TextView date = (TextView)itemView.findViewById(R.id.stats_episode_date);
-        date.setText(ed.getEpDate());
+        date.setText(EpisodeData.dateString(ed.getEpDate()) + "");
 
         return itemView;
     }

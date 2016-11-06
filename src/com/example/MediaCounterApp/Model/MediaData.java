@@ -1,12 +1,8 @@
 package com.example.MediaCounterApp.Model;
 
-import android.os.Parcelable;
-
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * Created by Milan on 5/21/2016.
@@ -18,19 +14,19 @@ public class MediaData implements Serializable, Comparable<MediaData>
     private String mediaName;
     private int count;
     private boolean complete;
-    private List<String> epDates;
+    private List<Long> epDates;
 
     public MediaData(String name)
     {
         init(name, false, new ArrayList<>());
     }
 
-    public MediaData(String name, boolean complete, List<String> epDates)
+    public MediaData(String name, boolean complete, List<Long> epDates)
     {
         init(name, complete, epDates);
     }
 
-    private void init(String name, boolean complete, List<String> epDates)
+    private void init(String name, boolean complete, List<Long> epDates)
     {
         this.mediaName = name;
         this.count = epDates.size();
@@ -64,12 +60,12 @@ public class MediaData implements Serializable, Comparable<MediaData>
         return mediaName;
     }
 
-    public List<String> getEpDates()
+    public List<Long> getEpDates()
     {
         return epDates;
     }
 
-    public void setEpDates(List<String> epDates)
+    public void setEpDates(List<Long> epDates)
     {
         this.epDates = epDates;
     }

@@ -101,11 +101,6 @@ public class MediaCounterActivity extends Activity
         Log.i("showStats", "start!");
         List<EpisodeData> epData = db.getEpisodeData();
 
-        for (int i = epData.size() - 10; i < epData.size(); i++)
-        {
-            Log.i("showStats", i + ": " + epData.get(i));
-        }
-
         Intent intent = new Intent(this, MediaStatsActivity.class);
 
         Bundle b = new Bundle();

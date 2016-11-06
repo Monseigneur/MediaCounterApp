@@ -9,7 +9,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -19,7 +18,7 @@ import java.util.Random;
  */
 public class MediaCounterDB extends SQLiteOpenHelper
 {
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
     private static final String DATABASE_NAME = "media_counter_db";
 
     // Have 2 dbs:
@@ -30,7 +29,8 @@ public class MediaCounterDB extends SQLiteOpenHelper
     private static final String KEY_TID = "tid";
     private static final String KEY_TITLE = "title";
     private static final String KEY_COMPLETE = "complete_status";
-    private static final String[] TITLES_COLUMNS = {KEY_TID, KEY_TITLE, KEY_COMPLETE};
+    private static final String KEY_ADDED_DATE = "added_date";
+    private static final String[] TITLES_COLUMNS = {KEY_TID, KEY_TITLE, KEY_COMPLETE, KEY_ADDED_DATE};
 
     private static final String TABLE_EPISODES = "episodes";
 
@@ -41,7 +41,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
     private static final String SQL_PARAMETER = " = ?";
     private static final String SQL_AND = " and ";
 
-    public static final String UNKNOWN_DATE = "UNKNOWN";
+    public static final long UNKNOWN_DATE = -1;
 
     public MediaCounterDB(Context context)
     {
@@ -54,14 +54,15 @@ public class MediaCounterDB extends SQLiteOpenHelper
         String createTitleDB = "CREATE TABLE titles ( " +
                 KEY_TID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 KEY_TITLE + " TEXT, " +
-                KEY_COMPLETE + " TEXT )";
+                KEY_COMPLETE + " INTEGER, " +
+                KEY_ADDED_DATE + " INTEGER )";
 
         db.execSQL(createTitleDB);
 
         String createEpisodesDB = "CREATE TABLE episodes ( " +
                 KEY_TID + " INTEGER, " +
                 KEY_EPNUM + " INTEGER, " +
-                KEY_DATE + " TEXT )";
+                KEY_DATE + " INTEGER )";
 
         db.execSQL(createEpisodesDB);
     }
@@ -125,7 +126,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-        String date;
+        long date;
         if (current)
         {
             date = getCurrentDate();
@@ -193,7 +194,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
             return;
         }
 
-        List<String> epDates = getEpDates(mediaName);
+        List<Long> epDates = getEpDates(mediaName);
 
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -236,12 +237,12 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
     public int getNumEpisodes(String mediaName)
     {
-        List<String> epDates = getEpDates(mediaName);
+        List<Long> epDates = getEpDates(mediaName);
 
         return epDates.size();
     }
 
-    public List<String> getEpDates(String mediaName)
+    public List<Long> getEpDates(String mediaName)
     {
         int tid = getIdForMedia(mediaName);
 
@@ -252,7 +253,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
         SQLiteDatabase db = this.getReadableDatabase();
 
-        List<String> epDates = new ArrayList<>();
+        List<Long> epDates = new ArrayList<>();
 
         Cursor cursor = db.query(TABLE_EPISODES, EPISODES_COLUMNS, KEY_TID + SQL_PARAMETER, new String[]{String.valueOf(tid)},
                                  null, null, null, null);
@@ -263,7 +264,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
             {
                 do
                 {
-                    epDates.add(cursor.getString(cursor.getColumnIndex(KEY_DATE)));
+                    epDates.add(cursor.getLong(cursor.getColumnIndex(KEY_DATE)));
                 } while (cursor.moveToNext());
             }
 
@@ -289,7 +290,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
                 {
                     String mediaName = cursor.getString(cursor.getColumnIndex(KEY_TITLE));
                     boolean completeStatus = Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(KEY_COMPLETE)));
-                    List<String> epDates = getEpDates(mediaName);
+                    List<Long> epDates = getEpDates(mediaName);
 
                     MediaData md = new MediaData(mediaName, completeStatus, epDates);
                     mdList.add(md);
@@ -362,7 +363,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         // For each media, add its episodes to the list.
         for (String name : names)
         {
-            List<String> epDates = getEpDates(name);
+            List<Long> epDates = getEpDates(name);
 
             for (int i = 0; i < epDates.size(); i++)
             {
@@ -413,18 +414,10 @@ public class MediaCounterDB extends SQLiteOpenHelper
         return result;
     }
 
-    private String getCurrentDate()
+    private long getCurrentDate()
     {
         Calendar rightNow = Calendar.getInstance();
 
-        int dayOfMonth = rightNow.get(Calendar.DAY_OF_MONTH);
-        int month = rightNow.get(Calendar.MONTH) + 1;       // January is 0?
-        int year = rightNow.get(Calendar.YEAR);
-        int hour = rightNow.get(Calendar.HOUR_OF_DAY);
-        int minute = rightNow.get(Calendar.MINUTE);
-
-        String dateString = String.format("%d-%d-%d %02d:%02d", month, dayOfMonth, year, hour, minute);
-
-        return dateString;
+        return rightNow.getTimeInMillis();
     }
 }
