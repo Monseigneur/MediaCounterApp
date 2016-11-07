@@ -286,8 +286,9 @@ public class MediaCounterDB extends SQLiteOpenHelper
                     String mediaName = cursor.getString(cursor.getColumnIndex(KEY_TITLE));
                     boolean completeStatus = Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(KEY_COMPLETE)));
                     List<Long> epDates = getEpDates(mediaName);
+                    long addedDate = cursor.getLong(cursor.getColumnIndex(KEY_ADDED_DATE));
 
-                    MediaData md = new MediaData(mediaName, completeStatus, epDates);
+                    MediaData md = new MediaData(mediaName, completeStatus, addedDate, epDates);
                     mdList.add(md);
                 } while (cursor.moveToNext());
             }

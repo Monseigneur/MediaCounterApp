@@ -14,24 +14,28 @@ public class MediaData implements Serializable, Comparable<MediaData>
     private String mediaName;
     private int count;
     private boolean complete;
+    private long addedDate;
     private List<Long> epDates;
+
 
     public MediaData(String name)
     {
-        init(name, false, new ArrayList<>());
+        init(name, false, 0, new ArrayList<>());
     }
 
-    public MediaData(String name, boolean complete, List<Long> epDates)
+    public MediaData(String name, boolean complete, long date, List<Long> epDates)
     {
-        init(name, complete, epDates);
+        init(name, complete, date, epDates);
     }
 
-    private void init(String name, boolean complete, List<Long> epDates)
+    private void init(String name, boolean complete, long date, List<Long> epDates)
     {
         this.mediaName = name;
         this.count = epDates.size();
         this.complete = complete;
+        this.addedDate = date;
         this.epDates = epDates;
+
     }
 
     public int getCount()

@@ -45,15 +45,20 @@ public class MediaInfoActivity extends Activity
 
         TextView completeLabel = (TextView)findViewById(R.id.media_info_complete_status);
 
-        completeLabel.setText(R.string.not_complete);
-
+        if (md.isComplete())
+        {
+            completeLabel.setText(R.string.complete);
+        }
+        else
+        {
+            completeLabel.setText(R.string.not_complete);
+        }
 
         ListView listView = (ListView)findViewById(R.id.media_info_ep_list);
         Log.i("before constructor", R.layout.media_info_list_entry + " " + md.getEpDates());
         MediaInfoEpisodeAdapter adapter = new MediaInfoEpisodeAdapter(this, R.layout.media_info_list_entry, md.getEpDates());
 
         listView.setAdapter(adapter);
-
     }
 
     public class MediaInfoEpisodeAdapter extends BaseAdapter
