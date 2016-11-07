@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import com.example.MediaCounterApp.Model.EpisodeData;
+import com.example.MediaCounterApp.Model.MediaCounterDB;
 import com.example.MediaCounterApp.R;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
  * Created by Milan on 5/21/2016.
  */
 public class MediaStatsAdapter extends BaseAdapter {
+    private Context context;
     private LayoutInflater inflater;
     private int resource;
     private List<EpisodeData> edList;
@@ -22,6 +24,7 @@ public class MediaStatsAdapter extends BaseAdapter {
 
     public MediaStatsAdapter(Context c, int r, List<EpisodeData> edl)
     {
+        context = c;
         inflater = (LayoutInflater)c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         resource = r;
 
@@ -66,7 +69,7 @@ public class MediaStatsAdapter extends BaseAdapter {
         name.setText(ed.getMediaName());
 
         TextView date = (TextView)itemView.findViewById(R.id.stats_episode_date);
-        date.setText(EpisodeData.dateString(ed.getEpDate()) + "");
+        date.setText(MediaCounterDB.dateString(context, ed.getEpDate()) + "");
 
         return itemView;
     }

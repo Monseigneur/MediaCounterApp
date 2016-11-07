@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.example.MediaCounterApp.Model.EpisodeData;
+import com.example.MediaCounterApp.Model.MediaCounterDB;
 import com.example.MediaCounterApp.Model.MediaData;
 import com.example.MediaCounterApp.R;
 
@@ -58,6 +58,7 @@ public class MediaInfoActivity extends Activity
 
     public class MediaInfoEpisodeAdapter extends BaseAdapter
     {
+        private Context context;
         private LayoutInflater inflater;
         private int resource;
         private List<Long> epDates;
@@ -65,6 +66,7 @@ public class MediaInfoActivity extends Activity
         public MediaInfoEpisodeAdapter(Context c, int r, List<Long> epDates)
         {
             Log.i("constructor", r + " " + epDates);
+            context = c;
             inflater = (LayoutInflater)c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             resource = r;
             this.epDates = epDates;
@@ -108,7 +110,7 @@ public class MediaInfoActivity extends Activity
             name.setText(position + 1 + "");
 
             TextView count = (TextView)itemView.findViewById(R.id.episode_date);
-            count.setText(EpisodeData.dateString(date) + "");
+            count.setText(MediaCounterDB.dateString(context, date) + "");
 
             return itemView;
         }

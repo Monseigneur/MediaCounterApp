@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import com.example.MediaCounterApp.R;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -41,7 +42,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
     private static final String SQL_PARAMETER = " = ?";
     private static final String SQL_AND = " and ";
 
-    public static final long UNKNOWN_DATE = -1;
+    public static final long UNKNOWN_DATE = 0;
 
     public MediaCounterDB(Context context)
     {
@@ -89,17 +90,23 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
     public boolean addMedia(String mediaName)
     {
+        return addMedia(mediaName, false, getCurrentDate());
+    }
+
+    private boolean addMedia(String mediaName, boolean complete, long date)
+    {
         if (getIdForMedia(mediaName) != -1)
         {
             Log.e("addMedia", "media already exists!");
             return false;
         }
-        SQLiteDatabase  db = this.getWritableDatabase();
 
+        SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(KEY_TITLE, mediaName);
-        values.put(KEY_COMPLETE, Boolean.FALSE);
+        values.put(KEY_COMPLETE, complete);
+        values.put(KEY_ADDED_DATE, date);
 
         db.insert(TABLE_TITLES, null, values);
 
@@ -108,10 +115,11 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
     public void addEpisode(String mediaName)
     {
-        addEpisode(mediaName, true);
+        int epNum = getNumEpisodes(mediaName) + 1;
+        addEpisode(mediaName, epNum, getCurrentDate());
     }
 
-    public void addEpisode(String mediaName, boolean current)
+    private void addEpisode(String mediaName, int num, long date)
     {
         int tid = getIdForMedia(mediaName);
 
@@ -121,24 +129,11 @@ public class MediaCounterDB extends SQLiteOpenHelper
             return;
         }
 
-        // Hack to count
-        int newEpNumber = getNumEpisodes(mediaName) + 1;
-
         SQLiteDatabase db = this.getWritableDatabase();
-
-        long date;
-        if (current)
-        {
-            date = getCurrentDate();
-        }
-        else
-        {
-            date = UNKNOWN_DATE;
-        }
 
         ContentValues values = new ContentValues();
         values.put(KEY_TID, tid);
-        values.put(KEY_EPNUM, newEpNumber);
+        values.put(KEY_EPNUM, num);
         values.put(KEY_DATE, date);
 
         Log.i("addEpisode", values.toString());
@@ -419,5 +414,28 @@ public class MediaCounterDB extends SQLiteOpenHelper
         Calendar rightNow = Calendar.getInstance();
 
         return rightNow.getTimeInMillis();
+    }
+
+    public static String dateString(Context c, long val)
+    {
+        if (val == MediaCounterDB.UNKNOWN_DATE)
+        {
+            return c.getString(R.string.unknown_date);
+        }
+        else
+        {
+            Calendar date = Calendar.getInstance();
+            date.setTimeInMillis(val);
+
+            int dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
+            int month = date.get(Calendar.MONTH) + 1;       // January is 0?
+            int year = date.get(Calendar.YEAR);
+            int hour = date.get(Calendar.HOUR_OF_DAY);
+            int minute = date.get(Calendar.MINUTE);
+
+            Log.i("dateString", "DATE STRING: M=" + month + " D=" + dayOfMonth + " Y=" + year + " H=" + hour + " M=" + minute);
+
+            return String.format("%d-%d-%d %02d:%02d", month, dayOfMonth, year, hour, minute);
+        }
     }
 }
