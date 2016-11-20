@@ -8,9 +8,16 @@
             android:id="@+id/media_info_name"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:text="name"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:paddingLeft="@dimen/edge_padding"/>
     <Space android:layout_width="fill_parent" android:layout_height="@dimen/space_height"/>
+    <TextView
+            android:id="@+id/media_info_added_date"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="added_date"
+            android:paddingLeft="@dimen/edge_padding"/>
     <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -20,6 +27,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
+                android:text="count"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:paddingLeft="@dimen/edge_padding"/>
         <TextView
@@ -28,6 +36,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
                 android:gravity="right"
+                android:text="@string/not_complete"
                 android:paddingRight="@dimen/edge_padding"/>
     </LinearLayout>
     <Space android:layout_width="fill_parent" android:layout_height="20dp"/>

@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import com.example.MediaCounterApp.Model.MediaData;
 import com.example.MediaCounterApp.R;
+import com.example.MediaCounterApp.ViewModel.MediaInfoViewModel;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -89,8 +90,11 @@ public class MediaCounterActivity extends Activity
         int pos = lv.getPositionForView(ll);
 
         MediaData md = mdList.get(pos);
-        md.setEpDates(db.getEpDates(md.getMediaName()));
-        b.putSerializable(MediaInfoActivity.MEDIA_INFO, md);
+
+        String name = md.getMediaName();
+        MediaInfoViewModel mivm = new MediaInfoViewModel(name, md.isComplete(), md.getAddedDate(), db.getEpDates(name));
+
+        b.putSerializable(MediaInfoActivity.MEDIA_INFO, mivm);
         intent.putExtras(b);
 
         startActivity(intent);
@@ -113,28 +117,33 @@ public class MediaCounterActivity extends Activity
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        if (requestCode == NEW_MEDIA_COUNTER_REQUEST)
+        Log.i("onActivityResult", "requestCode " + requestCode + " resultCode " + resultCode);
+        if (resultCode == RESULT_OK)
         {
-            if (resultCode == RESULT_OK)
+            switch (requestCode)
             {
-                String name = data.getStringExtra(MEDIA_COUNTER_NAME);
+                case NEW_MEDIA_COUNTER_REQUEST:
+                    String name = data.getStringExtra(MEDIA_COUNTER_NAME);
 
-                boolean result = db.addMedia(name);
+                    boolean result = db.addMedia(name);
 
-                if (result)
-                {
-                    MediaData md = new MediaData(name);
-                    mdList.add(md);
+                    if (result)
+                    {
+                        MediaData md = new MediaData(name);
+                        mdList.add(md);
 
-                    Collections.sort(mdList);
-                }
-                else
-                {
-                    // Media already exists, show a toast
-                    showToast(getString(R.string.duplicate_media));
-                }
-                System.out.println(name);
-                Log.i("onActivityResult", name);
+                        Collections.sort(mdList);
+                    }
+                    else
+                    {
+                        // Media already exists, show a toast
+                        showToast(getString(R.string.duplicate_media));
+                    }
+                    System.out.println(name);
+                    Log.i("onActivityResult", name);
+                    break;
+                default:
+                    break;
             }
         }
     }

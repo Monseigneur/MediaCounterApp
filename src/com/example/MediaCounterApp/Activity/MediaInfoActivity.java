@@ -12,8 +12,8 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.example.MediaCounterApp.Model.MediaCounterDB;
-import com.example.MediaCounterApp.Model.MediaData;
 import com.example.MediaCounterApp.R;
+import com.example.MediaCounterApp.ViewModel.MediaInfoViewModel;
 
 import java.util.List;
 
@@ -33,19 +33,24 @@ public class MediaInfoActivity extends Activity
         Intent i = getIntent();
         Bundle b = i.getExtras();
 
-        MediaData md = (MediaData)b.getSerializable(MEDIA_INFO);
+        MediaInfoViewModel mivm = (MediaInfoViewModel)b.getSerializable(MEDIA_INFO);
 
-        Log.i("info activity", md.toString());
+        Log.i("info activity", mivm.toString());
 
         TextView nameLabel = (TextView)findViewById(R.id.media_info_name);
-        nameLabel.setText(md.getMediaName());
+        nameLabel.setText(mivm.mediaName);
+
+        TextView addedDateLabel = (TextView)findViewById(R.id.media_info_added_date);
+        String addedDate = MediaCounterDB.dateString(this, mivm.addedDate);
+        addedDateLabel.setText("Added: " + addedDate);
 
         TextView countLabel = (TextView)findViewById(R.id.media_info_count);
-        countLabel.setText(md.getCount() + "");
+        countLabel.setText(mivm.epDates.size() + "");
 
         TextView completeLabel = (TextView)findViewById(R.id.media_info_complete_status);
 
-        if (md.isComplete())
+        // Set the initial state
+        if (mivm.completeStatus)
         {
             completeLabel.setText(R.string.complete);
         }
@@ -55,8 +60,8 @@ public class MediaInfoActivity extends Activity
         }
 
         ListView listView = (ListView)findViewById(R.id.media_info_ep_list);
-        Log.i("before constructor", R.layout.media_info_list_entry + " " + md.getEpDates());
-        MediaInfoEpisodeAdapter adapter = new MediaInfoEpisodeAdapter(this, R.layout.media_info_list_entry, md.getEpDates());
+        Log.i("before constructor", R.layout.media_info_list_entry + " " + mivm.epDates);
+        MediaInfoEpisodeAdapter adapter = new MediaInfoEpisodeAdapter(this, R.layout.media_info_list_entry, mivm.epDates);
 
         listView.setAdapter(adapter);
     }

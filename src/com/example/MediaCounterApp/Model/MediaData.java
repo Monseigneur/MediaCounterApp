@@ -59,6 +59,11 @@ public class MediaData implements Serializable, Comparable<MediaData>
         }
     }
 
+    public long getAddedDate()
+    {
+        return addedDate;
+    }
+
     public String getMediaName()
     {
         return mediaName;
