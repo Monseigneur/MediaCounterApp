@@ -7,12 +7,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import com.example.MediaCounterApp.R;
+import software.amazon.ion.*;
+import software.amazon.ion.system.IonSystemBuilder;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.io.*;
+import java.util.*;
 
 /**
  * Created by Milan on 6/19/2016.
@@ -44,9 +43,15 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
     public static final long UNKNOWN_DATE = 0;
 
+    private Context c;
+    private IonSystem ionSys;
+
     public MediaCounterDB(Context context)
     {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        c = context;
+
+        ionSys = IonSystemBuilder.standard().build();
     }
 
     @Override
@@ -141,6 +146,33 @@ public class MediaCounterDB extends SQLiteOpenHelper
         db.insert(TABLE_EPISODES, null, values);
 
         db.close();
+    }
+
+    public void setCompleteStatus(String mediaName, int completeStatus)
+    {
+        Log.i("setCompleteStatus", "setting complete for [" + mediaName + "] to " + completeStatus);
+        int tid = getIdForMedia(mediaName);
+
+        if (tid == -1)
+        {
+            Log.e("setCompleteStatus", "media does not exist");
+        }
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_COMPLETE, completeStatus);
+
+        db.beginTransaction();
+        int rowsUpdated = db.update(TABLE_TITLES, values, KEY_TID + SQL_PARAMETER, new String[]{String.valueOf(tid)});
+
+        Log.i("rows", "rows = " + rowsUpdated);
+        if (rowsUpdated == 1)
+        {
+            db.setTransactionSuccessful();
+        }
+
+        db.endTransaction();
     }
 
     public void deleteMedia(String mediaName)
@@ -284,11 +316,12 @@ public class MediaCounterDB extends SQLiteOpenHelper
                 do
                 {
                     String mediaName = cursor.getString(cursor.getColumnIndex(KEY_TITLE));
-                    boolean completeStatus = Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(KEY_COMPLETE)));
+                    Log.i("getMediaCounters", "name [" + mediaName + "] -> [" + cursor.getString(cursor.getColumnIndex(KEY_COMPLETE)) + "]");
+                    int completeStatus = cursor.getInt(cursor.getColumnIndex(KEY_COMPLETE));
                     List<Long> epDates = getEpDates(mediaName);
                     long addedDate = cursor.getLong(cursor.getColumnIndex(KEY_ADDED_DATE));
 
-                    MediaData md = new MediaData(mediaName, completeStatus, addedDate, epDates);
+                    MediaData md = new MediaData(mediaName, (completeStatus == 1), addedDate, epDates);
                     mdList.add(md);
                 } while (cursor.moveToNext());
             }
@@ -437,6 +470,147 @@ public class MediaCounterDB extends SQLiteOpenHelper
             Log.i("dateString", "DATE STRING: M=" + month + " D=" + dayOfMonth + " Y=" + year + " H=" + hour + " M=" + minute);
 
             return String.format("%d-%d-%d %02d:%02d", month, dayOfMonth, year, hour, minute);
+        }
+    }
+
+    public void backupData()
+    {
+        File base = getBackupDirectory();
+        File backupFile = new File(base, "media_counter_backup.txt");
+
+        writeData(backupFile);
+    }
+
+    public void importData()
+    {
+        File base = getBackupDirectory();
+        File backupFile = new File(base, "media_counter_backup_TEMP.txt");
+
+        // First backup the data, in case something goes wrong.
+        writeData(backupFile);
+
+        File importFile = new File(base, "media_counter_import.txt");
+
+        readData(importFile);
+    }
+
+    private File getBackupDirectory()
+    {
+        File base = new File(System.getenv("EXTERNAL_STORAGE"));
+        File backupDir = new File(base, "MediaCounterBackup");
+        Log.i("getBackupDirector", "dir = [" + backupDir + "]");
+
+        try
+        {
+            if (!backupDir.exists())
+            {
+                boolean result = backupDir.mkdirs();
+                Log.i("getBackupDirectory", "create dir returned " + result);
+            }
+
+            return backupDir;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private void readData(File file)
+    {
+        try
+        {
+            if (file.exists())
+            {
+                FileInputStream fis = new FileInputStream(file);
+
+                Iterator<IonValue> iter = ionSys.iterate(fis);
+
+                IonList elements = (IonList)iter.next();
+
+                for (IonValue iv : elements)
+                {
+                    IonStruct val = (IonStruct)iv;
+                    String mediaName = ((IonText)val.get("title")).stringValue();
+                    int completeStatus = ((IonInt)val.get("complete_status")).intValue();
+                    long addedDate = ((IonInt)val.get("added_date")).intValue();
+                    Log.i("import", "[" + mediaName + "] [" + completeStatus + "] [" + addedDate + "]");
+
+                    // Remove the original one. Probably want to change to some kind of merging scheme.
+                    deleteMedia(mediaName);
+
+                    addMedia(mediaName, (completeStatus == 1), addedDate);
+
+                    IonList episodes = (IonList)val.get("episodes");
+                    int i = 1;
+                    for (IonValue epIv : episodes)
+                    {
+                        Long epDate = ((IonInt)epIv).longValue();
+                        addEpisode(mediaName, i, epDate);
+                        i++;
+                        Log.i("import", "\t" + epDate);
+                    }
+                }
+
+                fis.close();
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private void writeData(File file)
+    {
+        List<MediaData> mdList = getMediaCounters();
+
+        IonList backupData = ionSys.newEmptyList();
+
+        try
+        {
+            for (MediaData md : mdList)
+            {
+                IonStruct media = ionSys.newNullStruct();
+                media.put("title").newString(md.getMediaName());
+                media.put("complete_status").newInt(md.isComplete() ? 1 : 0);
+                media.put("added_date").newInt(md.getAddedDate());
+
+                List<Long> epDates = md.getEpDates();
+                IonList epList = ionSys.newEmptyList();
+                for (int i = 0; i < epDates.size(); i++)
+                {
+                    epList.add(ionSys.newInt(epDates.get(i)));
+                }
+
+                media.put("episodes", epList);
+
+                backupData.add(media);
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        try
+        {
+            Log.i("writeData", backupData.toPrettyString());
+
+            if (file != null)
+            {
+                IonWriter writer = ionSys.newTextWriter(new FileOutputStream(file));
+
+                backupData.writeTo(writer);
+
+                writer.close();
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
     }
 }
