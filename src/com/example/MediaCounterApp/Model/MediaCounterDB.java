@@ -43,6 +43,12 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
     public static final long UNKNOWN_DATE = 0;
 
+    // Constants for data import / export
+    private static final String DATA_FIELD_TITLE = "title";
+    private static final String DATA_FIELD_COMPLETE = "complete_status";
+    private static final String DATA_FIELD_ADDED = "added_date";
+    private static final String DATA_FIELD_EPISODES = "episodes";
+
     private Context c;
     private IonSystem ionSys;
 
@@ -533,9 +539,9 @@ public class MediaCounterDB extends SQLiteOpenHelper
                 for (IonValue iv : elements)
                 {
                     IonStruct val = (IonStruct)iv;
-                    String mediaName = ((IonText)val.get("title")).stringValue();
-                    int completeStatus = ((IonInt)val.get("complete_status")).intValue();
-                    long addedDate = ((IonInt)val.get("added_date")).intValue();
+                    String mediaName = ((IonText)val.get(DATA_FIELD_TITLE)).stringValue();
+                    int completeStatus = ((IonInt)val.get(DATA_FIELD_COMPLETE)).intValue();
+                    long addedDate = ((IonInt)val.get(DATA_FIELD_ADDED)).intValue();
                     Log.i("import", "[" + mediaName + "] [" + completeStatus + "] [" + addedDate + "]");
 
                     // Remove the original one. Probably want to change to some kind of merging scheme.
@@ -543,7 +549,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
                     addMedia(mediaName, (completeStatus == 1), addedDate);
 
-                    IonList episodes = (IonList)val.get("episodes");
+                    IonList episodes = (IonList)val.get(DATA_FIELD_EPISODES);
                     int i = 1;
                     for (IonValue epIv : episodes)
                     {
@@ -574,9 +580,9 @@ public class MediaCounterDB extends SQLiteOpenHelper
             for (MediaData md : mdList)
             {
                 IonStruct media = ionSys.newNullStruct();
-                media.put("title").newString(md.getMediaName());
-                media.put("complete_status").newInt(md.isComplete() ? 1 : 0);
-                media.put("added_date").newInt(md.getAddedDate());
+                media.put(DATA_FIELD_TITLE).newString(md.getMediaName());
+                media.put(DATA_FIELD_COMPLETE).newInt(md.isComplete() ? 1 : 0);
+                media.put(DATA_FIELD_ADDED).newInt(md.getAddedDate());
 
                 List<Long> epDates = md.getEpDates();
                 IonList epList = ionSys.newEmptyList();
@@ -585,7 +591,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
                     epList.add(ionSys.newInt(epDates.get(i)));
                 }
 
-                media.put("episodes", epList);
+                media.put(DATA_FIELD_EPISODES, epList);
 
                 backupData.add(media);
             }
