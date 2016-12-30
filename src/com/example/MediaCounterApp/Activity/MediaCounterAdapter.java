@@ -29,7 +29,6 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
         resource = r;
 
         mdList = mdl;
-        checkBoxEnable = false;
     }
 
     @Override
@@ -45,17 +44,7 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
             itemView = convertView;
         }
 
-        MediaData md = (MediaData)getItem(position);
-
-        CheckBox cb = (CheckBox)itemView.findViewById(R.id.done_checkbox);
-        if (checkBoxEnable)
-        {
-            cb.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            cb.setVisibility(View.GONE);
-        }
+        MediaData md = getItem(position);
 
         TextView name = (TextView)itemView.findViewById(R.id.name_label);
         name.setText(md.getMediaName());
@@ -79,14 +68,5 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
     public void remove(int position)
     {
         mdList.remove(position);
-    }
-
-    public void enableDone(boolean enable)
-    {
-        if (checkBoxEnable != enable)
-        {
-            checkBoxEnable = enable;
-            notifyDataSetChanged();
-        }
     }
 }

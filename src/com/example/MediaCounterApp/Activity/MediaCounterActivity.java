@@ -202,8 +202,6 @@ public class MediaCounterActivity extends Activity
             lockButton.setText(R.string.lock_inc);
             lockButton.setBackgroundColor(Color.RED);
         }
-
-        adapter.enableDone(!lock);
     }
 
     private void changeCount(View view, boolean increment)
