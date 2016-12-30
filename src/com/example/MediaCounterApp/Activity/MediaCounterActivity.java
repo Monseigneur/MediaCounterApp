@@ -23,8 +23,11 @@ import java.util.List;
 
 public class MediaCounterActivity extends Activity
 {
+    // Activity message identifiers
     public static final int NEW_MEDIA_COUNTER_REQUEST = 1;
+    public static final int MEDIA_INFO_STATUS_CHANGE_REQUEST = 2;
     public static final String MEDIA_COUNTER_NAME = "media_name";
+    public static final String MEDIA_INFO_COMPLETE_STATUS = "media_info_complete_status";
 
     private List<MediaData> mdList;
     private MediaCounterAdapter adapter;
@@ -97,7 +100,7 @@ public class MediaCounterActivity extends Activity
         b.putSerializable(MediaInfoActivity.MEDIA_INFO, mivm);
         intent.putExtras(b);
 
-        startActivity(intent);
+        startActivityForResult(intent, MEDIA_INFO_STATUS_CHANGE_REQUEST);
     }
 
     public void showStats(View view)
@@ -120,10 +123,11 @@ public class MediaCounterActivity extends Activity
         Log.i("onActivityResult", "requestCode " + requestCode + " resultCode " + resultCode);
         if (resultCode == RESULT_OK)
         {
+            String name;
             switch (requestCode)
             {
                 case NEW_MEDIA_COUNTER_REQUEST:
-                    String name = data.getStringExtra(MEDIA_COUNTER_NAME);
+                    name = data.getStringExtra(MEDIA_COUNTER_NAME);
 
                     boolean result = db.addMedia(name);
 
@@ -142,6 +146,21 @@ public class MediaCounterActivity extends Activity
                     System.out.println(name);
                     Log.i("onActivityResult", name);
                     break;
+                case MEDIA_INFO_STATUS_CHANGE_REQUEST:
+                    boolean newStatus = data.getBooleanExtra(MEDIA_INFO_COMPLETE_STATUS, false);
+                    name = data.getStringExtra(MediaCounterActivity.MEDIA_COUNTER_NAME);
+                    Log.i("onActivityResult", "media info status change " + newStatus + " for media [" + name + "]");
+                    db.setCompleteStatus(name, newStatus ? 1 : 0);
+
+                    // Update the completeStatus in the list.
+                    for (int i = 0; i < mdList.size(); i++)
+                    {
+                        if (mdList.get(i).getMediaName().equals(name))
+                        {
+                            mdList.get(i).setComplete(newStatus);
+                        }
+                    }
+                    adapter.notifyDataSetChanged();
                 default:
                     break;
             }

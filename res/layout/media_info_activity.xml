@@ -27,16 +27,16 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
-                android:text="count"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:paddingLeft="@dimen/edge_padding"/>
-        <TextView
-                android:id="@+id/media_info_complete_status"
+        <Button
+                android:id="@+id/media_info_complete_status_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
                 android:gravity="right"
                 android:text="@string/not_complete"
+                android:onClick="changeCompleteStatus"
                 android:paddingRight="@dimen/edge_padding"/>
     </LinearLayout>
     <Space android:layout_width="fill_parent" android:layout_height="20dp"/>

@@ -84,6 +84,11 @@ public class MediaData implements Serializable, Comparable<MediaData>
         return complete;
     }
 
+    public void setComplete(boolean complete)
+    {
+        this.complete = complete;
+    }
+
     public String toString()
     {
         String completeText = (complete) ? " COMPLETE" : "";

@@ -2,10 +2,12 @@ package com.example.MediaCounterApp.Activity;
 
 import android.content.Context;
 
+import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import com.example.MediaCounterApp.Model.MediaData;
@@ -13,10 +15,8 @@ import com.example.MediaCounterApp.R;
 
 import java.util.List;
 
-/**
- * Created by Milan on 5/21/2016.
- */
-public class MediaCounterAdapter extends BaseAdapter {//implements ListAdapter {
+public class MediaCounterAdapter extends ArrayAdapter<MediaData>
+{
     private LayoutInflater inflater;
     private int resource;
     private List<MediaData> mdList;
@@ -24,26 +24,12 @@ public class MediaCounterAdapter extends BaseAdapter {//implements ListAdapter {
 
     public MediaCounterAdapter(Context c, int r, List<MediaData> mdl)
     {
+        super(c, r, mdl);
         inflater = (LayoutInflater)c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         resource = r;
 
         mdList = mdl;
         checkBoxEnable = false;
-    }
-
-    @Override
-    public int getCount() {
-        return mdList.size();
-    }
-
-    @Override
-    public Object getItem(int position) {
-        return mdList.get(position);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
     }
 
     @Override
@@ -74,6 +60,16 @@ public class MediaCounterAdapter extends BaseAdapter {//implements ListAdapter {
         TextView name = (TextView)itemView.findViewById(R.id.name_label);
         name.setText(md.getMediaName());
 
+        if (md.isComplete())
+        {
+            Log.i("MediaCounterAdaptor", "complete for media [" + md.getMediaName() + "]");
+            name.setTextColor(Color.GREEN);
+        }
+        else
+        {
+            name.setTextColor(Color.WHITE);
+        }
+
         TextView count = (TextView)itemView.findViewById(R.id.count_label);
         count.setText(md.getCount() + "");
 
@@ -83,11 +79,6 @@ public class MediaCounterAdapter extends BaseAdapter {//implements ListAdapter {
     public void remove(int position)
     {
         mdList.remove(position);
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return mdList.isEmpty();
     }
 
     public void enableDone(boolean enable)
