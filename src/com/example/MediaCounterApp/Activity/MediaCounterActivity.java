@@ -189,28 +189,42 @@ public class MediaCounterActivity extends Activity
 
     public void importData(View view)
     {
-        db.importData();
+        if (!incLocked)
+        {
+            db.importData();
+        }
     }
 
     public void exportData(View view)
     {
-        db.backupData();
+        if (!incLocked)
+        {
+            db.backupData();
+        }
     }
 
     public void setLockState(boolean lock)
     {
         Button lockButton = (Button)findViewById(R.id.lock_button);
+        Button importButton = (Button)findViewById(R.id.import_data_button);
+        Button exportButton = (Button)findViewById(R.id.export_data_button);
 
         incLocked = lock;
         if (lock)
         {
             lockButton.setText(R.string.unlock_inc);
             lockButton.setBackground(defaultButtonBg);
+
+            importButton.setVisibility(View.GONE);
+            exportButton.setVisibility(View.GONE);
         }
         else
         {
             lockButton.setText(R.string.lock_inc);
             lockButton.setBackgroundColor(Color.RED);
+
+            importButton.setVisibility(View.VISIBLE);
+            exportButton.setVisibility(View.VISIBLE);
         }
     }
 

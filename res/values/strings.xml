@@ -15,8 +15,8 @@
     <string name="not_complete">Not Complete</string>
     <string name="add_new_media_button">Add</string>
     <string name="add_new_media_label">Add a New Media Counter</string>
-    <string name="import_data">Import Data</string>
-    <string name="export_data">Export Data</string>
+    <string name="import_data">I</string>
+    <string name="export_data">E</string>
 
 
     <string name="duplicate_media">Media already exists!</string>
