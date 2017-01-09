@@ -136,7 +136,7 @@ public class MediaCounterActivity extends Activity
                         MediaData md = new MediaData(name);
                         mdList.add(md);
 
-                        Collections.sort(mdList);
+                        sortData(mdList);
                     }
                     else
                     {
@@ -187,9 +187,19 @@ public class MediaCounterActivity extends Activity
         setLockState(!incLocked);
     }
 
+    public void importData(View view)
+    {
+        db.importData();
+    }
+
+    public void exportData(View view)
+    {
+        db.backupData();
+    }
+
     public void setLockState(boolean lock)
     {
-        Button lockButton = (Button) findViewById(R.id.lock_button);
+        Button lockButton = (Button)findViewById(R.id.lock_button);
 
         incLocked = lock;
         if (lock)
@@ -236,5 +246,10 @@ public class MediaCounterActivity extends Activity
     {
         Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
         toast.show();
+    }
+
+    private void sortData(List<MediaData> mdList)
+    {
+        Collections.sort(mdList);
     }
 }

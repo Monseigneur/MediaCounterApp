@@ -19,6 +19,7 @@
             android:windowSoftInputMode="stateVisible"/>
         <activity android:name=".Activity.MediaInfoActivity"
             android:parentActivityName=".Activity.MediaCounterActivity"/>
-        <activity android:name=".Activity.MediaStatsActivity"/>
+        <activity android:name=".Activity.MediaStatsActivity"
+            android:parentActivityName=".Activity.MediaCounterActivity"/>
     </application>
 </manifest>

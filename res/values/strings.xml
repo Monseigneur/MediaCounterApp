@@ -8,12 +8,15 @@
     <string name="unlock_inc">Unlock</string>
     <string name="lock_inc">Lock</string>
     <string name="random_button_name">Random Selection</string>
+    <string name="stats_button_name">Stats</string>
     <string name="episode_number">Episode Number</string>
     <string name="episode_date">Date Watched</string>
     <string name="complete">Complete</string>
     <string name="not_complete">Not Complete</string>
     <string name="add_new_media_button">Add</string>
     <string name="add_new_media_label">Add a New Media Counter</string>
+    <string name="import_data">Import Data</string>
+    <string name="export_data">Export Data</string>
 
 
     <string name="duplicate_media">Media already exists!</string>

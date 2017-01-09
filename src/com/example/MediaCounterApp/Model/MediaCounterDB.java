@@ -121,6 +121,8 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
         db.insert(TABLE_TITLES, null, values);
 
+        db.close();
+
         return true;
     }
 

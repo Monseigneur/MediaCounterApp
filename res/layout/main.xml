@@ -14,15 +14,17 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <Button
+            android:id="@+id/random_media_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/random_button_name"
             android:onClick="chooseRandomMedia"
             android:layout_weight="0.5"/>
         <Button
+            android:id="@+id/stats_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Stats"
+            android:text="@string/stats_button_name"
             android:onClick="showStats"
             android:layout_weight="0.5"/>
         <Button
