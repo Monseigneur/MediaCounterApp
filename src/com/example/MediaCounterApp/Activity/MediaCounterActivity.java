@@ -192,6 +192,8 @@ public class MediaCounterActivity extends Activity
         if (!incLocked)
         {
             db.importData();
+
+            showToast("Import complete");
         }
     }
 
@@ -200,6 +202,8 @@ public class MediaCounterActivity extends Activity
         if (!incLocked)
         {
             db.backupData();
+
+            showToast("Export complete");
         }
     }
 
