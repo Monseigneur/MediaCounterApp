@@ -324,10 +324,10 @@ public class MediaCounterDB extends SQLiteOpenHelper
                 do
                 {
                     String mediaName = cursor.getString(cursor.getColumnIndex(KEY_TITLE));
-                    Log.i("getMediaCounters", "name [" + mediaName + "] -> [" + cursor.getString(cursor.getColumnIndex(KEY_COMPLETE)) + "]");
                     int completeStatus = cursor.getInt(cursor.getColumnIndex(KEY_COMPLETE));
                     List<Long> epDates = getEpDates(mediaName);
                     long addedDate = cursor.getLong(cursor.getColumnIndex(KEY_ADDED_DATE));
+                    Log.i("getMediaCounters", "name [" + mediaName + "] -> CS " + completeStatus + ", EP# " + epDates.size() + ", AD " + addedDate);
 
                     MediaData md = new MediaData(mediaName, (completeStatus == 1), addedDate, epDates);
                     mdList.add(md);
@@ -543,7 +543,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
                     IonStruct val = (IonStruct)iv;
                     String mediaName = ((IonText)val.get(DATA_FIELD_TITLE)).stringValue();
                     int completeStatus = ((IonInt)val.get(DATA_FIELD_COMPLETE)).intValue();
-                    long addedDate = ((IonInt)val.get(DATA_FIELD_ADDED)).intValue();
+                    long addedDate = ((IonInt)val.get(DATA_FIELD_ADDED)).longValue();
                     Log.i("import", "[" + mediaName + "] [" + completeStatus + "] [" + addedDate + "]");
 
                     // Remove the original one. Probably want to change to some kind of merging scheme.
