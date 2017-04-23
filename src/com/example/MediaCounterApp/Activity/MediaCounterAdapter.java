@@ -54,6 +54,10 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
             Log.i("MediaCounterAdaptor", "complete for media [" + md.getMediaName() + "]");
             name.setTextColor(Color.GREEN);
         }
+        else if (md.getCount() == 0)
+        {
+            name.setTextColor(Color.YELLOW);
+        }
         else
         {
             name.setTextColor(Color.WHITE);
