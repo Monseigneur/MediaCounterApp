@@ -30,7 +30,7 @@
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:paddingLeft="@dimen/edge_padding"/>
         <Button
-                android:id="@+id/media_info_complete_status_button"
+                android:id="@+id/media_info_status_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"

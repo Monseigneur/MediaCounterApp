@@ -18,19 +18,19 @@ import java.util.*;
  */
 public class MediaCounterDB extends SQLiteOpenHelper
 {
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME = "media_counter_db";
 
     // Have 2 dbs:
-    // Titles: tid, title, complete_status
+    // Titles: tid, title, status
     // Episodes: tid, epid, date
     private static final String TABLE_TITLES = "titles";
 
     private static final String KEY_TID = "tid";
     private static final String KEY_TITLE = "title";
-    private static final String KEY_COMPLETE = "complete_status";
+    private static final String KEY_STATUS = "status";
     private static final String KEY_ADDED_DATE = "added_date";
-    private static final String[] TITLES_COLUMNS = {KEY_TID, KEY_TITLE, KEY_COMPLETE, KEY_ADDED_DATE};
+    private static final String[] TITLES_COLUMNS = {KEY_TID, KEY_TITLE, KEY_STATUS, KEY_ADDED_DATE};
 
     private static final String TABLE_EPISODES = "episodes";
 
@@ -45,7 +45,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
     // Constants for data import / export
     private static final String DATA_FIELD_TITLE = "title";
-    private static final String DATA_FIELD_COMPLETE = "complete_status";
+    private static final String DATA_FIELD_STATUS = "status";
     private static final String DATA_FIELD_ADDED = "added_date";
     private static final String DATA_FIELD_EPISODES = "episodes";
 
@@ -66,7 +66,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         String createTitleDB = "CREATE TABLE titles ( " +
                 KEY_TID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 KEY_TITLE + " TEXT, " +
-                KEY_COMPLETE + " INTEGER, " +
+                KEY_STATUS + " INTEGER, " +
                 KEY_ADDED_DATE + " INTEGER )";
 
         db.execSQL(createTitleDB);
@@ -97,14 +97,14 @@ public class MediaCounterDB extends SQLiteOpenHelper
     // Possible:
     // - Delete an episode
     // - Delete a media counter
-    // - Mark a media counter complete
+    // - Change a media counter's state
 
     public boolean addMedia(String mediaName)
     {
-        return addMedia(mediaName, false, getCurrentDate());
+        return addMedia(mediaName, MediaCounterStatus.NEW, getCurrentDate());
     }
 
-    private boolean addMedia(String mediaName, boolean complete, long date)
+    private boolean addMedia(String mediaName, MediaCounterStatus status, long date)
     {
         if (getIdForMedia(mediaName) != -1)
         {
@@ -116,7 +116,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
         ContentValues values = new ContentValues();
         values.put(KEY_TITLE, mediaName);
-        values.put(KEY_COMPLETE, complete);
+        values.put(KEY_STATUS, status.value);
         values.put(KEY_ADDED_DATE, date);
 
         db.insert(TABLE_TITLES, null, values);
@@ -156,20 +156,20 @@ public class MediaCounterDB extends SQLiteOpenHelper
         db.close();
     }
 
-    public void setCompleteStatus(String mediaName, int completeStatus)
+    public void setStatus(String mediaName, MediaCounterStatus status)
     {
-        Log.i("setCompleteStatus", "setting complete for [" + mediaName + "] to " + completeStatus);
+        Log.i("setStatus", "setting status for [" + mediaName + "] to " + status);
         int tid = getIdForMedia(mediaName);
 
         if (tid == -1)
         {
-            Log.e("setCompleteStatus", "media does not exist");
+            Log.e("setStatus", "media does not exist");
         }
 
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_COMPLETE, completeStatus);
+        values.put(KEY_STATUS, status.value);
 
         db.beginTransaction();
         int rowsUpdated = db.update(TABLE_TITLES, values, KEY_TID + SQL_PARAMETER, new String[]{String.valueOf(tid)});
@@ -324,12 +324,14 @@ public class MediaCounterDB extends SQLiteOpenHelper
                 do
                 {
                     String mediaName = cursor.getString(cursor.getColumnIndex(KEY_TITLE));
-                    int completeStatus = cursor.getInt(cursor.getColumnIndex(KEY_COMPLETE));
+                    int statusVal = cursor.getInt(cursor.getColumnIndex(KEY_STATUS));
+                    MediaCounterStatus status = MediaCounterStatus.from(statusVal);
                     List<Long> epDates = getEpDates(mediaName);
-                    long addedDate = cursor.getLong(cursor.getColumnIndex(KEY_ADDED_DATE));
-                    Log.i("getMediaCounters", "name [" + mediaName + "] -> CS " + completeStatus + ", EP# " + epDates.size() + ", AD " + addedDate);
 
-                    MediaData md = new MediaData(mediaName, (completeStatus == 1), addedDate, epDates);
+                    long addedDate = cursor.getLong(cursor.getColumnIndex(KEY_ADDED_DATE));
+                    Log.i("getMediaCounters", "name [" + mediaName + "] -> S " + status + ", EP# " + epDates.size() + ", AD " + addedDate);
+
+                    MediaData md = new MediaData(mediaName, status, addedDate, epDates);
                     mdList.add(md);
                 } while (cursor.moveToNext());
             }
@@ -350,7 +352,8 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
         for (MediaData md : mdList)
         {
-            if (!md.isComplete())
+            MediaCounterStatus status = md.getStatus();
+            if ((status != MediaCounterStatus.COMPLETE) && (status != MediaCounterStatus.DROPPED))
             {
                 incomplete.add(md);
             }
@@ -542,14 +545,15 @@ public class MediaCounterDB extends SQLiteOpenHelper
                 {
                     IonStruct val = (IonStruct)iv;
                     String mediaName = ((IonText)val.get(DATA_FIELD_TITLE)).stringValue();
-                    int completeStatus = ((IonInt)val.get(DATA_FIELD_COMPLETE)).intValue();
+                    int statusVal = ((IonInt)val.get(DATA_FIELD_STATUS)).intValue();
+                    MediaCounterStatus status = MediaCounterStatus.from(statusVal);
                     long addedDate = ((IonInt)val.get(DATA_FIELD_ADDED)).longValue();
-                    Log.i("import", "[" + mediaName + "] [" + completeStatus + "] [" + addedDate + "]");
+                    Log.i("import", "[" + mediaName + "] [" + status + "] [" + addedDate + "]");
 
                     // Remove the original one. Probably want to change to some kind of merging scheme.
                     deleteMedia(mediaName);
 
-                    addMedia(mediaName, (completeStatus == 1), addedDate);
+                    addMedia(mediaName, status, addedDate);
 
                     IonList episodes = (IonList)val.get(DATA_FIELD_EPISODES);
                     int i = 1;
@@ -583,7 +587,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
             {
                 IonStruct media = ionSys.newNullStruct();
                 media.put(DATA_FIELD_TITLE).newString(md.getMediaName());
-                media.put(DATA_FIELD_COMPLETE).newInt(md.isComplete() ? 1 : 0);
+                media.put(DATA_FIELD_STATUS).newInt(md.getStatus().value);
                 media.put(DATA_FIELD_ADDED).newInt(md.getAddedDate());
 
                 List<Long> epDates = md.getEpDates();

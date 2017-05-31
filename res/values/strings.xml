@@ -11,7 +11,10 @@
     <string name="stats_button_name">Stats</string>
     <string name="episode_number">Episode Number</string>
     <string name="episode_date">Date Watched</string>
-    <string name="complete">Complete</string>
+    <string name="new_text">New</string>
+    <string name="ongoing_text">Ongoing</string>
+    <string name="complete_text">Complete</string>
+    <string name="dropped_text">Dropped</string>
     <string name="not_complete">Not Complete</string>
     <string name="add_new_media_button">Add</string>
     <string name="add_new_media_label">Add a New Media Counter</string>

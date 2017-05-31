@@ -1,5 +1,7 @@
 package com.example.MediaCounterApp.ViewModel;
 
+import com.example.MediaCounterApp.Model.MediaCounterStatus;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -14,14 +16,14 @@ public class MediaInfoViewModel implements Serializable
     // - Added date
     // - Episode list (number, date)
     public String mediaName;
-    public boolean completeStatus;
+    public MediaCounterStatus status;
     public long addedDate;
     public List<Long> epDates;
 
-    public MediaInfoViewModel(String n, boolean cs, long ad, List<Long> ed)
+    public MediaInfoViewModel(String n, MediaCounterStatus s, long ad, List<Long> ed)
     {
         mediaName = n;
-        completeStatus = cs;
+        status = s;
         addedDate = ad;
         epDates = ed;
     }
@@ -31,7 +33,7 @@ public class MediaInfoViewModel implements Serializable
     {
         return "MediaInfoViewModel{" +
                 "mediaName='" + mediaName + '\'' +
-                ", completeStatus=" + completeStatus +
+                ", status=" + status +
                 ", addedDate=" + addedDate +
                 ", epDates=" + epDates +
                 '}';

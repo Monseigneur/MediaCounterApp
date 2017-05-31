@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import com.example.MediaCounterApp.Model.MediaCounterStatus;
 import com.example.MediaCounterApp.Model.MediaData;
 import com.example.MediaCounterApp.R;
 import com.example.MediaCounterApp.ViewModel.MediaInfoViewModel;
@@ -27,7 +28,7 @@ public class MediaCounterActivity extends Activity
     public static final int NEW_MEDIA_COUNTER_REQUEST = 1;
     public static final int MEDIA_INFO_STATUS_CHANGE_REQUEST = 2;
     public static final String MEDIA_COUNTER_NAME = "media_name";
-    public static final String MEDIA_INFO_COMPLETE_STATUS = "media_info_complete_status";
+    public static final String MEDIA_INFO_STATUS = "media_info_status";
 
     private List<MediaData> mdList;
     private MediaCounterAdapter adapter;
@@ -95,7 +96,7 @@ public class MediaCounterActivity extends Activity
         MediaData md = mdList.get(pos);
 
         String name = md.getMediaName();
-        MediaInfoViewModel mivm = new MediaInfoViewModel(name, md.isComplete(), md.getAddedDate(), db.getEpDates(name));
+        MediaInfoViewModel mivm = new MediaInfoViewModel(name, md.getStatus(), md.getAddedDate(), db.getEpDates(name));
 
         b.putSerializable(MediaInfoActivity.MEDIA_INFO, mivm);
         intent.putExtras(b);
@@ -147,17 +148,17 @@ public class MediaCounterActivity extends Activity
                     Log.i("onActivityResult", name);
                     break;
                 case MEDIA_INFO_STATUS_CHANGE_REQUEST:
-                    boolean newStatus = data.getBooleanExtra(MEDIA_INFO_COMPLETE_STATUS, false);
+                    MediaCounterStatus newStatus = (MediaCounterStatus)data.getSerializableExtra(MEDIA_INFO_STATUS);
                     name = data.getStringExtra(MediaCounterActivity.MEDIA_COUNTER_NAME);
                     Log.i("onActivityResult", "media info status change " + newStatus + " for media [" + name + "]");
-                    db.setCompleteStatus(name, newStatus ? 1 : 0);
+                    db.setStatus(name, newStatus);
 
                     // Update the completeStatus in the list.
                     for (int i = 0; i < mdList.size(); i++)
                     {
                         if (mdList.get(i).getMediaName().equals(name))
                         {
-                            mdList.get(i).setComplete(newStatus);
+                            mdList.get(i).setStatus(newStatus);
                         }
                     }
                     adapter.notifyDataSetChanged();

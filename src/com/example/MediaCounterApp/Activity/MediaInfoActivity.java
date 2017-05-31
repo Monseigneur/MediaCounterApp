@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.example.MediaCounterApp.Model.MediaCounterDB;
+import com.example.MediaCounterApp.Model.MediaCounterStatus;
 import com.example.MediaCounterApp.R;
 import com.example.MediaCounterApp.ViewModel.MediaInfoViewModel;
 
@@ -22,8 +23,9 @@ public class MediaInfoActivity extends Activity
 
     private Button completeButton;
 
-    private boolean originalStatus;
-    private boolean currentStatus;
+    private MediaCounterStatus originalStatus;
+    private MediaCounterStatus currentStatus;
+    private boolean counterStarted;
     private String name;
 
     @Override
@@ -50,9 +52,9 @@ public class MediaInfoActivity extends Activity
         TextView countLabel = (TextView)findViewById(R.id.media_info_count);
         countLabel.setText(mivm.epDates.size() + "");
 
-        completeButton = (Button)findViewById(R.id.media_info_complete_status_button);
+        completeButton = (Button)findViewById(R.id.media_info_status_button);
 
-        originalStatus = mivm.completeStatus;
+        originalStatus = mivm.status;
         currentStatus = originalStatus;
         // Set the initial state
         setButtonText();
@@ -66,20 +68,47 @@ public class MediaInfoActivity extends Activity
 
     private void setButtonText()
     {
-        if (currentStatus)
+        int textId;
+        switch (currentStatus)
         {
-            completeButton.setText(R.string.complete);
+            default:
+            case NEW:
+                textId = R.string.new_text;
+                break;
+            case ONGOING:
+                textId = R.string.ongoing_text;
+                break;
+            case COMPLETE:
+                textId = R.string.complete_text;
+                break;
+            case DROPPED:
+                textId = R.string.dropped_text;
+                break;
         }
-        else
-        {
-            completeButton.setText(R.string.not_complete);
-        }
+        completeButton.setText(textId);
     }
 
     public void changeCompleteStatus(View view)
     {
         Log.i("changeCompleteStatus", "changing status");
-        currentStatus = !currentStatus;
+        MediaCounterStatus newStatus;
+        switch (currentStatus)
+        {
+            default:
+            case NEW:
+                newStatus = MediaCounterStatus.ONGOING;
+                break;
+            case ONGOING:
+                newStatus = MediaCounterStatus.COMPLETE;
+                break;
+            case COMPLETE:
+                newStatus = MediaCounterStatus.DROPPED;
+                break;
+            case DROPPED:
+                newStatus = MediaCounterStatus.NEW;
+                break;
+        }
+        currentStatus = newStatus;
         setButtonText();
     }
 
@@ -87,7 +116,7 @@ public class MediaInfoActivity extends Activity
     public void finish()
     {
         Intent result = new Intent();
-        result.putExtra(MediaCounterActivity.MEDIA_INFO_COMPLETE_STATUS, currentStatus);
+        result.putExtra(MediaCounterActivity.MEDIA_INFO_STATUS, currentStatus);
         result.putExtra(MediaCounterActivity.MEDIA_COUNTER_NAME, name);
         setResult(Activity.RESULT_OK, result);
         super.finish();

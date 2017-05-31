@@ -3,12 +3,10 @@ package com.example.MediaCounterApp.Activity;
 import android.content.Context;
 
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.TextView;
 import com.example.MediaCounterApp.Model.MediaData;
 import com.example.MediaCounterApp.R;
@@ -49,19 +47,25 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
         TextView name = (TextView)itemView.findViewById(R.id.name_label);
         name.setText(md.getMediaName());
 
-        if (md.isComplete())
+        int nameColor;
+        switch (md.getStatus())
         {
-            Log.i("MediaCounterAdaptor", "complete for media [" + md.getMediaName() + "]");
-            name.setTextColor(Color.GREEN);
+            default:
+            case NEW:
+                nameColor = Color.WHITE;
+                break;
+            case ONGOING:
+                nameColor = Color.YELLOW;
+                break;
+            case COMPLETE:
+                nameColor = Color.GREEN;
+                break;
+            case DROPPED:
+                nameColor = Color.RED;
+                break;
         }
-        else if (md.getCount() == 0)
-        {
-            name.setTextColor(Color.YELLOW);
-        }
-        else
-        {
-            name.setTextColor(Color.WHITE);
-        }
+
+        name.setTextColor(nameColor);
 
         TextView count = (TextView)itemView.findViewById(R.id.count_label);
         count.setText(md.getCount() + "");

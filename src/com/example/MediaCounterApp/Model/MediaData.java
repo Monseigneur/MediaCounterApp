@@ -13,26 +13,26 @@ public class MediaData implements Serializable, Comparable<MediaData>
 
     private String mediaName;
     private int count;
-    private boolean complete;
+    private MediaCounterStatus status;
     private long addedDate;
     private List<Long> epDates;
 
 
     public MediaData(String name)
     {
-        init(name, false, 0, new ArrayList<>());
+        init(name, MediaCounterStatus.NEW, 0, new ArrayList<>());
     }
 
-    public MediaData(String name, boolean complete, long date, List<Long> epDates)
+    public MediaData(String name, MediaCounterStatus status, long date, List<Long> epDates)
     {
-        init(name, complete, date, epDates);
+        init(name, status, date, epDates);
     }
 
-    private void init(String name, boolean complete, long date, List<Long> epDates)
+    private void init(String name, MediaCounterStatus status, long date, List<Long> epDates)
     {
         this.mediaName = name;
         this.count = epDates.size();
-        this.complete = complete;
+        this.status = status;
         this.addedDate = date;
         this.epDates = epDates;
 
@@ -47,7 +47,7 @@ public class MediaData implements Serializable, Comparable<MediaData>
     {
         if (increment)
         {
-            if (!complete)
+            if (status != MediaCounterStatus.COMPLETE)
             {
                 count++;
             }
@@ -55,7 +55,15 @@ public class MediaData implements Serializable, Comparable<MediaData>
         else
         {
             count--;
-            complete = false;
+
+            if (count == 0)
+            {
+                status = MediaCounterStatus.NEW;
+            }
+            else
+            {
+                status = MediaCounterStatus.ONGOING;
+            }
         }
     }
 
@@ -79,20 +87,19 @@ public class MediaData implements Serializable, Comparable<MediaData>
         this.epDates = epDates;
     }
 
-    public boolean isComplete()
+    public MediaCounterStatus getStatus()
     {
-        return complete;
+        return status;
     }
 
-    public void setComplete(boolean complete)
+    public void setStatus(MediaCounterStatus status)
     {
-        this.complete = complete;
+        this.status = status;
     }
 
     public String toString()
     {
-        String completeText = (complete) ? " COMPLETE" : "";
-        return "[" + mediaName + ": " + count + completeText + "]";
+        return "[" + mediaName + ": " + count + "(" + status + ")]";
     }
 
     @Override
