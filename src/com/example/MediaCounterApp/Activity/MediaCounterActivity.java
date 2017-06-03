@@ -241,15 +241,16 @@ public class MediaCounterActivity extends Activity
             int pos = lv.getPositionForView(ll);
             MediaData md = (MediaData) lv.getAdapter().getItem(pos);
 
-            md.adjustCount(increment);
-
-            if (increment)
+            if (md.adjustCount(increment))
             {
-                db.addEpisode(md.getMediaName());
-            }
-            else
-            {
-                db.deleteEpisode(md.getMediaName());
+                if (increment)
+                {
+                    db.addEpisode(md.getMediaName());
+                }
+                else
+                {
+                    db.deleteEpisode(md.getMediaName());
+                }
             }
 
             if (!increment && (md.getCount() < 0))

@@ -43,28 +43,30 @@ public class MediaData implements Serializable, Comparable<MediaData>
         return count;
     }
 
-    public void adjustCount(boolean increment)
+    public boolean adjustCount(boolean increment)
     {
+        // This flag was added so that the caller would know if the adjustCount call succeeded and wouldn't updated
+        // the database incorrectly if it failed (such as when the MediaData is already marked as complete and the
+        // count is incremented.
+        // TODO Should a "cleaner" be added to the DB code that will find orphaned episodes and remove them?
+        boolean updated = false;
         if (increment)
         {
             if (status != MediaCounterStatus.COMPLETE)
             {
                 count++;
+                updateStatus();
+                updated = true;
             }
         }
         else
         {
             count--;
-
-            if (count == 0)
-            {
-                status = MediaCounterStatus.NEW;
-            }
-            else
-            {
-                status = MediaCounterStatus.ONGOING;
-            }
+            updateStatus();
+            updated = true;
         }
+
+        return updated;
     }
 
     public long getAddedDate()
@@ -109,5 +111,18 @@ public class MediaData implements Serializable, Comparable<MediaData>
         String otherName = another.getMediaName().toLowerCase();
 
         return thisName.compareTo(otherName);
+    }
+
+    private void updateStatus()
+    {
+        // TODO Want to do some extra checks to not allow any illegal status transitions?
+        if (count == 0)
+        {
+            status = MediaCounterStatus.NEW;
+        }
+        else
+        {
+            status = MediaCounterStatus.ONGOING;
+        }
     }
 }
