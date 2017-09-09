@@ -23,14 +23,15 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
     public MediaCounterAdapter(Context c, int r, List<MediaData> mdl)
     {
         super(c, r, mdl);
-        inflater = (LayoutInflater)c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        inflater = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         resource = r;
 
         mdList = mdl;
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, ViewGroup parent)
+    {
         View itemView = null;
 
         if (convertView == null)
@@ -44,7 +45,7 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
 
         MediaData md = getItem(position);
 
-        TextView name = (TextView)itemView.findViewById(R.id.name_label);
+        TextView name = (TextView) itemView.findViewById(R.id.name_label);
         name.setText(md.getMediaName());
 
         int nameColor;
@@ -67,7 +68,7 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
 
         name.setTextColor(nameColor);
 
-        TextView count = (TextView)itemView.findViewById(R.id.count_label);
+        TextView count = (TextView) itemView.findViewById(R.id.count_label);
         count.setText(md.getCount() + "");
 
         return itemView;

@@ -113,7 +113,7 @@ public class MediaCounterActivity extends Activity
 
         Bundle b = new Bundle();
 
-        b.putSerializable(MediaStatsActivity.MEDIA_STATS, (Serializable)epData);
+        b.putSerializable(MediaStatsActivity.MEDIA_STATS, (Serializable) epData);
         intent.putExtras(b);
 
         startActivity(intent);
@@ -148,7 +148,7 @@ public class MediaCounterActivity extends Activity
                     Log.i("onActivityResult", name);
                     break;
                 case MEDIA_INFO_STATUS_CHANGE_REQUEST:
-                    MediaCounterStatus newStatus = (MediaCounterStatus)data.getSerializableExtra(MEDIA_INFO_STATUS);
+                    MediaCounterStatus newStatus = (MediaCounterStatus) data.getSerializableExtra(MEDIA_INFO_STATUS);
                     name = data.getStringExtra(MediaCounterActivity.MEDIA_COUNTER_NAME);
                     Log.i("onActivityResult", "media info status change " + newStatus + " for media [" + name + "]");
                     db.setStatus(name, newStatus);
@@ -210,9 +210,9 @@ public class MediaCounterActivity extends Activity
 
     public void setLockState(boolean lock)
     {
-        Button lockButton = (Button)findViewById(R.id.lock_button);
-        Button importButton = (Button)findViewById(R.id.import_data_button);
-        Button exportButton = (Button)findViewById(R.id.export_data_button);
+        Button lockButton = (Button) findViewById(R.id.lock_button);
+        Button importButton = (Button) findViewById(R.id.import_data_button);
+        Button exportButton = (Button) findViewById(R.id.export_data_button);
 
         incLocked = lock;
         if (lock)

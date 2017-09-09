@@ -40,6 +40,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
     private static final String SQL_PARAMETER = " = ?";
     private static final String SQL_AND = " and ";
+    private static final String SQL_OR = " or ";
 
     public static final long UNKNOWN_DATE = 0;
 
@@ -48,6 +49,8 @@ public class MediaCounterDB extends SQLiteOpenHelper
     private static final String DATA_FIELD_STATUS = "status";
     private static final String DATA_FIELD_ADDED = "added_date";
     private static final String DATA_FIELD_EPISODES = "episodes";
+
+    private static final String TAG = "MediaCounterDB";
 
     private Context c;
     private IonSystem ionSys;
@@ -309,13 +312,36 @@ public class MediaCounterDB extends SQLiteOpenHelper
         return epDates;
     }
 
-    public List<MediaData> getMediaCounters()
+    public List<MediaData> getMediaCounters(EnumSet<MediaCounterStatus> statuses)
     {
         SQLiteDatabase db = this.getReadableDatabase();
 
         List<MediaData> mdList = new ArrayList<>();
 
-        Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, null, null, null, null, null, null);
+        if (statuses.isEmpty())
+        {
+            return mdList;
+        }
+
+        String selection = "";
+        String[] parameters = new String[statuses.size()];
+        int i = 0;
+
+        for (MediaCounterStatus mcs : statuses)
+        {
+            parameters[i] = "" + mcs.value;
+            selection += KEY_STATUS + SQL_PARAMETER;
+
+            if (i < (statuses.size() - 1))
+            {
+                selection += SQL_OR;
+            }
+
+            i++;
+        }
+        Log.i(TAG, "getMediaCounters(enum): selection [" + selection + "] params " + Arrays.toString(parameters));
+
+        Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, selection, parameters, null, null, null, null);
 
         if (cursor != null)
         {
@@ -342,6 +368,13 @@ public class MediaCounterDB extends SQLiteOpenHelper
         Collections.sort(mdList);
 
         return mdList;
+    }
+
+    public List<MediaData> getMediaCounters()
+    {
+        EnumSet<MediaCounterStatus> statuses = EnumSet.allOf(MediaCounterStatus.class);
+
+        return getMediaCounters(statuses);
     }
 
     public String getRandomMedia()
