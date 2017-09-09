@@ -243,6 +243,7 @@ public class MediaCounterActivity extends Activity
 
             if (md.adjustCount(increment))
             {
+                db.setStatus(md.getMediaName(), md.getStatus());
                 if (increment)
                 {
                     db.addEpisode(md.getMediaName());
