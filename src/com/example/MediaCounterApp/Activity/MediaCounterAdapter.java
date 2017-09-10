@@ -1,7 +1,6 @@
 package com.example.MediaCounterApp.Activity;
 
 import android.content.Context;
-
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +9,6 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import com.example.MediaCounterApp.Model.MediaData;
 import com.example.MediaCounterApp.R;
-
 import java.util.List;
 
 public class MediaCounterAdapter extends ArrayAdapter<MediaData>
@@ -18,7 +16,6 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
     private LayoutInflater inflater;
     private int resource;
     private List<MediaData> mdList;
-    private boolean checkBoxEnable;
 
     public MediaCounterAdapter(Context c, int r, List<MediaData> mdl)
     {
@@ -32,8 +29,7 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
     @Override
     public View getView(int position, View convertView, ViewGroup parent)
     {
-        View itemView = null;
-
+        View itemView;
         if (convertView == null)
         {
             itemView = inflater.inflate(resource, parent, false);

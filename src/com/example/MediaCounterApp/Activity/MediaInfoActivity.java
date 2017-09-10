@@ -19,13 +19,14 @@ import java.util.List;
 
 public class MediaInfoActivity extends Activity
 {
+    private static String TAG = "MediaInfoActivity";
+
     public static final String MEDIA_INFO = "media_info";
 
     private Button completeButton;
 
     private MediaCounterStatus originalStatus;
     private MediaCounterStatus currentStatus;
-    private boolean counterStarted;
     private String name;
 
     @Override
@@ -39,7 +40,7 @@ public class MediaInfoActivity extends Activity
 
         MediaInfoViewModel mivm = (MediaInfoViewModel)b.getSerializable(MEDIA_INFO);
 
-        Log.i("info activity", mivm.toString());
+        Log.i(TAG, "onCreate: " + mivm.toString());
 
         name = mivm.mediaName;
         TextView nameLabel = (TextView)findViewById(R.id.media_info_name);
@@ -60,12 +61,15 @@ public class MediaInfoActivity extends Activity
         setButtonText();
 
         ListView listView = (ListView)findViewById(R.id.media_info_ep_list);
-        Log.i("before constructor", R.layout.media_info_list_entry + " " + mivm.epDates);
+        Log.i(TAG, "onCreate: " + R.layout.media_info_list_entry + " " + mivm.epDates);
         MediaInfoEpisodeAdapter adapter = new MediaInfoEpisodeAdapter(this, R.layout.media_info_list_entry, mivm.epDates);
 
         listView.setAdapter(adapter);
     }
 
+    /**
+     * Sets the button text depending on the current status.
+     */
     private void setButtonText()
     {
         int textId;
@@ -88,9 +92,15 @@ public class MediaInfoActivity extends Activity
         completeButton.setText(textId);
     }
 
-    public void changeCompleteStatus(View view)
+    /**
+     * Changes the status
+     * @param view
+     */
+    public void changeStatus(View view)
     {
-        Log.i("changeCompleteStatus", "changing status");
+        Log.i(TAG, "changeStatus: changing status");
+
+        // Cycle through the statuses
         MediaCounterStatus newStatus;
         switch (currentStatus)
         {
@@ -137,6 +147,8 @@ public class MediaInfoActivity extends Activity
 
     public class MediaInfoEpisodeAdapter extends ArrayAdapter<Long>
     {
+        private String TAG = "MediaInfoEpisodeAdapter";
+
         private Context context;
         private LayoutInflater inflater;
         private int resource;
@@ -145,7 +157,7 @@ public class MediaInfoActivity extends Activity
         public MediaInfoEpisodeAdapter(Context c, int r, List<Long> epDates)
         {
             super(c, r, epDates);
-            Log.i("constructor", r + " " + epDates);
+            Log.i(TAG,"Constructor: " + r + " " + epDates);
             context = c;
             inflater = (LayoutInflater)c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             resource = r;
@@ -155,8 +167,7 @@ public class MediaInfoActivity extends Activity
         @Override
         public View getView(int position, View convertView, ViewGroup parent)
         {
-            View itemView = null;
-
+            View itemView;
             if (convertView == null)
             {
                 itemView = inflater.inflate(resource, parent, false);

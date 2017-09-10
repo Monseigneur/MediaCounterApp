@@ -36,7 +36,7 @@
                 android:layout_weight="0.5"
                 android:gravity="right"
                 android:text="@string/not_complete"
-                android:onClick="changeCompleteStatus"
+                android:onClick="changeStatus"
                 android:paddingRight="@dimen/edge_padding"/>
     </LinearLayout>
     <Space android:layout_width="fill_parent" android:layout_height="20dp"/>
