@@ -517,35 +517,49 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
     }
 
-    public void backupData()
+    public boolean backupData()
     {
         File base = getBackupDirectory();
-        File backupFile = new File(base, "media_counter_backup.txt");
+        if (base != null)
+        {
+            File backupFile = new File(base, "media_counter_backup.txt");
+            return writeData(backupFile);
+        }
 
-        writeData(backupFile);
+        return false;
     }
 
-    public void importData()
+    public boolean importData()
     {
         File base = getBackupDirectory();
-        File backupFile = new File(base, "media_counter_backup_TEMP.txt");
 
-        // First backup the data, in case something goes wrong.
-        writeData(backupFile);
+        if (base != null)
+        {
+            File backupFile = new File(base, "media_counter_backup_TEMP.txt");
 
-        File importFile = new File(base, "media_counter_import.txt");
+            // First backup the data, in case something goes wrong.
+            if (!writeData(backupFile))
+            {
+                return false;
+            }
 
-        readData(importFile);
+            File importFile = new File(base, "media_counter_import.txt");
+
+            return readData(importFile);
+        }
+
+        return false;
     }
 
     private File getBackupDirectory()
     {
-        File base = new File(System.getenv("EXTERNAL_STORAGE"));
-        File backupDir = new File(base, "MediaCounterBackup");
-        Log.i("getBackupDirector", "dir = [" + backupDir + "]");
-
         try
         {
+            File base = new File(System.getenv("EXTERNAL_STORAGE"));
+            Log.i("getBackupDirectory", "base dir = [" + base + "}");
+            File backupDir = new File(base, "MediaCounterBackup");
+            Log.i("getBackupDirector", "dir = [" + backupDir + "]");
+
             if (!backupDir.exists())
             {
                 boolean result = backupDir.mkdirs();
@@ -556,13 +570,13 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            Log.i("getBackupDirectory", "error");
         }
 
         return null;
     }
 
-    private void readData(File file)
+    private boolean readData(File file)
     {
         try
         {
@@ -604,11 +618,13 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            return false;
         }
+
+        return true;
     }
 
-    private void writeData(File file)
+    private boolean writeData(File file)
     {
         List<MediaData> mdList = getMediaCounters();
 
@@ -637,7 +653,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            return false;
         }
 
         try
@@ -655,7 +671,9 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            return false;
         }
+
+        return true;
     }
 }

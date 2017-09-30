@@ -1,18 +1,23 @@
 package com.example.MediaCounterApp.Activity;
 
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.support.v4.app.ActivityCompat;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
+
 import com.example.MediaCounterApp.Model.EpisodeData;
 import com.example.MediaCounterApp.Model.MediaCounterDB;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+
 import com.example.MediaCounterApp.Model.MediaCounterStatus;
 import com.example.MediaCounterApp.Model.MediaData;
 import com.example.MediaCounterApp.R;
@@ -21,6 +26,7 @@ import com.example.MediaCounterApp.ViewModel.MediaInfoViewModel;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.jar.Manifest;
 
 public class MediaCounterActivity extends Activity
 {
@@ -45,6 +51,8 @@ public class MediaCounterActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        verifyStoragePermissions(this);
+
         defaultButtonBg = findViewById(R.id.lock_button).getBackground();
 
         db = new MediaCounterDB(this);
@@ -64,6 +72,21 @@ public class MediaCounterActivity extends Activity
     public void onPause()
     {
         super.onPause();
+    }
+
+    public static void verifyStoragePermissions(Activity act)
+    {
+        int permission = ActivityCompat.checkSelfPermission(act, android.Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (permission != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(act, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+        }
+
+        permission = ActivityCompat.checkSelfPermission(act, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permission != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(act, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+        }
     }
 
     /**
@@ -192,9 +215,14 @@ public class MediaCounterActivity extends Activity
     {
         if (!incLocked)
         {
-            db.importData();
-
-            showToast("Import complete");
+            if (db.importData())
+            {
+                showToast("Import complete");
+            }
+            else
+            {
+                showToast("Import failed");
+            }
         }
     }
 
@@ -202,9 +230,15 @@ public class MediaCounterActivity extends Activity
     {
         if (!incLocked)
         {
-            db.backupData();
+            if (db.backupData())
+            {
+                showToast("Export complete");
+            }
+            else
+            {
+                showToast("Export failed");
+            }
 
-            showToast("Export complete");
         }
     }
 
