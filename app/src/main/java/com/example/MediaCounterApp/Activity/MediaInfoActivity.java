@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+
 import com.example.MediaCounterApp.Model.MediaCounterDB;
 import com.example.MediaCounterApp.Model.MediaCounterStatus;
 import com.example.MediaCounterApp.R;
@@ -38,29 +39,29 @@ public class MediaInfoActivity extends Activity
         Intent i = getIntent();
         Bundle b = i.getExtras();
 
-        MediaInfoViewModel mivm = (MediaInfoViewModel)b.getSerializable(MEDIA_INFO);
+        MediaInfoViewModel mivm = (MediaInfoViewModel) b.getSerializable(MEDIA_INFO);
 
         Log.i(TAG, "onCreate: " + mivm.toString());
 
         name = mivm.mediaName;
-        TextView nameLabel = (TextView)findViewById(R.id.media_info_name);
+        TextView nameLabel = (TextView) findViewById(R.id.media_info_name);
         nameLabel.setText(name);
 
-        TextView addedDateLabel = (TextView)findViewById(R.id.media_info_added_date);
+        TextView addedDateLabel = (TextView) findViewById(R.id.media_info_added_date);
         String addedDate = MediaCounterDB.dateString(this, mivm.addedDate);
         addedDateLabel.setText("Added: " + addedDate);
 
-        TextView countLabel = (TextView)findViewById(R.id.media_info_count);
+        TextView countLabel = (TextView) findViewById(R.id.media_info_count);
         countLabel.setText(mivm.epDates.size() + "");
 
-        completeButton = (Button)findViewById(R.id.media_info_status_button);
+        completeButton = (Button) findViewById(R.id.media_info_status_button);
 
         originalStatus = mivm.status;
         currentStatus = originalStatus;
         // Set the initial state
         setButtonText();
 
-        ListView listView = (ListView)findViewById(R.id.media_info_ep_list);
+        ListView listView = (ListView) findViewById(R.id.media_info_ep_list);
         Log.i(TAG, "onCreate: " + R.layout.media_info_list_entry + " " + mivm.epDates);
         MediaInfoEpisodeAdapter adapter = new MediaInfoEpisodeAdapter(this, R.layout.media_info_list_entry, mivm.epDates);
 
@@ -94,6 +95,7 @@ public class MediaInfoActivity extends Activity
 
     /**
      * Changes the status
+     *
      * @param view
      */
     public void changeStatus(View view)
@@ -157,9 +159,9 @@ public class MediaInfoActivity extends Activity
         public MediaInfoEpisodeAdapter(Context c, int r, List<Long> epDates)
         {
             super(c, r, epDates);
-            Log.i(TAG,"Constructor: " + r + " " + epDates);
+            Log.i(TAG, "Constructor: " + r + " " + epDates);
             context = c;
-            inflater = (LayoutInflater)c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            inflater = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             resource = r;
             this.epDates = epDates;
         }
@@ -167,25 +169,39 @@ public class MediaInfoActivity extends Activity
         @Override
         public View getView(int position, View convertView, ViewGroup parent)
         {
-            View itemView;
+            MediaInfoEpisodeAdapter.ViewHolder vh;
             if (convertView == null)
             {
-                itemView = inflater.inflate(resource, parent, false);
+                convertView = inflater.inflate(resource, parent, false);
+
+                vh = new MediaInfoEpisodeAdapter.ViewHolder();
+
+                vh.name = (TextView) convertView.findViewById(R.id.episode_number);
+                vh.count = (TextView) convertView.findViewById(R.id.episode_date);
+
+                convertView.setTag(vh);
             }
             else
             {
-                itemView = convertView;
+                vh = (MediaInfoEpisodeAdapter.ViewHolder) convertView.getTag();
             }
 
             long date = getItem(position);
 
-            TextView name = (TextView)itemView.findViewById(R.id.episode_number);
+            TextView name = vh.name;
             name.setText(position + 1 + "");
 
-            TextView count = (TextView)itemView.findViewById(R.id.episode_date);
+            TextView count = vh.count;
             count.setText(MediaCounterDB.dateString(context, date) + "");
 
-            return itemView;
+            return convertView;
+        }
+
+        // ViewHolder pattern to increase Adapter performance
+        private class ViewHolder
+        {
+            public TextView name;
+            public TextView count;
         }
     }
 }
