@@ -114,21 +114,6 @@ public class MediaCounterActivity extends Activity
     /**
      * New view methods
      */
-    public void newMediaCounter(View view)
-    {
-        Log.i("newMediaCounter", "send!");
-
-        Intent intent = new Intent(this, MediaCounterAddActivity.class);
-
-        startActivityForResult(intent, NEW_MEDIA_COUNTER_REQUEST);
-    }
-
-    public void chooseRandomMedia(View view)
-    {
-        String randomMedia = db.getRandomMedia();
-        showToast(randomMedia);
-    }
-
     public void viewMediaInfo(View view)
     {
         Intent intent = new Intent(this, MediaInfoActivity.class);
@@ -147,21 +132,6 @@ public class MediaCounterActivity extends Activity
         intent.putExtras(b);
 
         startActivityForResult(intent, MEDIA_INFO_STATUS_CHANGE_REQUEST);
-    }
-
-    public void showStats(View view)
-    {
-        Log.i("showStats", "start!");
-        List<EpisodeData> epData = db.getEpisodeData();
-
-        Intent intent = new Intent(this, MediaStatsActivity.class);
-
-        Bundle b = new Bundle();
-
-        b.putSerializable(MediaStatsActivity.MEDIA_STATS, (Serializable) epData);
-        intent.putExtras(b);
-
-        startActivity(intent);
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -219,39 +189,61 @@ public class MediaCounterActivity extends Activity
     /**
      * Helper methods
      */
-    public void changeLockState(View view)
+    public void buttonOnClick(View view)
     {
-        setLockState(!incLocked);
-    }
-
-    public void importData(View view)
-    {
-        if (!incLocked)
+        switch (view.getId())
         {
-            if (db.importData())
-            {
-                showToast("Import complete");
-            }
-            else
-            {
-                showToast("Import failed");
-            }
-        }
-    }
+            case R.id.import_data_button:
+                if (!incLocked)
+                {
+                    if (db.importData())
+                    {
+                        showToast("Import complete");
+                    }
+                    else
+                    {
+                        showToast("Import failed");
+                    }
+                }
+                break;
+            case R.id.export_data_button:
+                if (!incLocked)
+                {
+                    if (db.backupData())
+                    {
+                        showToast("Export complete");
+                    }
+                    else
+                    {
+                        showToast("Export failed");
+                    }
 
-    public void exportData(View view)
-    {
-        if (!incLocked)
-        {
-            if (db.backupData())
-            {
-                showToast("Export complete");
-            }
-            else
-            {
-                showToast("Export failed");
-            }
+                }
+                break;
+            case R.id.random_media_button:
+                String randomMedia = db.getRandomMedia();
+                showToast(randomMedia);
+                break;
+            case R.id.stats_button:
+                Log.i("showStats", "start!");
+                List<EpisodeData> epData = db.getEpisodeData();
 
+                Intent statsIntent = new Intent(this, MediaStatsActivity.class);
+                Bundle b = new Bundle();
+
+                b.putSerializable(MediaStatsActivity.MEDIA_STATS, (Serializable) epData);
+                statsIntent.putExtras(b);
+
+                startActivity(statsIntent);
+                break;
+            case R.id.lock_button:
+                setLockState(!incLocked);
+                break;
+            case R.id.new_media_button:
+                Log.i("newMediaCounter", "send!");
+                Intent newMediaIntent = new Intent(this, MediaCounterAddActivity.class);
+                startActivityForResult(newMediaIntent, NEW_MEDIA_COUNTER_REQUEST);
+                break;
         }
     }
 

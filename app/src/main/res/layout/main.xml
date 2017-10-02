@@ -13,13 +13,14 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.15"
             android:text="@string/import_data"
-            android:onClick="importData"
+            android:onClick="buttonOnClick"
             android:visibility="gone"/>
         <Button
+            android:id="@+id/new_media_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/new_media_name"
-            android:onClick="newMediaCounter"
+            android:onClick="buttonOnClick"
             android:layout_weight="1"/>
         <Button
             android:id="@+id/export_data_button"
@@ -27,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.15"
             android:text="@string/export_data"
-            android:onClick="exportData"
+            android:onClick="buttonOnClick"
             android:visibility="gone"/>
 
     </LinearLayout>
@@ -44,21 +45,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/random_button_name"
-            android:onClick="chooseRandomMedia"
+            android:onClick="buttonOnClick"
             android:layout_weight="0.5"/>
         <Button
             android:id="@+id/stats_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/stats_button_name"
-            android:onClick="showStats"
+            android:onClick="buttonOnClick"
             android:layout_weight="0.5"/>
         <Button
             android:id="@+id/lock_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/unlock_inc"
-            android:onClick="changeLockState"
+            android:onClick="buttonOnClick"
             android:layout_weight="0.5"/>
     </LinearLayout>
 
