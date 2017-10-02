@@ -5,6 +5,8 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.v4.app.ActivityCompat;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -25,6 +27,7 @@ import com.example.MediaCounterApp.ViewModel.MediaInfoViewModel;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.jar.Manifest;
 
@@ -36,7 +39,6 @@ public class MediaCounterActivity extends Activity
     public static final String MEDIA_COUNTER_NAME = "media_name";
     public static final String MEDIA_INFO_STATUS = "media_info_status";
 
-    private List<MediaData> mdList;
     private MediaCounterAdapter adapter;
 
     private MediaCounterDB db;
@@ -56,13 +58,33 @@ public class MediaCounterActivity extends Activity
         defaultButtonBg = findViewById(R.id.lock_button).getBackground();
 
         db = new MediaCounterDB(this);
-        mdList = db.getMediaCounters();
+        List<MediaData> mdList = db.getMediaCounters();
         Log.i("onCreate", "list = " + mdList);
 
         lv = (ListView) findViewById(R.id.media_list);
 
         adapter = new MediaCounterAdapter(this, R.layout.media_counter_list_entry, mdList);
         lv.setAdapter(adapter);
+
+        CheckBox viewToggle = (CheckBox) findViewById(R.id.view_check_box);
+        viewToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+            {
+                EnumSet<MediaCounterStatus> filter;
+                if (isChecked)
+                {
+                    filter = EnumSet.of(MediaCounterStatus.NEW, MediaCounterStatus.ONGOING);
+                }
+                else
+                {
+                    filter = EnumSet.allOf(MediaCounterStatus.class);
+                }
+
+                adapter.setFilterMask(filter);
+            }
+        });
 
         incLocked = true;
         setLockState(true);
@@ -116,7 +138,7 @@ public class MediaCounterActivity extends Activity
         LinearLayout ll = (LinearLayout) view.getParent();
         int pos = lv.getPositionForView(ll);
 
-        MediaData md = mdList.get(pos);
+        MediaData md = adapter.getItem(pos);
 
         String name = md.getMediaName();
         MediaInfoViewModel mivm = new MediaInfoViewModel(name, md.getStatus(), md.getAddedDate(), db.getEpDates(name));
@@ -158,9 +180,7 @@ public class MediaCounterActivity extends Activity
                     if (result)
                     {
                         MediaData md = new MediaData(name);
-                        mdList.add(md);
-
-                        sortData(mdList);
+                        adapter.add(md);
                     }
                     else
                     {
@@ -176,15 +196,8 @@ public class MediaCounterActivity extends Activity
                     Log.i("onActivityResult", "media info status change " + newStatus + " for media [" + name + "]");
                     db.setStatus(name, newStatus);
 
-                    // Update the completeStatus in the list.
-                    for (int i = 0; i < mdList.size(); i++)
-                    {
-                        if (mdList.get(i).getMediaName().equals(name))
-                        {
-                            mdList.get(i).setStatus(newStatus);
-                        }
-                    }
-                    adapter.notifyDataSetChanged();
+                    adapter.getItem(name).setStatus(newStatus);
+                    adapter.update();
                 default:
                     break;
             }
@@ -273,7 +286,7 @@ public class MediaCounterActivity extends Activity
         {
             LinearLayout ll = (LinearLayout) view.getParent();
             int pos = lv.getPositionForView(ll);
-            MediaData md = (MediaData) lv.getAdapter().getItem(pos);
+            MediaData md = adapter.getItem(pos);
 
             if (md.adjustCount(increment))
             {
@@ -293,7 +306,7 @@ public class MediaCounterActivity extends Activity
                 adapter.remove(pos);
             }
 
-            adapter.notifyDataSetChanged();
+            adapter.update();
         }
     }
 
@@ -301,10 +314,5 @@ public class MediaCounterActivity extends Activity
     {
         Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
         toast.show();
-    }
-
-    private void sortData(List<MediaData> mdList)
-    {
-        Collections.sort(mdList);
     }
 }

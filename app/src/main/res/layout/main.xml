@@ -35,6 +35,10 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
+        <CheckBox
+            android:id="@+id/view_check_box"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
         <Button
             android:id="@+id/random_media_button"
             android:layout_width="wrap_content"

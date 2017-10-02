@@ -116,7 +116,7 @@ public class MediaData implements Serializable, Comparable<MediaData>
     private void updateStatus()
     {
         // TODO Want to do some extra checks to not allow any illegal status transitions?
-        if (count == 0)
+        if (count <= 0)
         {
             status = MediaCounterStatus.NEW;
         }

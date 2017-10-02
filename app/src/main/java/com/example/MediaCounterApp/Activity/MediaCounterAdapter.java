@@ -2,22 +2,31 @@ package com.example.MediaCounterApp.Activity;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.example.MediaCounterApp.Model.MediaCounterStatus;
 import com.example.MediaCounterApp.Model.MediaData;
 import com.example.MediaCounterApp.R;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 
 public class MediaCounterAdapter extends ArrayAdapter<MediaData>
 {
     private LayoutInflater inflater;
     private int resource;
-    private List<MediaData> mdList;
+    private List<MediaData> originalData;
+    private List<MediaData> filteredData;
+
+    private EnumSet<MediaCounterStatus> currentFilter;
 
     public MediaCounterAdapter(Context c, int r, List<MediaData> mdl)
     {
@@ -25,7 +34,10 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
         inflater = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         resource = r;
 
-        mdList = mdl;
+        originalData = mdl;
+        filteredData = new ArrayList<>(mdl);
+
+        currentFilter = EnumSet.allOf(MediaCounterStatus.class);
     }
 
     @Override
@@ -78,9 +90,76 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
         return convertView;
     }
 
+    @Override
+    public int getCount()
+    {
+        return filteredData.size();
+    }
+
+    @Nullable
+    @Override
+    public MediaData getItem(int position)
+    {
+        return filteredData.get(position);
+    }
+
+    public MediaData getItem(String mediaName)
+    {
+        for (MediaData md : originalData)
+        {
+            if (md.getMediaName().equals(mediaName))
+            {
+                return md;
+            }
+        }
+
+        return null;
+    }
+
+    public void setFilterMask(EnumSet<MediaCounterStatus> filterMask)
+    {
+        currentFilter = filterMask;
+        filteredData.clear();
+        for (MediaData md : originalData)
+        {
+            if (filterMask.contains(md.getStatus()))
+            {
+                filteredData.add(md);
+            }
+        }
+
+        notifyDataSetChanged();
+    }
+
+    public void add(MediaData md)
+    {
+        originalData.add(md);
+
+        Collections.sort(originalData);
+
+        setFilterMask(currentFilter);
+    }
+
     public void remove(int position)
     {
-        mdList.remove(position);
+        // If an element is removed from the filtered view, it needs to be removed from the original data as well.
+        MediaData md = filteredData.remove(position);
+
+        for (int i = 0; i < originalData.size(); i++)
+        {
+            if (originalData.get(i).getMediaName().equals(md.getMediaName()))
+            {
+                originalData.remove(i);
+                break;
+            }
+        }
+    }
+
+    public void update()
+    {
+        setFilterMask(currentFilter);
+
+        notifyDataSetChanged();
     }
 
     // ViewHolder pattern to increase Adapter performance
