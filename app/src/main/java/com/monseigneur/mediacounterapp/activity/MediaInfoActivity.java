@@ -1,4 +1,4 @@
-package com.example.mediacounterapp.Activity;
+package com.monseigneur.mediacounterapp.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -11,10 +11,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 
-import com.example.mediacounterapp.Model.MediaCounterDB;
-import com.example.mediacounterapp.Model.MediaCounterStatus;
-import com.example.mediacounterapp.R;
-import com.example.mediacounterapp.ViewModel.MediaInfoViewModel;
+import com.monseigneur.mediacounterapp.model.MediaCounterDB;
+import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
+import com.monseigneur.mediacounterapp.R;
+import com.monseigneur.mediacounterapp.viewmodel.MediaInfoViewModel;
 
 import java.util.List;
 

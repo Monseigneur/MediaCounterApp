@@ -1,4 +1,4 @@
-package com.example.mediacounterapp.Activity;
+package com.monseigneur.mediacounterapp.activity;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -9,9 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.example.mediacounterapp.Model.MediaCounterStatus;
-import com.example.mediacounterapp.Model.MediaData;
-import com.example.mediacounterapp.R;
+import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
+import com.monseigneur.mediacounterapp.model.MediaData;
+import com.monseigneur.mediacounterapp.R;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -1,6 +1,6 @@
-package com.example.mediacounterapp.ViewModel;
+package com.monseigneur.mediacounterapp.viewmodel;
 
-import com.example.mediacounterapp.Model.MediaCounterStatus;
+import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 
 import java.io.Serializable;
 import java.util.List;

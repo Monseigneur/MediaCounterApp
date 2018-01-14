@@ -1,4 +1,4 @@
-package com.example.mediacounterapp.Model;
+package com.monseigneur.mediacounterapp.model;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-import com.example.mediacounterapp.R;
+import com.monseigneur.mediacounterapp.R;
 import software.amazon.ion.*;
 import software.amazon.ion.system.IonSystemBuilder;
 

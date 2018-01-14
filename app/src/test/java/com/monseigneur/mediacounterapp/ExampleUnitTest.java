@@ -1,4 +1,4 @@
-package com.example.mediacounterapp;
+package com.monseigneur.mediacounterapp;
 
 import org.junit.Test;
 

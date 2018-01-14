@@ -1,4 +1,4 @@
-package com.example.mediacounterapp.Activity;
+package com.monseigneur.mediacounterapp.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,8 +6,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.example.mediacounterapp.Model.EpisodeData;
-import com.example.mediacounterapp.R;
+import com.monseigneur.mediacounterapp.model.EpisodeData;
+import com.monseigneur.mediacounterapp.R;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.example.mediacounterapp.Model;
+package com.monseigneur.mediacounterapp.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;

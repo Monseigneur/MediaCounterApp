@@ -1,11 +1,11 @@
-package com.example.mediacounterapp.Activity;
+package com.monseigneur.mediacounterapp.activity;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
-import com.example.mediacounterapp.R;
+import com.monseigneur.mediacounterapp.R;
 
 /**
  * Created by Milan on 5/21/2016.
