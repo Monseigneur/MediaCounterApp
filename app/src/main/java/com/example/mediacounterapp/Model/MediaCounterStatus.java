@@ -1,4 +1,4 @@
-package com.example.MediaCounterApp.Model;
+package com.example.mediacounterapp.Model;
 
 public enum MediaCounterStatus
 {

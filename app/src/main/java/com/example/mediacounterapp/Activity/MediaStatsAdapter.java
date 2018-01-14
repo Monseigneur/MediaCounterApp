@@ -1,4 +1,4 @@
-package com.example.MediaCounterApp.Activity;
+package com.example.mediacounterapp.Activity;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -7,9 +7,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.example.MediaCounterApp.Model.EpisodeData;
-import com.example.MediaCounterApp.Model.MediaCounterDB;
-import com.example.MediaCounterApp.R;
+import com.example.mediacounterapp.Model.EpisodeData;
+import com.example.mediacounterapp.Model.MediaCounterDB;
+import com.example.mediacounterapp.R;
 
 import java.util.List;
 

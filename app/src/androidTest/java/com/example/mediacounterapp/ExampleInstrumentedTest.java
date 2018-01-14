@@ -1,4 +1,4 @@
-package com.example.MediaCounterApp;
+package com.example.mediacounterapp;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

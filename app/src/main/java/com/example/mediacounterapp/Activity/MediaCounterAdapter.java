@@ -1,18 +1,17 @@
-package com.example.MediaCounterApp.Activity;
+package com.example.mediacounterapp.Activity;
 
 import android.content.Context;
 import android.graphics.Color;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.example.MediaCounterApp.Model.MediaCounterStatus;
-import com.example.MediaCounterApp.Model.MediaData;
-import com.example.MediaCounterApp.R;
+import com.example.mediacounterapp.Model.MediaCounterStatus;
+import com.example.mediacounterapp.Model.MediaData;
+import com.example.mediacounterapp.R;
 
 import java.util.ArrayList;
 import java.util.Collections;

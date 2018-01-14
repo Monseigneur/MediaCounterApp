@@ -1,9 +1,6 @@
-package com.example.MediaCounterApp.Model;
-
-import android.util.Log;
+package com.example.mediacounterapp.Model;
 
 import java.io.Serializable;
-import java.util.Calendar;
 
 /**
  * Created by Milan on 8/5/2016.

@@ -1,4 +1,4 @@
-package com.example.MediaCounterApp.Activity;
+package com.example.mediacounterapp.Activity;
 
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -11,8 +11,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.MediaCounterApp.Model.EpisodeData;
-import com.example.MediaCounterApp.Model.MediaCounterDB;
+import com.example.mediacounterapp.Model.EpisodeData;
+import com.example.mediacounterapp.Model.MediaCounterDB;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -20,16 +20,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
-import com.example.MediaCounterApp.Model.MediaCounterStatus;
-import com.example.MediaCounterApp.Model.MediaData;
-import com.example.MediaCounterApp.R;
-import com.example.MediaCounterApp.ViewModel.MediaInfoViewModel;
+import com.example.mediacounterapp.Model.MediaCounterStatus;
+import com.example.mediacounterapp.Model.MediaData;
+import com.example.mediacounterapp.R;
+import com.example.mediacounterapp.ViewModel.MediaInfoViewModel;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.jar.Manifest;
 
 public class MediaCounterActivity extends Activity
 {
