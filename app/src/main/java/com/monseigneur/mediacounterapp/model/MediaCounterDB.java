@@ -42,6 +42,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
     private static final String SQL_AND = " and ";
     private static final String SQL_OR = " or ";
 
+    public static final int UNKNOWN_MEDIA = -1;
     public static final long UNKNOWN_DATE = 0;
 
     // Constants for data import / export
@@ -109,7 +110,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
     private boolean addMedia(String mediaName, MediaCounterStatus status, long date)
     {
-        if (getIdForMedia(mediaName) != -1)
+        if (getIdForMedia(mediaName) != UNKNOWN_MEDIA)
         {
             Log.e("addMedia", "media already exists!");
             return false;
@@ -139,7 +140,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
     {
         int tid = getIdForMedia(mediaName);
 
-        if (tid == -1)
+        if (tid == UNKNOWN_MEDIA)
         {
             Log.e("addEpisode", "media does not exist");
             return;
@@ -164,7 +165,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         Log.i("setStatus", "setting status for [" + mediaName + "] to " + status);
         int tid = getIdForMedia(mediaName);
 
-        if (tid == -1)
+        if (tid == UNKNOWN_MEDIA)
         {
             Log.e("setStatus", "media does not exist");
         }
@@ -190,7 +191,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
     {
         int tid = getIdForMedia(mediaName);
 
-        if (tid == -1)
+        if (tid == UNKNOWN_MEDIA)
         {
             Log.e("deleteMedia", "media does not exist");
             return;
@@ -226,7 +227,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
     {
         int tid = getIdForMedia(mediaName);
 
-        if (tid == -1)
+        if (tid == UNKNOWN_MEDIA)
         {
             Log.e("deleteEpisode", "media does not exist");
             return;
@@ -284,7 +285,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
     {
         int tid = getIdForMedia(mediaName);
 
-        if (tid == -1)
+        if (tid == UNKNOWN_MEDIA)
         {
             Log.e("getEpDates", "media does not exist");
         }
@@ -439,7 +440,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         for (String name : names.keySet())
         {
             List<Long> epDates = getEpDates(name);
-            MediaCounterStatus status = MediaCounterStatus.ONGOING;
+            MediaCounterStatus status = MediaCounterStatus.NEW;
 
             for (int i = 0; i < epDates.size(); i++)
             {
@@ -469,14 +470,14 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
         if (cursor == null)
         {
-            return -1;
+            return UNKNOWN_MEDIA;
         }
 
         int result;
 
         if (cursor.getCount() == 0)
         {
-            result = -1;
+            result = UNKNOWN_MEDIA;
         }
         else
         {

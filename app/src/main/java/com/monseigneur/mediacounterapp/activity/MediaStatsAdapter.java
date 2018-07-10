@@ -85,6 +85,9 @@ public class MediaStatsAdapter extends BaseAdapter
             case DROPPED:
                 textColor = Color.RED;
                 break;
+            case ONGOING:
+                textColor = Color.YELLOW;
+                break;
             default:
                 textColor = Color.WHITE;
                 break;
