@@ -415,7 +415,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         // Get all media names
         SQLiteDatabase db = this.getReadableDatabase();
 
-        List<String> names = new ArrayList<>();
+        Map<String, MediaCounterStatus> names = new HashMap<>();
 
         Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, null, null, null, null, null, null);
 
@@ -426,7 +426,9 @@ public class MediaCounterDB extends SQLiteOpenHelper
                 do
                 {
                     String mediaName = cursor.getString(cursor.getColumnIndex(KEY_TITLE));
-                    names.add(mediaName);
+                    int statusVal = cursor.getInt(cursor.getColumnIndex(KEY_STATUS));
+                    MediaCounterStatus status = MediaCounterStatus.from(statusVal);
+                    names.put(mediaName, status);
                 } while (cursor.moveToNext());
             }
 
@@ -434,13 +436,20 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
 
         // For each media, add its episodes to the list.
-        for (String name : names)
+        for (String name : names.keySet())
         {
             List<Long> epDates = getEpDates(name);
+            MediaCounterStatus status = MediaCounterStatus.ONGOING;
 
             for (int i = 0; i < epDates.size(); i++)
             {
-                EpisodeData ed = new EpisodeData(name, i + 1, epDates.get(i));
+                // Set the status of the last Episode according to the Media
+                if (i == (epDates.size() - 1))
+                {
+                    status = names.get(name);
+                }
+
+                EpisodeData ed = new EpisodeData(name, i + 1, epDates.get(i), status);
                 data.add(ed);
             }
         }

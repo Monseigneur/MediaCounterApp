@@ -1,6 +1,7 @@
 package com.monseigneur.mediacounterapp.activity;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -75,14 +76,31 @@ public class MediaStatsAdapter extends BaseAdapter
 
         EpisodeData ed = (EpisodeData) getItem(position);
 
+        int textColor;
+        switch (ed.getMediaStatus())
+        {
+            case COMPLETE:
+                textColor = Color.GREEN;
+                break;
+            case DROPPED:
+                textColor = Color.RED;
+                break;
+            default:
+                textColor = Color.WHITE;
+                break;
+        }
+
         TextView num = vh.num;
         num.setText("" + ed.getEpNum());
+        num.setTextColor(textColor);
 
         TextView name = vh.name;
         name.setText(ed.getMediaName());
+        name.setTextColor(textColor);
 
         TextView date = vh.date;
         date.setText(MediaCounterDB.dateString(context, ed.getEpDate()) + "");
+        date.setTextColor(textColor);
 
         return convertView;
     }

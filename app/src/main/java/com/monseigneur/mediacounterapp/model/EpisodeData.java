@@ -10,12 +10,14 @@ public class EpisodeData implements Comparable<EpisodeData>, Serializable
     private String mediaName;
     private int epNum;
     private long epDate;
+    private MediaCounterStatus mediaStatus;
 
-    public EpisodeData(String name, int num, long date)
+    public EpisodeData(String name, int num, long date, MediaCounterStatus status)
     {
         mediaName = name;
         epNum = num;
         epDate = date;
+        mediaStatus = status;
     }
 
     public String getMediaName()
@@ -31,6 +33,11 @@ public class EpisodeData implements Comparable<EpisodeData>, Serializable
     public long getEpDate()
     {
         return epDate;
+    }
+
+    public MediaCounterStatus getMediaStatus()
+    {
+        return mediaStatus;
     }
 
     @Override
@@ -57,7 +64,8 @@ public class EpisodeData implements Comparable<EpisodeData>, Serializable
         return "EpisodeData{" +
                 "mediaName='" + mediaName + '\'' +
                 ", epNum=" + epNum +
-                ", epDate='" + epDate + '\'' +
+                ", epDate=" + epDate +
+                ", mediaStatus=" + mediaStatus +
                 '}';
     }
 
