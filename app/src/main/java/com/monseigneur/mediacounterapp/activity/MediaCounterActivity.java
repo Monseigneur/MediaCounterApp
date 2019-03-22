@@ -3,7 +3,7 @@ package com.monseigneur.mediacounterapp.activity;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.support.v4.app.ActivityCompat;
+import androidx.core.app.ActivityCompat;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
