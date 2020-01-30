@@ -42,7 +42,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
     private static final String DATABASE_NAME = "media_counter_db";
 
     // Have 2 dbs:
-    // Titles: tid, title, status
+    // Titles: tid, title, status, added date
     // Episodes: tid, epid, date
     private static final String TABLE_TITLES = "titles";
 
@@ -123,11 +123,25 @@ public class MediaCounterDB extends SQLiteOpenHelper
     // - Delete a media counter
     // - Change a media counter's state
 
+    /**
+     * Adds a new Media to the database
+     *
+     * @param mediaName name of the Media to add
+     * @return true if the Media was successfully added, false otherwise
+     */
     public boolean addMedia(String mediaName)
     {
         return addMedia(mediaName, MediaCounterStatus.NEW, getCurrentDate());
     }
 
+    /**
+     * Adds a new Media to the database
+     *
+     * @param mediaName name of the Media to add
+     * @param status    status to set the Media to
+     * @param date      date that the Media was added
+     * @return true if the Media was successfully added, false otherwise
+     */
     private boolean addMedia(String mediaName, MediaCounterStatus status, long date)
     {
         if (getIdForMedia(mediaName) != UNKNOWN_MEDIA)
@@ -150,12 +164,24 @@ public class MediaCounterDB extends SQLiteOpenHelper
         return true;
     }
 
+    /**
+     * Adds a new Episode to an existing Media
+     *
+     * @param mediaName name of the Media to add to
+     */
     public void addEpisode(String mediaName)
     {
         int epNum = getNumEpisodes(mediaName) + 1;
         addEpisode(mediaName, epNum, getCurrentDate());
     }
 
+    /**
+     * Adds a new Episode to an existing Media
+     *
+     * @param mediaName name of the Media to add to
+     * @param num       number of the currently added Episode
+     * @param date      date the Episode was completed
+     */
     private void addEpisode(String mediaName, int num, long date)
     {
         int tid = getIdForMedia(mediaName);
@@ -180,6 +206,12 @@ public class MediaCounterDB extends SQLiteOpenHelper
         db.close();
     }
 
+    /**
+     * Sets the status of a particular Media
+     *
+     * @param mediaName name of the Media to set the status of
+     * @param status    new status value to set
+     */
     public void setStatus(String mediaName, MediaCounterStatus status)
     {
         Log.i("setStatus", "setting status for [" + mediaName + "] to " + status);
@@ -188,6 +220,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         if (tid == UNKNOWN_MEDIA)
         {
             Log.e("setStatus", "media does not exist");
+            return;
         }
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -207,6 +240,11 @@ public class MediaCounterDB extends SQLiteOpenHelper
         db.endTransaction();
     }
 
+    /**
+     * Removes a Media from the database
+     *
+     * @param mediaName name of the Media to remove
+     */
     public void deleteMedia(String mediaName)
     {
         int tid = getIdForMedia(mediaName);
@@ -227,7 +265,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         SQLiteDatabase db = this.getWritableDatabase();
 
         db.beginTransaction();
-        int rowsDeleted = db.delete(TABLE_TITLES, KEY_TID + SQL_PARAMETER, new String[] { String.valueOf(tid) });
+        int rowsDeleted = db.delete(TABLE_TITLES, KEY_TID + SQL_PARAMETER, new String[]{String.valueOf(tid)});
 
         if (rowsDeleted == 1)
         {
@@ -243,6 +281,11 @@ public class MediaCounterDB extends SQLiteOpenHelper
         db.close();
     }
 
+    /**
+     * Removes the latest Episode for a Media
+     *
+     * @param mediaName the name of the Media to remove from
+     */
     public void deleteEpisode(String mediaName)
     {
         int tid = getIdForMedia(mediaName);
@@ -261,7 +304,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         {
             db.beginTransaction();
             int rowsDeleted = db.delete(TABLE_EPISODES, KEY_TID + SQL_PARAMETER + SQL_AND + KEY_EPNUM + SQL_PARAMETER,
-                                        new String[] { String.valueOf(tid), String.valueOf(epDates.size()) });
+                    new String[]{String.valueOf(tid), String.valueOf(epDates.size())});
 
             if (rowsDeleted == 1)
             {
@@ -269,7 +312,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
             }
             else
             {
-                Log.e("deleteEpisode", "Deleting episode removed more than 1 row! rows deleted = " + rowsDeleted);
+                Log.e("deleteEpisode", "Deleting episode would remove more than 1 row! rows deleted = " + rowsDeleted);
             }
 
             db.endTransaction();
@@ -278,7 +321,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         {
             // If we didn't have any episodes, just delete the media counter itself.
             db.beginTransaction();
-            int rowsDeleted = db.delete(TABLE_TITLES, KEY_TID + SQL_PARAMETER, new String[] { String.valueOf(tid) });
+            int rowsDeleted = db.delete(TABLE_TITLES, KEY_TID + SQL_PARAMETER, new String[]{String.valueOf(tid)});
 
             if (rowsDeleted == 1)
             {
@@ -294,6 +337,12 @@ public class MediaCounterDB extends SQLiteOpenHelper
         db.close();
     }
 
+    /**
+     * Gets the number of Episodes seen for a particular Media
+     *
+     * @param mediaName the name of the Media
+     * @return the number of Episodes seen for the given Media
+     */
     public int getNumEpisodes(String mediaName)
     {
         List<Long> epDates = getEpDates(mediaName);
@@ -301,6 +350,12 @@ public class MediaCounterDB extends SQLiteOpenHelper
         return epDates.size();
     }
 
+    /**
+     * Gets the dates of all Episodes for a particular Media
+     *
+     * @param mediaName the name of the Media
+     * @return A List of the Episode dates
+     */
     public List<Long> getEpDates(String mediaName)
     {
         int tid = getIdForMedia(mediaName);
@@ -315,7 +370,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         List<Long> epDates = new ArrayList<>();
 
         Cursor cursor = db.query(TABLE_EPISODES, EPISODES_COLUMNS, KEY_TID + SQL_PARAMETER, new String[]{String.valueOf(tid)},
-                                 null, null, null, null);
+                null, null, null, null);
 
         if (cursor != null)
         {
@@ -333,6 +388,12 @@ public class MediaCounterDB extends SQLiteOpenHelper
         return epDates;
     }
 
+    /**
+     * Gets all Medias for a given set of statuses
+     *
+     * @param statuses all statuses to search for
+     * @return all Medias that match a given set of statuses
+     */
     public List<MediaData> getMediaCounters(EnumSet<MediaCounterStatus> statuses)
     {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -391,6 +452,11 @@ public class MediaCounterDB extends SQLiteOpenHelper
         return mdList;
     }
 
+    /**
+     * Gets all Medias
+     *
+     * @return a List of all Medias
+     */
     public List<MediaData> getMediaCounters()
     {
         EnumSet<MediaCounterStatus> statuses = EnumSet.allOf(MediaCounterStatus.class);
@@ -398,6 +464,11 @@ public class MediaCounterDB extends SQLiteOpenHelper
         return getMediaCounters(statuses);
     }
 
+    /**
+     * Chooses a random Media that is not Complete or Dropped
+     *
+     * @return a random Media
+     */
     public String getRandomMedia()
     {
         List<MediaData> mdList = getMediaCounters();
@@ -429,6 +500,11 @@ public class MediaCounterDB extends SQLiteOpenHelper
         return randomMediaName;
     }
 
+    /**
+     * Gets Episodes for all Medias
+     *
+     * @return a List of all Episodes
+     */
     public List<EpisodeData> getEpisodeData()
     {
         List<EpisodeData> data = new ArrayList<>();
@@ -482,12 +558,18 @@ public class MediaCounterDB extends SQLiteOpenHelper
         return data;
     }
 
+    /**
+     * Gets the Media ID for a given Media
+     *
+     * @param mediaName name of the Media
+     * @return ID for the Media
+     */
     private int getIdForMedia(String mediaName)
     {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, KEY_TITLE + SQL_PARAMETER, new String[]{mediaName},
-                                 null, null, null, null);
+                null, null, null, null);
 
         if (cursor == null)
         {
@@ -518,6 +600,11 @@ public class MediaCounterDB extends SQLiteOpenHelper
         return result;
     }
 
+    /**
+     * Gets the current date
+     *
+     * @return the current date, in milliseconds
+     */
     private long getCurrentDate()
     {
         Calendar rightNow = Calendar.getInstance();
@@ -525,6 +612,13 @@ public class MediaCounterDB extends SQLiteOpenHelper
         return rightNow.getTimeInMillis();
     }
 
+    /**
+     * Converts a millisecond time into a date string
+     *
+     * @param c   context
+     * @param val millisecond time
+     * @return the date string for the given time
+     */
     public static String dateString(Context c, long val)
     {
         if (val == MediaCounterDB.UNKNOWN_DATE)
@@ -548,6 +642,11 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
     }
 
+    /**
+     * Backs up the database
+     *
+     * @return true if successfully backed up, false otherwise
+     */
     public boolean backupData()
     {
         File base = getBackupDirectory();
@@ -560,6 +659,11 @@ public class MediaCounterDB extends SQLiteOpenHelper
         return false;
     }
 
+    /**
+     * Imports data into the database
+     *
+     * @return true if successfully imported, false otherwise
+     */
     public boolean importData()
     {
         File base = getBackupDirectory();
@@ -582,6 +686,11 @@ public class MediaCounterDB extends SQLiteOpenHelper
         return false;
     }
 
+    /**
+     * Gets the storage directory for the backup files
+     *
+     * @return The backup storage directory
+     */
     private File getBackupDirectory()
     {
         try
@@ -604,6 +713,12 @@ public class MediaCounterDB extends SQLiteOpenHelper
         return null;
     }
 
+    /**
+     * Reads from the import file and populates the database
+     *
+     * @param file import file
+     * @return true if all data was successfully imported, false otherwise
+     */
     private boolean readData(File file)
     {
         try
@@ -614,15 +729,15 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
                 Iterator<IonValue> iter = ionSys.iterate(fis);
 
-                IonList elements = (IonList)iter.next();
+                IonList elements = (IonList) iter.next();
 
                 for (IonValue iv : elements)
                 {
-                    IonStruct val = (IonStruct)iv;
-                    String mediaName = ((IonText)val.get(DATA_FIELD_TITLE)).stringValue();
-                    int statusVal = ((IonInt)val.get(DATA_FIELD_STATUS)).intValue();
+                    IonStruct val = (IonStruct) iv;
+                    String mediaName = ((IonText) val.get(DATA_FIELD_TITLE)).stringValue();
+                    int statusVal = ((IonInt) val.get(DATA_FIELD_STATUS)).intValue();
                     MediaCounterStatus status = MediaCounterStatus.from(statusVal);
-                    long addedDate = ((IonInt)val.get(DATA_FIELD_ADDED)).longValue();
+                    long addedDate = ((IonInt) val.get(DATA_FIELD_ADDED)).longValue();
                     Log.i("import", "[" + mediaName + "] [" + status + "] [" + addedDate + "]");
 
                     // Remove the original one. Probably want to change to some kind of merging scheme.
@@ -630,11 +745,11 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
                     addMedia(mediaName, status, addedDate);
 
-                    IonList episodes = (IonList)val.get(DATA_FIELD_EPISODES);
+                    IonList episodes = (IonList) val.get(DATA_FIELD_EPISODES);
                     int i = 1;
                     for (IonValue epIv : episodes)
                     {
-                        Long epDate = ((IonInt)epIv).longValue();
+                        Long epDate = ((IonInt) epIv).longValue();
                         addEpisode(mediaName, i, epDate);
                         i++;
                         Log.i("import", "\t" + epDate);
@@ -652,6 +767,12 @@ public class MediaCounterDB extends SQLiteOpenHelper
         return true;
     }
 
+    /**
+     * Writes the contents of the database to the backup file
+     *
+     * @param file the backup file
+     * @return true if all data was successfully written, false otherwise
+     */
     private boolean writeData(File file)
     {
         List<MediaData> mdList = getMediaCounters();

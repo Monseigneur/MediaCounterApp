@@ -97,6 +97,11 @@ public class MediaCounterActivity extends Activity
         super.onPause();
     }
 
+    /**
+     * Verify and prompt for storage permissions
+     *
+     * @param act the Activity
+     */
     public static void verifyStoragePermissions(Activity act)
     {
         int permission = ActivityCompat.checkSelfPermission(act, android.Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -113,7 +118,9 @@ public class MediaCounterActivity extends Activity
     }
 
     /**
-     * New view methods
+     * Start the Media Info view for a selected Media view
+     *
+     * @param view the tapped view
      */
     public void viewMediaInfo(View view)
     {
@@ -135,6 +142,13 @@ public class MediaCounterActivity extends Activity
         startActivityForResult(intent, MEDIA_INFO_STATUS_CHANGE_REQUEST);
     }
 
+    /**
+     * Handle Activity results
+     *
+     * @param requestCode the Activity request code
+     * @param resultCode  the Activity result code
+     * @param data        return data
+     */
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         Log.i("onActivityResult", "requestCode " + requestCode + " resultCode " + resultCode);
@@ -158,7 +172,7 @@ public class MediaCounterActivity extends Activity
                         // Media already exists, show a toast
                         showToast(getString(R.string.duplicate_media));
                     }
-                    System.out.println(name);
+
                     Log.i("onActivityResult", name);
                     break;
                 case MEDIA_INFO_STATUS_CHANGE_REQUEST:
@@ -175,12 +189,22 @@ public class MediaCounterActivity extends Activity
         }
     }
 
+    /**
+     * Increment Media count touch handler
+     *
+     * @param view the tapped Media view
+     */
     public void incMediaCount(View view)
     {
         Log.i("incMediaCount", "start");
         changeCount(view, true);
     }
 
+    /**
+     * Decrement Media count touch handler
+     *
+     * @param view the tapped Media view
+     */
     public void decMediaCount(View view)
     {
         Log.i("decMediaCount", "start");
@@ -188,7 +212,9 @@ public class MediaCounterActivity extends Activity
     }
 
     /**
-     * Helper methods
+     * Button handler
+     *
+     * @param view the tapped view
      */
     public void buttonOnClick(View view)
     {
@@ -258,7 +284,6 @@ public class MediaCounterActivity extends Activity
                         edList.add(Long.valueOf(ed.getEpNum()));
                         edList.add(Long.valueOf(ed.getEpDate()));
                         edList.add(Long.valueOf(ed.getMediaStatus().value));
-
                     }
 
                     // Create a list of the names to be used in the reverse mapping
@@ -296,11 +321,16 @@ public class MediaCounterActivity extends Activity
         }
     }
 
+    /**
+     * Change the update lock state
+     *
+     * @param lock true to lock, false to unlock
+     */
     public void setLockState(boolean lock)
     {
-        Button lockButton = (Button) findViewById(R.id.lock_button);
-        Button importButton = (Button) findViewById(R.id.import_data_button);
-        Button exportButton = (Button) findViewById(R.id.export_data_button);
+        Button lockButton = findViewById(R.id.lock_button);
+        Button importButton = findViewById(R.id.import_data_button);
+        Button exportButton = findViewById(R.id.export_data_button);
 
         incLocked = lock;
         if (lock)
@@ -321,6 +351,12 @@ public class MediaCounterActivity extends Activity
         }
     }
 
+    /**
+     * Change the count of a tapped Media
+     *
+     * @param view      the tapped Media view
+     * @param increment true to increment, false to decrement
+     */
     private void changeCount(View view, boolean increment)
     {
         if (!incLocked)
@@ -351,6 +387,11 @@ public class MediaCounterActivity extends Activity
         }
     }
 
+    /**
+     * Show a toast message
+     *
+     * @param text message to show
+     */
     private void showToast(String text)
     {
         Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
