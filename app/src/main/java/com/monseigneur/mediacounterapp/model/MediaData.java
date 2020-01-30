@@ -2,6 +2,7 @@ package com.monseigneur.mediacounterapp.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -125,4 +126,55 @@ public class MediaData implements Serializable, Comparable<MediaData>
             status = MediaCounterStatus.ONGOING;
         }
     }
+
+    public static final Comparator<MediaData> BY_NAME =
+        new Comparator<MediaData>()
+        {
+            @Override
+            public int compare(MediaData o1, MediaData o2)
+            {
+                String thisName = o1.mediaName.toLowerCase();
+                String otherName = o2.getMediaName().toLowerCase();
+
+                return thisName.compareTo(otherName);
+            }
+        };
+
+    // How do you handle the screen update? If I push + on a show that isn't the first, should it
+    // move underneath my hand? Probably not. Do I want to change the way episodes are updated,
+    // through the info view?
+    public static final Comparator<MediaData> BY_LAST_EPISODE =
+        new Comparator<MediaData>()
+        {
+            @Override
+            public int compare(MediaData o1, MediaData o2)
+            {
+                // Compare by date of latest episode, or add date
+                long o1Date = o1.addedDate;
+                if (o1.getCount() > 0)
+                {
+                    o1Date = o1.getEpDates().get(o1.getCount() - 1);
+                }
+
+                long o2Date = o2.addedDate;
+                if (o2.getCount() > 0)
+                {
+                    o2Date = o2.getEpDates().get(o2.getCount() - 1);
+                }
+
+                long delta = o1Date - o2Date;
+
+                int result = 0;
+                if (delta < 0)
+                {
+                    result = 1;
+                }
+                else if (delta > 0)
+                {
+                    result = -1;
+                }
+
+                return result;
+            }
+        };
 }

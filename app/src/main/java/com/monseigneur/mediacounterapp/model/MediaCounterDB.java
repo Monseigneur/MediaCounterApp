@@ -5,13 +5,33 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
 import android.util.Log;
-import com.monseigneur.mediacounterapp.R;
-import software.amazon.ion.*;
-import software.amazon.ion.system.IonSystemBuilder;
 
-import java.io.*;
-import java.util.*;
+import com.monseigneur.mediacounterapp.R;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import software.amazon.ion.IonInt;
+import software.amazon.ion.IonList;
+import software.amazon.ion.IonStruct;
+import software.amazon.ion.IonSystem;
+import software.amazon.ion.IonText;
+import software.amazon.ion.IonValue;
+import software.amazon.ion.IonWriter;
+import software.amazon.ion.system.IonSystemBuilder;
 
 /**
  * Created by Milan on 6/19/2016.
@@ -366,7 +386,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
             cursor.close();
         }
 
-        Collections.sort(mdList);
+        Collections.sort(mdList, MediaData.BY_LAST_EPISODE);
 
         return mdList;
     }
@@ -416,7 +436,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         // Get all media names
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Map<String, MediaCounterStatus> names = new HashMap<>();
+        Map<String, MediaCounterStatus> mediaStatus = new HashMap<>();
 
         Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, null, null, null, null, null, null);
 
@@ -429,7 +449,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
                     String mediaName = cursor.getString(cursor.getColumnIndex(KEY_TITLE));
                     int statusVal = cursor.getInt(cursor.getColumnIndex(KEY_STATUS));
                     MediaCounterStatus status = MediaCounterStatus.from(statusVal);
-                    names.put(mediaName, status);
+                    mediaStatus.put(mediaName, status);
                 } while (cursor.moveToNext());
             }
 
@@ -437,7 +457,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
 
         // For each media, add its episodes to the list.
-        for (String name : names.keySet())
+        for (String name : mediaStatus.keySet())
         {
             List<Long> epDates = getEpDates(name);
             MediaCounterStatus status = MediaCounterStatus.NEW;
@@ -447,9 +467,10 @@ public class MediaCounterDB extends SQLiteOpenHelper
                 // Set the status of the last Episode according to the Media
                 if (i == (epDates.size() - 1))
                 {
-                    status = names.get(name);
+                    status = mediaStatus.get(name);
                 }
 
+                Log.i("getEpData", "[" + name + "]->" + (i + 1) + " " + status);
                 EpisodeData ed = new EpisodeData(name, i + 1, epDates.get(i), status);
                 data.add(ed);
             }
@@ -565,15 +586,12 @@ public class MediaCounterDB extends SQLiteOpenHelper
     {
         try
         {
-            File base = new File(System.getenv("EXTERNAL_STORAGE"));
-            Log.i("getBackupDirectory", "base dir = [" + base + "}");
-            File backupDir = new File(base, "MediaCounterBackup");
-            Log.i("getBackupDirector", "dir = [" + backupDir + "]");
-
+            File backupDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "MediaCounterData");
+            Log.i("getBackupDirectory", "base pub dir = [" + backupDir + "]");
             if (!backupDir.exists())
             {
-                boolean result = backupDir.mkdirs();
-                Log.i("getBackupDirectory", "create dir returned " + result);
+                boolean res = backupDir.mkdirs();
+                Log.i("getBackupDirectory", "mkdir res " + res);
             }
 
             return backupDir;

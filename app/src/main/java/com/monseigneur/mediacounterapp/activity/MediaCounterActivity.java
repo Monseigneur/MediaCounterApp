@@ -1,9 +1,14 @@
 package com.monseigneur.mediacounterapp.activity;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import androidx.core.app.ActivityCompat;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -11,23 +16,21 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.model.EpisodeData;
 import com.monseigneur.mediacounterapp.model.MediaCounterDB;
-
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 import com.monseigneur.mediacounterapp.model.MediaData;
-import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.viewmodel.MediaInfoViewModel;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import androidx.core.app.ActivityCompat;
 
 public class MediaCounterActivity extends Activity
 {
@@ -225,14 +228,62 @@ public class MediaCounterActivity extends Activity
             case R.id.stats_button:
                 Log.i("showStats", "start!");
                 List<EpisodeData> epData = db.getEpisodeData();
+                Log.i("showStats", "epData size " + epData.size());
 
                 Intent statsIntent = new Intent(this, MediaStatsActivity.class);
                 Bundle b = new Bundle();
 
-                b.putSerializable(MediaStatsActivity.MEDIA_STATS, (Serializable) epData);
-                statsIntent.putExtras(b);
+                try
+                {
+                    List<Long> edList = new ArrayList<>();
+                    Map<String, Integer> namesMap = new HashMap<>();
 
-                startActivity(statsIntent);
+                    int nameIndex = 1;
+                    for (EpisodeData ed : epData)
+                    {
+                        int nameKey = 0;
+                        if (namesMap.containsKey(ed.getMediaName()))
+                        {
+                            nameKey = namesMap.get(ed.getMediaName());
+                        }
+                        else
+                        {
+                            nameKey = nameIndex;
+                            nameIndex++;
+
+                            namesMap.put(ed.getMediaName(), nameKey);
+                        }
+
+                        edList.add(Long.valueOf(nameKey));
+                        edList.add(Long.valueOf(ed.getEpNum()));
+                        edList.add(Long.valueOf(ed.getEpDate()));
+                        edList.add(Long.valueOf(ed.getMediaStatus().value));
+
+                    }
+
+                    // Create a list of the names to be used in the reverse mapping
+                    Map<Integer, String> reverseNameMap = new HashMap<>();
+
+                    for (String name : namesMap.keySet())
+                    {
+                        reverseNameMap.put(namesMap.get(name), name);
+                    }
+
+                    b.putSerializable(MediaStatsActivity.MEDIA_STATS, (Serializable) edList);
+                    b.putSerializable(MediaStatsActivity.MEDIA_NAMES, (Serializable) reverseNameMap);
+                    statsIntent.putExtras(b);
+
+                    Parcel p = Parcel.obtain();
+                    p.writeBundle(b);
+                    Log.i("showStats", "size2 " + p.dataSize() + " num keys " + reverseNameMap.keySet().size());
+                    p.recycle();
+
+                    startActivity(statsIntent);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
                 break;
             case R.id.lock_button:
                 setLockState(!incLocked);
