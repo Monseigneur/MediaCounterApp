@@ -2,21 +2,22 @@ package com.monseigneur.mediacounterapp.activity;
 
 import android.content.Context;
 import android.graphics.Color;
-import androidx.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 import com.monseigneur.mediacounterapp.model.MediaData;
-import com.monseigneur.mediacounterapp.R;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+
+import androidx.annotation.Nullable;
 
 public class MediaCounterAdapter extends ArrayAdapter<MediaData>
 {
@@ -134,7 +135,7 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
     {
         originalData.add(md);
 
-        Collections.sort(originalData);
+        Collections.sort(originalData, MediaData.BY_LAST_EPISODE);
 
         setFilterMask(currentFilter);
     }

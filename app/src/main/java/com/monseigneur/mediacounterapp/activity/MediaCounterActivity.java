@@ -164,6 +164,7 @@ public class MediaCounterActivity extends Activity
 
                     if (result)
                     {
+                        // TODO MediaData is not constructed with the right addedDate from the above DB call
                         MediaData md = new MediaData(name);
                         adapter.add(md);
                     }

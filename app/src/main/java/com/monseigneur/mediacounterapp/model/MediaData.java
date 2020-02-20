@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by Milan on 5/21/2016.
  */
-public class MediaData implements Serializable, Comparable<MediaData>
+public class MediaData implements Serializable
 {
     private static final long serialVersionUID = 0L;
 
@@ -40,10 +40,19 @@ public class MediaData implements Serializable, Comparable<MediaData>
     public MediaData(String name, MediaCounterStatus status, long date, List<Long> epDates)
     {
         this.mediaName = name;
-        this.count = epDates.size();
         this.status = status;
         this.addedDate = date;
-        this.epDates = epDates;
+
+        if (epDates == null)
+        {
+            this.epDates = new ArrayList<>();
+        }
+        else
+        {
+            this.epDates = epDates;
+        }
+
+        this.count = this.epDates.size();
     }
 
     /**
@@ -140,15 +149,6 @@ public class MediaData implements Serializable, Comparable<MediaData>
     public String toString()
     {
         return "[" + mediaName + ": " + count + "(" + status + ")]";
-    }
-
-    @Override
-    public int compareTo(MediaData another)
-    {
-        String thisName = mediaName.toLowerCase();
-        String otherName = another.getMediaName().toLowerCase();
-
-        return thisName.compareTo(otherName);
     }
 
     /**
