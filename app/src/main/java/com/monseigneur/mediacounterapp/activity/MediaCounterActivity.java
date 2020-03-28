@@ -1,5 +1,6 @@
 package com.monseigneur.mediacounterapp.activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -16,6 +17,9 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+
 import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.model.EpisodeData;
 import com.monseigneur.mediacounterapp.model.MediaCounterDB;
@@ -30,8 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import androidx.core.app.ActivityCompat;
-
 public class MediaCounterActivity extends Activity
 {
     // Activity message identifiers
@@ -39,6 +41,8 @@ public class MediaCounterActivity extends Activity
     public static final int MEDIA_INFO_STATUS_CHANGE_REQUEST = 2;
     public static final String MEDIA_COUNTER_NAME = "media_name";
     public static final String MEDIA_INFO_STATUS = "media_info_status";
+
+    public static final int PERMISSION_MANIPULATE_EXTERNAL_STORAGE_REQUEST = 1;
 
     private MediaCounterAdapter adapter;
 
@@ -102,18 +106,43 @@ public class MediaCounterActivity extends Activity
      *
      * @param act the Activity
      */
-    public static void verifyStoragePermissions(Activity act)
+    private void verifyStoragePermissions(Activity act)
     {
-        int permission = ActivityCompat.checkSelfPermission(act, android.Manifest.permission.READ_EXTERNAL_STORAGE);
-        if (permission != PackageManager.PERMISSION_GRANTED)
+        if (!checkPermissions(act))
         {
-            ActivityCompat.requestPermissions(act, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-        }
+            String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
-        permission = ActivityCompat.checkSelfPermission(act, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if (permission != PackageManager.PERMISSION_GRANTED)
+            ActivityCompat.requestPermissions(act, permissions, PERMISSION_MANIPULATE_EXTERNAL_STORAGE_REQUEST);
+        }
+    }
+
+    /**
+     * Check storage permissions
+     *
+     * @param act activity
+     * @return true if storage permissions are granted, false otherwise
+     */
+    private boolean checkPermissions(Activity act)
+    {
+        int readPermission = ActivityCompat.checkSelfPermission(act, android.Manifest.permission.READ_EXTERNAL_STORAGE);
+        int writePermission = ActivityCompat.checkSelfPermission(act, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        return ((readPermission == PackageManager.PERMISSION_GRANTED) && (writePermission == PackageManager.PERMISSION_GRANTED));
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        if (requestCode == PERMISSION_MANIPULATE_EXTERNAL_STORAGE_REQUEST)
         {
-            ActivityCompat.requestPermissions(act, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+            for (int i = 0; i < permissions.length; i++)
+            {
+                Log.i("requestPermissions", "Permission " + permissions[i] + " result " + grantResults[i]);
+            }
+        }
+        else
+        {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
@@ -224,26 +253,41 @@ public class MediaCounterActivity extends Activity
             case R.id.import_data_button:
                 if (!incLocked)
                 {
-                    if (db.importData())
+                    if (checkPermissions(this))
                     {
-                        showToast("Import complete");
+                        if (db.importData())
+                        {
+                            showToast("Import complete");
+                        }
+                        else
+                        {
+                            showToast("Import failed");
+                        }
                     }
                     else
                     {
-                        showToast("Import failed");
+                        showToast("Import failed due to missing permissions");
                     }
+
                 }
                 break;
             case R.id.export_data_button:
                 if (!incLocked)
                 {
-                    if (db.backupData())
+                    if (checkPermissions(this))
                     {
-                        showToast("Export complete");
+                        if (db.backupData())
+                        {
+                            showToast("Export complete");
+                        }
+                        else
+                        {
+                            showToast("Export failed");
+                        }
                     }
                     else
                     {
-                        showToast("Export failed");
+                        showToast("Export failed due to missing permissions");
                     }
 
                 }
