@@ -1,29 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.monseigneur.mediacounterapp">
 
-          package="com.monseigneur.mediacounterapp"
->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <application android:allowBackup="true"
-                 android:label="@string/app_name"
-                 android:icon="@mipmap/ic_launcher"
 
-                 android:supportsRtl="true"
-                 android:theme="@style/AppTheme">
-        <activity android:name="com.monseigneur.mediacounterapp.activity.MediaCounterActivity"
-                  android:label="@string/app_name">
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <activity
+            android:name=".activity.MediaCounterActivity"
+            android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.monseigneur.mediacounterapp.activity.MediaCounterAddActivity"
-                  android:parentActivityName="com.monseigneur.mediacounterapp.activity.MediaCounterActivity"
-                  android:windowSoftInputMode="stateVisible"/>
-        <activity android:name="com.monseigneur.mediacounterapp.activity.MediaInfoActivity"
-                  android:parentActivityName="com.monseigneur.mediacounterapp.activity.MediaCounterActivity"/>
-        <activity android:name="com.monseigneur.mediacounterapp.activity.MediaStatsActivity"
-                  android:parentActivityName="com.monseigneur.mediacounterapp.activity.MediaCounterActivity"/>
+        <activity
+            android:name=".activity.MediaCounterAddActivity"
+            android:parentActivityName=".activity.MediaCounterActivity"
+            android:windowSoftInputMode="stateVisible" />
+        <activity
+            android:name=".activity.MediaInfoActivity"
+            android:parentActivityName=".activity.MediaCounterActivity" />
+        <activity
+            android:name=".activity.MediaStatsActivity"
+            android:parentActivityName=".activity.MediaCounterActivity" />
     </application>
 
 </manifest>

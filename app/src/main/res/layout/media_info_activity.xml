@@ -5,39 +5,45 @@
               android:layout_height="match_parent">
 
     <TextView
-            android:id="@+id/media_info_name"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="name"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:paddingLeft="@dimen/edge_padding"/>
+        android:id="@+id/media_info_name"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/edge_padding"
+        android:paddingEnd="@dimen/edge_padding"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
     <Space android:layout_width="fill_parent" android:layout_height="@dimen/space_height"/>
+
     <TextView
-            android:id="@+id/media_info_added_date"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="added_date"
-            android:paddingLeft="@dimen/edge_padding"/>
+        android:id="@+id/media_info_added_date"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/edge_padding"
+        android:paddingEnd="@dimen/edge_padding" />
     <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+
         <TextView
-                android:id="@+id/media_info_count"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.5"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:paddingLeft="@dimen/edge_padding"/>
+            android:id="@+id/media_info_count"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:paddingLeft="@dimen/edge_padding"
+            android:paddingRight="@dimen/edge_padding"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
         <Button
-                android:id="@+id/media_info_status_button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.5"
-                android:gravity="right"
-                android:text="@string/not_complete"
-                android:onClick="changeStatus"
-                android:paddingRight="@dimen/edge_padding"/>
+            android:id="@+id/media_info_status_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center_horizontal"
+            android:onClick="changeStatus"
+            android:paddingStart="@dimen/edge_padding"
+            android:paddingEnd="@dimen/edge_padding"
+            android:text="@string/not_complete"
+            android:textAlignment="center" />
     </LinearLayout>
     <Space android:layout_width="fill_parent" android:layout_height="20dp"/>
 
@@ -45,19 +51,23 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
+
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/episode_number"
             android:layout_weight="0.5"
-            android:paddingLeft="@dimen/edge_padding"/>
+            android:paddingStart="@dimen/edge_padding"
+            android:paddingEnd="@dimen/edge_padding"
+            android:text="@string/episode_number" />
+
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/episode_date"
             android:layout_weight="0.5"
-            android:gravity="right"
-            android:paddingRight="@dimen/edge_padding"/>
+            android:gravity="end"
+            android:paddingStart="@dimen/edge_padding"
+            android:paddingEnd="@dimen/edge_padding"
+            android:text="@string/episode_date" />
 
     </LinearLayout>
     <Space android:layout_width="fill_parent" android:layout_height="@dimen/space_height"/>

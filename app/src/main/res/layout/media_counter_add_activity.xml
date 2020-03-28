@@ -3,22 +3,26 @@
               android:orientation="vertical"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent">
+
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:paddingStart="@dimen/edge_padding"
+        android:paddingEnd="@dimen/edge_padding"
         android:text="@string/add_new_media_label"
-        android:paddingLeft="@dimen/edge_padding"/>
+        android:textAppearance="?android:attr/textAppearanceLarge" />
     <Space android:layout_width="fill_parent" android:layout_height="@dimen/space_height"/>
+
     <EditText
-            android:id="@+id/media_name"
-            android:hint="@string/media_name_hint"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:focusableInTouchMode="true"
-            android:focusable="true"
-            android:paddingLeft="@dimen/edge_padding"/>
+        android:id="@+id/media_name"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:hint="@string/media_name_hint"
+        android:inputType="text"
+        android:paddingStart="@dimen/edge_padding"
+        android:paddingEnd="@dimen/edge_padding" />
     <Button
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

@@ -8,15 +8,18 @@
         android:id="@+id/episode_number"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_weight="0.5"
-        android:paddingLeft="@dimen/edge_padding"/>
+        android:paddingStart="@dimen/edge_padding"
+        android:paddingEnd="@dimen/edge_padding"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
     <TextView
         android:id="@+id/episode_date"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="0.5"
-        android:gravity="right"
-        android:paddingRight="@dimen/edge_padding"/>
+        android:gravity="end"
+        android:paddingStart="@dimen/edge_padding"
+        android:paddingEnd="@dimen/edge_padding" />
 
 </LinearLayout>
