@@ -62,8 +62,8 @@ public class MediaCounterDB extends SQLiteOpenHelper
     private static final String SQL_AND = " and ";
     private static final String SQL_OR = " or ";
 
-    public static final int UNKNOWN_MEDIA = -1;
-    public static final long UNKNOWN_DATE = 0;
+    private static final int UNKNOWN_MEDIA = -1;
+    private static final long UNKNOWN_DATE = 0;
 
     // Constants for data import / export
     private static final String DATA_FIELD_TITLE = "title";
@@ -72,6 +72,9 @@ public class MediaCounterDB extends SQLiteOpenHelper
     private static final String DATA_FIELD_EPISODES = "episodes";
 
     private static final String TAG = "MediaCounterDB";
+
+    private static final String FILENAME_PREFIX = "media_counter_backup";
+    private static final String FILENAME_EXTENSION = ".txt";
 
     private Context c;
     private IonSystem ionSys;
@@ -643,6 +646,29 @@ public class MediaCounterDB extends SQLiteOpenHelper
     }
 
     /**
+     * Generates a filename timestamp
+     *
+     * @return timestamp for a filename
+     */
+    private String fileTimeStamp() {
+        long time = getCurrentDate();
+
+        Calendar date = Calendar.getInstance();
+        date.setTimeInMillis(time);
+
+        int dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
+        int month = date.get(Calendar.MONTH) + 1;       // January is 0?
+        int year = date.get(Calendar.YEAR);
+        int hour = date.get(Calendar.HOUR_OF_DAY);
+        int minute = date.get(Calendar.MINUTE);
+        int second = date.get(Calendar.SECOND);
+
+        Log.i("fileTimestamp", "DATE STRING: Y=" + year + " M=" + month + " D=" + dayOfMonth + " H=" + hour + " M=" + minute + " S=" + second);
+
+        return String.format("%d%02d%02d_%02d%02d%02d", year, month, dayOfMonth, hour, minute, second);
+    }
+
+    /**
      * Backs up the database
      *
      * @return true if successfully backed up, false otherwise
@@ -652,7 +678,11 @@ public class MediaCounterDB extends SQLiteOpenHelper
         File base = getBackupDirectory();
         if (base != null)
         {
-            File backupFile = new File(base, "media_counter_backup.txt");
+            String timeStamp = fileTimeStamp();
+
+            String fileName = FILENAME_PREFIX + "_" + timeStamp + FILENAME_EXTENSION;
+
+            File backupFile = new File(base, fileName);
             return writeData(backupFile);
         }
 
