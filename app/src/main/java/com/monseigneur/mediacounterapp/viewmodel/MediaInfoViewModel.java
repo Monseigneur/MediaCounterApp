@@ -15,10 +15,10 @@ public class MediaInfoViewModel implements Serializable
     // - Complete status
     // - Added date
     // - Episode list (number, date)
-    public String mediaName;
-    public MediaCounterStatus status;
-    public long addedDate;
-    public List<Long> epDates;
+    public final String mediaName;
+    public final MediaCounterStatus status;
+    public final long addedDate;
+    public final List<Long> epDates;
 
     public MediaInfoViewModel(String n, MediaCounterStatus s, long ad, List<Long> ed)
     {

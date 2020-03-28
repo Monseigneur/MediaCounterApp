@@ -21,6 +21,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
@@ -76,13 +77,11 @@ public class MediaCounterDB extends SQLiteOpenHelper
     private static final String FILENAME_PREFIX = "media_counter_backup";
     private static final String FILENAME_EXTENSION = ".txt";
 
-    private Context c;
-    private IonSystem ionSys;
+    private final IonSystem ionSys;
 
     public MediaCounterDB(Context context)
     {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        c = context;
 
         ionSys = IonSystemBuilder.standard().build();
     }
@@ -248,7 +247,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
      *
      * @param mediaName name of the Media to remove
      */
-    public void deleteMedia(String mediaName)
+    private void deleteMedia(String mediaName)
     {
         int tid = getIdForMedia(mediaName);
 
@@ -346,7 +345,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
      * @param mediaName the name of the Media
      * @return the number of Episodes seen for the given Media
      */
-    public int getNumEpisodes(String mediaName)
+    private int getNumEpisodes(String mediaName)
     {
         List<Long> epDates = getEpDates(mediaName);
 
@@ -397,7 +396,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
      * @param statuses all statuses to search for
      * @return all Medias that match a given set of statuses
      */
-    public List<MediaData> getMediaCounters(EnumSet<MediaCounterStatus> statuses)
+    private List<MediaData> getMediaCounters(EnumSet<MediaCounterStatus> statuses)
     {
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -408,25 +407,25 @@ public class MediaCounterDB extends SQLiteOpenHelper
             return mdList;
         }
 
-        String selection = "";
+        StringBuilder selection = new StringBuilder();
         String[] parameters = new String[statuses.size()];
         int i = 0;
 
         for (MediaCounterStatus mcs : statuses)
         {
             parameters[i] = "" + mcs.value;
-            selection += KEY_STATUS + SQL_PARAMETER;
+            selection.append(KEY_STATUS + SQL_PARAMETER);
 
             if (i < (statuses.size() - 1))
             {
-                selection += SQL_OR;
+                selection.append(SQL_OR);
             }
 
             i++;
         }
         Log.i(TAG, "getMediaCounters(enum): selection [" + selection + "] params " + Arrays.toString(parameters));
 
-        Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, selection, parameters, null, null, null, null);
+        Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, selection.toString(), parameters, null, null, null, null);
 
         if (cursor != null)
         {
@@ -641,7 +640,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
             Log.i("dateString", "DATE STRING: M=" + month + " D=" + dayOfMonth + " Y=" + year + " H=" + hour + " M=" + minute);
 
-            return String.format("%d-%d-%d %02d:%02d", month, dayOfMonth, year, hour, minute);
+            return String.format(Locale.US, "%d-%d-%d %02d:%02d", month, dayOfMonth, year, hour, minute);
         }
     }
 
@@ -665,7 +664,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
         Log.i("fileTimestamp", "DATE STRING: Y=" + year + " M=" + month + " D=" + dayOfMonth + " H=" + hour + " M=" + minute + " S=" + second);
 
-        return String.format("%d%02d%02d_%02d%02d%02d", year, month, dayOfMonth, hour, minute, second);
+        return String.format(Locale.US, "%d%02d%02d_%02d%02d%02d", year, month, dayOfMonth, hour, minute, second);
     }
 
     /**
@@ -779,7 +778,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
                     int i = 1;
                     for (IonValue epIv : episodes)
                     {
-                        Long epDate = ((IonInt) epIv).longValue();
+                        long epDate = ((IonInt) epIv).longValue();
                         addEpisode(mediaName, i, epDate);
                         i++;
                         Log.i("import", "\t" + epDate);

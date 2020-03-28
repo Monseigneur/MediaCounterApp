@@ -7,10 +7,10 @@ import java.io.Serializable;
  */
 public class EpisodeData implements Comparable<EpisodeData>, Serializable
 {
-    private String mediaName;
-    private int epNum;
-    private long epDate;
-    private MediaCounterStatus mediaStatus;
+    private final String mediaName;
+    private final int epNum;
+    private final long epDate;
+    private final MediaCounterStatus mediaStatus;
 
     public EpisodeData(String name, int num, long date, MediaCounterStatus status)
     {

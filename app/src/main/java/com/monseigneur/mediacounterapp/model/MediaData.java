@@ -12,11 +12,11 @@ public class MediaData implements Serializable
 {
     private static final long serialVersionUID = 0L;
 
-    private String mediaName;
+    private final String mediaName;
     private int count;
     private MediaCounterStatus status;
-    private long addedDate;
-    private List<Long> epDates;
+    private final long addedDate;
+    private final List<Long> epDates;
 
 
     /**
@@ -66,8 +66,8 @@ public class MediaData implements Serializable
     }
 
     /**
-     * @param increment
-     * @return
+     * @param increment whether to increment or decrement
+     * @return true if update was successful, false otherwise
      */
     public boolean adjustCount(boolean increment)
     {
