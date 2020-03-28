@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+
 import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 import com.monseigneur.mediacounterapp.model.MediaData;
@@ -17,14 +19,12 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
-import androidx.annotation.Nullable;
-
 public class MediaCounterAdapter extends ArrayAdapter<MediaData>
 {
-    private LayoutInflater inflater;
-    private int resource;
-    private List<MediaData> originalData;
-    private List<MediaData> filteredData;
+    private final LayoutInflater inflater;
+    private final int resource;
+    private final List<MediaData> originalData;
+    private final List<MediaData> filteredData;
 
     private EnumSet<MediaCounterStatus> currentFilter;
 
@@ -47,10 +47,10 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
         if (convertView == null)
         {
             convertView = inflater.inflate(resource, parent, false);
-            vh = new MediaCounterAdapter.ViewHolder();
+            vh = new ViewHolder();
 
-            vh.name = (TextView) convertView.findViewById(R.id.name_label);
-            vh.count = (TextView) convertView.findViewById(R.id.count_label);
+            vh.name = convertView.findViewById(R.id.name_label);
+            vh.count = convertView.findViewById(R.id.count_label);
 
             convertView.setTag(vh);
         }
@@ -85,7 +85,7 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
         name.setTextColor(nameColor);
 
         TextView count = vh.count;
-        count.setText(md.getCount() + "");
+        count.setText(String.valueOf(md.getCount()));
 
         return convertView;
     }
@@ -163,9 +163,9 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
     }
 
     // ViewHolder pattern to increase Adapter performance
-    private class ViewHolder
+    private static class ViewHolder
     {
-        public TextView name;
-        public TextView count;
+        TextView name;
+        TextView count;
     }
 }

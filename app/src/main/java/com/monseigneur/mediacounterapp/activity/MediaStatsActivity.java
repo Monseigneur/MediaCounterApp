@@ -60,10 +60,10 @@ public class MediaStatsActivity extends Activity
 
         Log.i("statsActivity", edList.toString());
 
-        TextView totalCount = (TextView) findViewById(R.id.media_stats_total_label);
+        TextView totalCount = findViewById(R.id.media_stats_total_label);
         totalCount.setText("Total episodes: " + edList.size());
 
-        ListView listView = (ListView) findViewById(R.id.media_stats_list);
+        ListView listView = findViewById(R.id.media_stats_list);
         Log.i("before constructor", R.layout.media_stats_list_entry + " " + edList);
         MediaStatsAdapter adapter = new MediaStatsAdapter(this, R.layout.media_stats_list_entry, edList);
 

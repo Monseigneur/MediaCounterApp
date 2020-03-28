@@ -8,9 +8,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.model.EpisodeData;
 import com.monseigneur.mediacounterapp.model.MediaCounterDB;
-import com.monseigneur.mediacounterapp.R;
 
 import java.util.List;
 
@@ -19,11 +19,10 @@ import java.util.List;
  */
 public class MediaStatsAdapter extends BaseAdapter
 {
-    private Context context;
-    private LayoutInflater inflater;
-    private int resource;
-    private List<EpisodeData> edList;
-    private boolean checkBoxEnable;
+    private final Context context;
+    private final LayoutInflater inflater;
+    private final int resource;
+    private final List<EpisodeData> edList;
 
     public MediaStatsAdapter(Context c, int r, List<EpisodeData> edl)
     {
@@ -32,7 +31,6 @@ public class MediaStatsAdapter extends BaseAdapter
         resource = r;
 
         edList = edl;
-        checkBoxEnable = false;
     }
 
     @Override
@@ -61,11 +59,11 @@ public class MediaStatsAdapter extends BaseAdapter
         {
             convertView = inflater.inflate(resource, parent, false);
 
-            vh = new MediaStatsAdapter.ViewHolder();
+            vh = new ViewHolder();
 
-            vh.num = (TextView) convertView.findViewById(R.id.stats_episode_number);
-            vh.name = (TextView) convertView.findViewById(R.id.stats_media_name);
-            vh.date = (TextView) convertView.findViewById(R.id.stats_episode_date);
+            vh.num = convertView.findViewById(R.id.stats_episode_number);
+            vh.name = convertView.findViewById(R.id.stats_media_name);
+            vh.date = convertView.findViewById(R.id.stats_episode_date);
 
             convertView.setTag(vh);
         }
@@ -94,7 +92,7 @@ public class MediaStatsAdapter extends BaseAdapter
         }
 
         TextView num = vh.num;
-        num.setText("" + ed.getEpNum());
+        num.setText(String.valueOf(ed.getEpNum()));
         num.setTextColor(textColor);
 
         TextView name = vh.name;
@@ -102,7 +100,7 @@ public class MediaStatsAdapter extends BaseAdapter
         name.setTextColor(textColor);
 
         TextView date = vh.date;
-        date.setText(MediaCounterDB.dateString(context, ed.getEpDate()) + "");
+        date.setText(String.valueOf(MediaCounterDB.dateString(context, ed.getEpDate())));
         date.setTextColor(textColor);
 
         return convertView;
@@ -120,10 +118,10 @@ public class MediaStatsAdapter extends BaseAdapter
     }
 
     // ViewHolder pattern to increase Adapter performance
-    private class ViewHolder
+    private static class ViewHolder
     {
-        public TextView num;
-        public TextView name;
-        public TextView date;
+        TextView num;
+        TextView name;
+        TextView date;
     }
 }

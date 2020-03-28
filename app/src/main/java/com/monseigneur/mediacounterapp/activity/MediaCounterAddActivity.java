@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+
 import com.monseigneur.mediacounterapp.R;
 
 /**
@@ -22,7 +23,7 @@ public class MediaCounterAddActivity extends Activity {
     {
         Intent result = new Intent();
 
-        EditText et = (EditText)findViewById(R.id.media_name);
+        EditText et = findViewById(R.id.media_name);
 
         String mediaName = et.getText().toString();
 

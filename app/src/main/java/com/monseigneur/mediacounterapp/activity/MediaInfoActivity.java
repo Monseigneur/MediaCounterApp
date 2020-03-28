@@ -9,24 +9,26 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.TextView;
 
+import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.model.MediaCounterDB;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
-import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.viewmodel.MediaInfoViewModel;
 
 import java.util.List;
 
 public class MediaInfoActivity extends Activity
 {
-    private static String TAG = "MediaInfoActivity";
+    private static final String TAG = "MediaInfoActivity";
 
     public static final String MEDIA_INFO = "media_info";
 
     private Button completeButton;
 
-    private MediaCounterStatus originalStatus;
     private MediaCounterStatus currentStatus;
     private String name;
 
@@ -44,26 +46,25 @@ public class MediaInfoActivity extends Activity
         Log.i(TAG, "onCreate: " + mivm.toString());
 
         name = mivm.mediaName;
-        TextView nameLabel = (TextView) findViewById(R.id.media_info_name);
+        TextView nameLabel = findViewById(R.id.media_info_name);
         nameLabel.setText(name);
 
-        TextView addedDateLabel = (TextView) findViewById(R.id.media_info_added_date);
+        TextView addedDateLabel = findViewById(R.id.media_info_added_date);
         String addedDate = MediaCounterDB.dateString(this, mivm.addedDate);
         addedDateLabel.setText("Added: " + addedDate);
 
-        TextView countLabel = (TextView) findViewById(R.id.media_info_count);
-        countLabel.setText(mivm.epDates.size() + "");
+        TextView countLabel = findViewById(R.id.media_info_count);
+        countLabel.setText(String.valueOf(mivm.epDates.size()));
 
-        completeButton = (Button) findViewById(R.id.media_info_status_button);
+        completeButton = findViewById(R.id.media_info_status_button);
 
-        originalStatus = mivm.status;
-        currentStatus = originalStatus;
+        currentStatus = mivm.status;
         // Set the initial state
         setButtonText();
 
-        ListView listView = (ListView) findViewById(R.id.media_info_ep_list);
+        ListView listView = findViewById(R.id.media_info_ep_list);
         Log.i(TAG, "onCreate: " + R.layout.media_info_list_entry + " " + mivm.epDates);
-        MediaInfoEpisodeAdapter adapter = new MediaInfoEpisodeAdapter(this, R.layout.media_info_list_entry, mivm.epDates);
+        MediaInfoEpisodeAdapter adapter = new MediaInfoEpisodeAdapter(this, mivm.epDates);
 
         listView.setAdapter(adapter);
     }
@@ -96,7 +97,7 @@ public class MediaInfoActivity extends Activity
     /**
      * Changes the status
      *
-     * @param view
+     * @param view view
      */
     public void changeStatus(View view)
     {
@@ -137,33 +138,30 @@ public class MediaInfoActivity extends Activity
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        switch (item.getItemId())
+        if (item.getItemId() == android.R.id.home)
         {
             // Respond to the action bar's Up/Home button
-            case android.R.id.home:
-                finish();
-                return true;
+            finish();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public class MediaInfoEpisodeAdapter extends ArrayAdapter<Long>
+    static class MediaInfoEpisodeAdapter extends ArrayAdapter<Long>
     {
-        private String TAG = "MediaInfoEpisodeAdapter";
+        private final String TAG = "MediaInfoEpisodeAdapter";
 
-        private Context context;
-        private LayoutInflater inflater;
-        private int resource;
-        private List<Long> epDates;
+        private final Context context;
+        private final LayoutInflater inflater;
+        private final int resource;
 
-        public MediaInfoEpisodeAdapter(Context c, int r, List<Long> epDates)
+        MediaInfoEpisodeAdapter(Context c, List<Long> epDates)
         {
-            super(c, r, epDates);
-            Log.i(TAG, "Constructor: " + r + " " + epDates);
+            super(c, R.layout.media_info_list_entry, epDates);
+            Log.i(TAG, "Constructor: " + R.layout.media_info_list_entry + " " + epDates);
             context = c;
             inflater = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            resource = r;
-            this.epDates = epDates;
+            resource = R.layout.media_info_list_entry;
         }
 
         @Override
@@ -174,10 +172,10 @@ public class MediaInfoActivity extends Activity
             {
                 convertView = inflater.inflate(resource, parent, false);
 
-                vh = new MediaInfoEpisodeAdapter.ViewHolder();
+                vh = new ViewHolder();
 
-                vh.name = (TextView) convertView.findViewById(R.id.episode_number);
-                vh.count = (TextView) convertView.findViewById(R.id.episode_date);
+                vh.name = convertView.findViewById(R.id.episode_number);
+                vh.count = convertView.findViewById(R.id.episode_date);
 
                 convertView.setTag(vh);
             }
@@ -189,19 +187,19 @@ public class MediaInfoActivity extends Activity
             long date = getItem(position);
 
             TextView name = vh.name;
-            name.setText(position + 1 + "");
+            name.setText(String.valueOf(position + 1));
 
             TextView count = vh.count;
-            count.setText(MediaCounterDB.dateString(context, date) + "");
+            count.setText(String.valueOf(MediaCounterDB.dateString(context, date)));
 
             return convertView;
         }
 
         // ViewHolder pattern to increase Adapter performance
-        private class ViewHolder
+        private static class ViewHolder
         {
-            public TextView name;
-            public TextView count;
+            TextView name;
+            TextView count;
         }
     }
 }

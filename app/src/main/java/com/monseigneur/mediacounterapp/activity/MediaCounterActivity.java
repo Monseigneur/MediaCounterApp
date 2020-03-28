@@ -37,12 +37,12 @@ import java.util.Map;
 public class MediaCounterActivity extends Activity
 {
     // Activity message identifiers
-    public static final int NEW_MEDIA_COUNTER_REQUEST = 1;
-    public static final int MEDIA_INFO_STATUS_CHANGE_REQUEST = 2;
+    private static final int NEW_MEDIA_COUNTER_REQUEST = 1;
+    private static final int MEDIA_INFO_STATUS_CHANGE_REQUEST = 2;
     public static final String MEDIA_COUNTER_NAME = "media_name";
     public static final String MEDIA_INFO_STATUS = "media_info_status";
 
-    public static final int PERMISSION_MANIPULATE_EXTERNAL_STORAGE_REQUEST = 1;
+    private static final int PERMISSION_MANIPULATE_EXTERNAL_STORAGE_REQUEST = 1;
 
     private MediaCounterAdapter adapter;
 
@@ -66,12 +66,12 @@ public class MediaCounterActivity extends Activity
         List<MediaData> mdList = db.getMediaCounters();
         Log.i("onCreate", "list = " + mdList);
 
-        lv = (ListView) findViewById(R.id.media_list);
+        lv = findViewById(R.id.media_list);
 
         adapter = new MediaCounterAdapter(this, R.layout.media_counter_list_entry, mdList);
         lv.setAdapter(adapter);
 
-        CheckBox viewToggle = (CheckBox) findViewById(R.id.view_check_box);
+        CheckBox viewToggle = findViewById(R.id.view_check_box);
         viewToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
         {
             @Override
@@ -312,7 +312,7 @@ public class MediaCounterActivity extends Activity
                     int nameIndex = 1;
                     for (EpisodeData ed : epData)
                     {
-                        int nameKey = 0;
+                        int nameKey;
                         if (namesMap.containsKey(ed.getMediaName()))
                         {
                             nameKey = namesMap.get(ed.getMediaName());
@@ -325,10 +325,10 @@ public class MediaCounterActivity extends Activity
                             namesMap.put(ed.getMediaName(), nameKey);
                         }
 
-                        edList.add(Long.valueOf(nameKey));
-                        edList.add(Long.valueOf(ed.getEpNum()));
-                        edList.add(Long.valueOf(ed.getEpDate()));
-                        edList.add(Long.valueOf(ed.getMediaStatus().value));
+                        edList.add((long) nameKey);
+                        edList.add((long) ed.getEpNum());
+                        edList.add(ed.getEpDate());
+                        edList.add((long) ed.getMediaStatus().value);
                     }
 
                     // Create a list of the names to be used in the reverse mapping
@@ -371,7 +371,7 @@ public class MediaCounterActivity extends Activity
      *
      * @param lock true to lock, false to unlock
      */
-    public void setLockState(boolean lock)
+    private void setLockState(boolean lock)
     {
         Button lockButton = findViewById(R.id.lock_button);
         Button importButton = findViewById(R.id.import_data_button);
