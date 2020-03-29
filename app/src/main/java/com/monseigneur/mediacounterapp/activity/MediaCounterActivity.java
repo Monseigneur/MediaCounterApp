@@ -10,17 +10,15 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import com.monseigneur.mediacounterapp.R;
+import com.monseigneur.mediacounterapp.databinding.MainActivityBinding;
 import com.monseigneur.mediacounterapp.model.EpisodeData;
 import com.monseigneur.mediacounterapp.model.MediaCounterDB;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
@@ -44,11 +42,11 @@ public class MediaCounterActivity extends Activity
 
     private static final int PERMISSION_MANIPULATE_EXTERNAL_STORAGE_REQUEST = 1;
 
-    private MediaCounterAdapter adapter;
+    private MainActivityBinding binding;
 
+    private MediaCounterAdapter adapter;
     private MediaCounterDB db;
 
-    private ListView lv;
     private boolean incLocked;
     private Drawable defaultButtonBg;
 
@@ -56,23 +54,21 @@ public class MediaCounterActivity extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        binding = MainActivityBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         verifyStoragePermissions(this);
 
-        defaultButtonBg = findViewById(R.id.lock_button).getBackground();
+        defaultButtonBg = binding.lockButton.getBackground();
 
         db = new MediaCounterDB(this);
         List<MediaData> mdList = db.getMediaCounters();
         Log.i("onCreate", "list = " + mdList);
 
-        lv = findViewById(R.id.media_list);
-
         adapter = new MediaCounterAdapter(this, R.layout.media_counter_list_entry, mdList);
-        lv.setAdapter(adapter);
+        binding.mediaList.setAdapter(adapter);
 
-        CheckBox viewToggle = findViewById(R.id.view_check_box);
-        viewToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        binding.viewCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
         {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
@@ -158,14 +154,14 @@ public class MediaCounterActivity extends Activity
         Bundle b = new Bundle();
 
         LinearLayout ll = (LinearLayout) view.getParent();
-        int pos = lv.getPositionForView(ll);
+        int pos = binding.mediaList.getPositionForView(ll);
 
         MediaData md = adapter.getItem(pos);
 
         String name = md.getMediaName();
-        MediaInfoViewModel mivm = new MediaInfoViewModel(name, md.getStatus(), md.getAddedDate(), db.getEpDates(name));
+        MediaInfoViewModel viewModel = new MediaInfoViewModel(name, md.getStatus(), md.getAddedDate(), db.getEpDates(name));
 
-        b.putSerializable(MediaInfoActivity.MEDIA_INFO, mivm);
+        b.putSerializable(MediaInfoActivity.MEDIA_INFO, viewModel);
         intent.putExtras(b);
 
         startActivityForResult(intent, MEDIA_INFO_STATUS_CHANGE_REQUEST);
@@ -373,26 +369,22 @@ public class MediaCounterActivity extends Activity
      */
     private void setLockState(boolean lock)
     {
-        Button lockButton = findViewById(R.id.lock_button);
-        Button importButton = findViewById(R.id.import_data_button);
-        Button exportButton = findViewById(R.id.export_data_button);
-
         incLocked = lock;
         if (lock)
         {
-            lockButton.setText(R.string.unlock_inc);
-            lockButton.setBackground(defaultButtonBg);
+            binding.lockButton.setText(R.string.unlock_inc);
+            binding.lockButton.setBackground(defaultButtonBg);
 
-            importButton.setVisibility(View.GONE);
-            exportButton.setVisibility(View.GONE);
+            binding.importDataButton.setVisibility(View.GONE);
+            binding.exportDataButton.setVisibility(View.GONE);
         }
         else
         {
-            lockButton.setText(R.string.lock_inc);
-            lockButton.setBackgroundColor(Color.RED);
+            binding.lockButton.setText(R.string.lock_inc);
+            binding.lockButton.setBackgroundColor(Color.RED);
 
-            importButton.setVisibility(View.VISIBLE);
-            exportButton.setVisibility(View.VISIBLE);
+            binding.importDataButton.setVisibility(View.VISIBLE);
+            binding.exportDataButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -407,7 +399,7 @@ public class MediaCounterActivity extends Activity
         if (!incLocked)
         {
             LinearLayout ll = (LinearLayout) view.getParent();
-            int pos = lv.getPositionForView(ll);
+            int pos = binding.mediaList.getPositionForView(ll);
             MediaData md = adapter.getItem(pos);
 
             if (md.adjustCount(increment))

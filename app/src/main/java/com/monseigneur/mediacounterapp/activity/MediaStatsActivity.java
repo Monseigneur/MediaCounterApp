@@ -4,10 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.ListView;
-import android.widget.TextView;
 
 import com.monseigneur.mediacounterapp.R;
+import com.monseigneur.mediacounterapp.databinding.MediaStatsActivityBinding;
 import com.monseigneur.mediacounterapp.model.EpisodeData;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 
@@ -24,11 +23,15 @@ public class MediaStatsActivity extends Activity
     public static final String MEDIA_STATS = "media_stats";
     public static final String MEDIA_NAMES = "media_names";
 
+    private MediaStatsActivityBinding binding;
+
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.media_stats_activity);
+
+        binding = MediaStatsActivityBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
 
         Intent i = getIntent();
@@ -60,14 +63,11 @@ public class MediaStatsActivity extends Activity
 
         Log.i("statsActivity", edList.toString());
 
-        TextView totalCount = findViewById(R.id.media_stats_total_label);
-        totalCount.setText("Total episodes: " + edList.size());
+        binding.mediaStatsTotalLabel.setText("Total episodes: " + edList.size());
 
-        ListView listView = findViewById(R.id.media_stats_list);
-        Log.i("before constructor", R.layout.media_stats_list_entry + " " + edList);
         MediaStatsAdapter adapter = new MediaStatsAdapter(this, R.layout.media_stats_list_entry, edList);
 
-        listView.setAdapter(adapter);
+        binding.mediaStatsList.setAdapter(adapter);
 
     }
 }

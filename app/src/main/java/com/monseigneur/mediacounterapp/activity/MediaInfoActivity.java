@@ -10,11 +10,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.monseigneur.mediacounterapp.R;
+import com.monseigneur.mediacounterapp.databinding.MediaInfoActivityBinding;
 import com.monseigneur.mediacounterapp.model.MediaCounterDB;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 import com.monseigneur.mediacounterapp.viewmodel.MediaInfoViewModel;
@@ -27,7 +26,7 @@ public class MediaInfoActivity extends Activity
 
     public static final String MEDIA_INFO = "media_info";
 
-    private Button completeButton;
+    private MediaInfoActivityBinding binding;
 
     private MediaCounterStatus currentStatus;
     private String name;
@@ -36,37 +35,32 @@ public class MediaInfoActivity extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.media_info_activity);
+
+        binding = MediaInfoActivityBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         Intent i = getIntent();
         Bundle b = i.getExtras();
 
-        MediaInfoViewModel mivm = (MediaInfoViewModel) b.getSerializable(MEDIA_INFO);
+        MediaInfoViewModel viewModel = (MediaInfoViewModel) b.getSerializable(MEDIA_INFO);
 
-        Log.i(TAG, "onCreate: " + mivm.toString());
+        Log.i(TAG, "onCreate: " + viewModel.toString());
 
-        name = mivm.mediaName;
-        TextView nameLabel = findViewById(R.id.media_info_name);
-        nameLabel.setText(name);
+        name = viewModel.mediaName;
+        binding.mediaInfoName.setText(name);
 
-        TextView addedDateLabel = findViewById(R.id.media_info_added_date);
-        String addedDate = MediaCounterDB.dateString(this, mivm.addedDate);
-        addedDateLabel.setText("Added: " + addedDate);
+        String addedDate = MediaCounterDB.dateString(this, viewModel.addedDate);
+        binding.mediaInfoAddedDate.setText("Added: " + addedDate);
 
-        TextView countLabel = findViewById(R.id.media_info_count);
-        countLabel.setText(String.valueOf(mivm.epDates.size()));
+        binding.mediaInfoCount.setText(String.valueOf(viewModel.epDates.size()));
 
-        completeButton = findViewById(R.id.media_info_status_button);
-
-        currentStatus = mivm.status;
+        currentStatus = viewModel.status;
         // Set the initial state
         setButtonText();
 
-        ListView listView = findViewById(R.id.media_info_ep_list);
-        Log.i(TAG, "onCreate: " + R.layout.media_info_list_entry + " " + mivm.epDates);
-        MediaInfoEpisodeAdapter adapter = new MediaInfoEpisodeAdapter(this, mivm.epDates);
+        MediaInfoEpisodeAdapter adapter = new MediaInfoEpisodeAdapter(this, viewModel.epDates);
 
-        listView.setAdapter(adapter);
+        binding.mediaInfoEpList.setAdapter(adapter);
     }
 
     /**
@@ -91,7 +85,8 @@ public class MediaInfoActivity extends Activity
                 textId = R.string.dropped_text;
                 break;
         }
-        completeButton.setText(textId);
+
+        binding.mediaInfoStatusButton.setText(textId);
     }
 
     /**
