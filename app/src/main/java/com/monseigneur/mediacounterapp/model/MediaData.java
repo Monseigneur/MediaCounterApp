@@ -18,15 +18,16 @@ public class MediaData implements Serializable
     private final long addedDate;
     private final List<Long> epDates;
 
-
     /**
      * Creates a new Media
      *
      * @param name name of the new Media
+     * @param status status of the Media
+     * @param date date the Media was added
      */
-    public MediaData(String name)
+    public MediaData(String name, MediaCounterStatus status, long date)
     {
-        this(name, MediaCounterStatus.NEW, 0, new ArrayList<Long>());
+        this(name, status, date, new ArrayList<>());
     }
 
     /**

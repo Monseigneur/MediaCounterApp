@@ -129,9 +129,9 @@ public class MediaCounterDB extends SQLiteOpenHelper
      * Adds a new Media to the database
      *
      * @param mediaName name of the Media to add
-     * @return true if the Media was successfully added, false otherwise
+     * @return MediaData if the Media was successfully added, null otherwise
      */
-    public boolean addMedia(String mediaName)
+    public MediaData addMedia(String mediaName)
     {
         return addMedia(mediaName, MediaCounterStatus.NEW, getCurrentDate());
     }
@@ -142,14 +142,14 @@ public class MediaCounterDB extends SQLiteOpenHelper
      * @param mediaName name of the Media to add
      * @param status    status to set the Media to
      * @param date      date that the Media was added
-     * @return true if the Media was successfully added, false otherwise
+     * @return MediaData if the Media was successfully added, null otherwise
      */
-    private boolean addMedia(String mediaName, MediaCounterStatus status, long date)
+    private MediaData addMedia(String mediaName, MediaCounterStatus status, long date)
     {
         if (getIdForMedia(mediaName) != UNKNOWN_MEDIA)
         {
             Log.e("addMedia", "media already exists!");
-            return false;
+            return null;
         }
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -163,7 +163,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
         db.close();
 
-        return true;
+        return new MediaData(mediaName, status, date);
     }
 
     /**

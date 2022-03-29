@@ -23,14 +23,12 @@ public class MediaStatsActivity extends Activity
     public static final String MEDIA_STATS = "media_stats";
     public static final String MEDIA_NAMES = "media_names";
 
-    private MediaStatsActivityBinding binding;
-
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
 
-        binding = MediaStatsActivityBinding.inflate(getLayoutInflater());
+        MediaStatsActivityBinding binding = MediaStatsActivityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
 
@@ -40,18 +38,20 @@ public class MediaStatsActivity extends Activity
         Log.i("statsActivity", "oncreate");
 
         List<EpisodeData> edList = new ArrayList<>();
-        List<Long> lData;
-        Map<Integer, String> nameData;
+        List<Long> lData = new ArrayList<>();
+        Map<Integer, String> nameData = new HashMap<>();
 
         if (b != null)
         {
-            lData = (List<Long>) b.getSerializable(MEDIA_STATS);
-            nameData = (Map<Integer, String>) b.getSerializable(MEDIA_NAMES);
-        }
-        else
-        {
-            lData = new ArrayList<>();
-            nameData = new HashMap<>();
+            try
+            {
+                lData = (List<Long>) b.getSerializable(MEDIA_STATS);
+                nameData = (Map<Integer, String>) b.getSerializable(MEDIA_NAMES);
+            }
+            catch (Exception e)
+            {
+                Log.i("onCreate", "Unable to deserialize");
+            }
         }
 
         // For the best performance, the data comes across as a list of Longs: [name ID, episode number, date, status]

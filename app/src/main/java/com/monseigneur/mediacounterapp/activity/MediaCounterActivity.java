@@ -185,13 +185,11 @@ public class MediaCounterActivity extends Activity
                 case NEW_MEDIA_COUNTER_REQUEST:
                     name = data.getStringExtra(MEDIA_COUNTER_NAME);
 
-                    boolean result = db.addMedia(name);
+                    MediaData result = db.addMedia(name);
 
-                    if (result)
+                    if (result != null)
                     {
-                        // TODO MediaData is not constructed with the right addedDate from the above DB call
-                        MediaData md = new MediaData(name);
-                        adapter.add(md);
+                        adapter.add(result);
                     }
                     else
                     {
