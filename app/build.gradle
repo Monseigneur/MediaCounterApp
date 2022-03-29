@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
     defaultConfig {
         applicationId "com.example.MediaCounterApp"
         minSdkVersion 22
-        targetSdkVersion 28
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -17,8 +17,8 @@ android {
         }
     }
 
-    viewBinding {
-        enabled true
+    buildFeatures {
+        viewBinding = true
     }
 }
 
@@ -27,6 +27,6 @@ dependencies {
     androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0-alpha4', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    implementation 'androidx.appcompat:appcompat:1.0.0-beta01'
-    testImplementation 'junit:junit:4.12'
+    implementation 'androidx.appcompat:appcompat:1.4.0-alpha02'
+    testImplementation 'junit:junit:4.13.2'
 }
