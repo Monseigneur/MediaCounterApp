@@ -20,13 +20,13 @@ public class MediaDataUnitTest
     public void constructBasic_fieldsInitialized()
     {
         String name = "Test Media";
-        MediaData md = new MediaData(name);
+        MediaData md = new MediaData(name, MediaCounterStatus.NEW, 1L);
 
         assertNotNull(md);
 
         assertEquals(name, md.getMediaName());
         assertEquals(0, md.getCount());
-        assertEquals(0, md.getAddedDate());
+        assertEquals(1, md.getAddedDate());
         assertEquals(MediaCounterStatus.NEW, md.getStatus());
 
         List<Long> dates = md.getEpDates();
@@ -72,32 +72,50 @@ public class MediaDataUnitTest
     }
 
     @Test
-    public void adjustCount_modifiesCount()
+    public void addAndRemoveEpisodes_modifiesCount()
     {
-        MediaData md = new MediaData("Test Media");
+        MediaData md = new MediaData("a", MediaCounterStatus.NEW, 1L);
 
-        assertNotNull(md);
-        assertEquals(0, md.getCount());
+        assertEquals(md.getCount(), 0);
 
-        boolean result;
+        // Removing an episode when there aren't any should fail.
+        assertFalse(md.removeEpisode());
+        assertEquals(md.getCount(), 0);
+        assertTrue(md.getEpDates().isEmpty());
 
-        result = md.adjustCount(true);
-        assertTrue(result);
-        assertEquals(1, md.getCount());
+        // Adding episodes should work and change the status.
+        assertTrue(md.addEpisode(1L));
+        assertEquals(md.getCount(), 1);
+        assertEquals(md.getEpDates().size(), md.getCount());
 
-        result = md.adjustCount(false);
-        assertTrue(result);
-        assertEquals(0, md.getCount());
+        assertTrue(md.addEpisode(2L));
+        assertEquals(md.getCount(), 2);
+        assertEquals(md.getEpDates().size(), md.getCount());
 
-        result = md.adjustCount(false);
-        assertTrue(result);
-        assertEquals(-1, md.getCount());
+        // Removing an episode should work.
+        assertTrue(md.removeEpisode());
+        assertEquals(md.getCount(), 1);
+        assertEquals(md.getEpDates().size(), md.getCount());
+
+        // Changing to COMPLETE should not allow new adds.
+        md.setStatus(MediaCounterStatus.COMPLETE);
+        assertFalse(md.addEpisode(3L));
+        assertEquals(md.getEpDates().size(), md.getCount());
+
+        // Removing the last episode should return the count to 0, and the status to NEW.
+        assertTrue(md.removeEpisode());
+        assertEquals(md.getCount(), 0);
+        assertEquals(md.getEpDates().size(), md.getCount());
+
+        // A subsequent remove when empty should fail.
+        assertFalse(md.removeEpisode());
     }
 
     @Test
-    public void adjustCount_modifiesStatus()
+    public void addAndRemoveEpisodes_changesStatus()
     {
-        MediaData md = new MediaData("Test Media");
+        long date = 1L;
+        MediaData md = new MediaData("Test Media", MediaCounterStatus.NEW, date);
 
         assertNotNull(md);
         assertEquals(MediaCounterStatus.NEW, md.getStatus());
@@ -105,9 +123,9 @@ public class MediaDataUnitTest
         boolean result;
 
         // Add 2 counts
-        result = md.adjustCount(true);
+        result = md.addEpisode(date);
         assertTrue(result);
-        result = md.adjustCount(true);
+        result = md.addEpisode(date);
         assertTrue(result);
         assertEquals(MediaCounterStatus.ONGOING, md.getStatus());
 
@@ -116,17 +134,17 @@ public class MediaDataUnitTest
         assertEquals(MediaCounterStatus.COMPLETE, md.getStatus());
 
         // Try to add another count
-        result = md.adjustCount(true);
+        result = md.addEpisode(date);
         assertFalse(result);
         assertEquals(MediaCounterStatus.COMPLETE, md.getStatus());
 
         // Try to reduce a count
-        result = md.adjustCount(false);
+        result = md.removeEpisode();
         assertTrue(result);
         assertEquals(MediaCounterStatus.ONGOING, md.getStatus());
 
         // Add another count
-        result = md.adjustCount(true);
+        result = md.addEpisode(date);
         assertTrue(result);
 
         // Set to dropped
@@ -134,7 +152,7 @@ public class MediaDataUnitTest
         assertEquals(MediaCounterStatus.DROPPED, md.getStatus());
 
         // Try to add a count
-        result = md.adjustCount(true);
+        result = md.addEpisode(date);
         assertTrue(result);
         assertEquals(MediaCounterStatus.ONGOING, md.getStatus());
 
@@ -143,14 +161,14 @@ public class MediaDataUnitTest
         assertEquals(MediaCounterStatus.DROPPED, md.getStatus());
 
         // Try to reduce a count
-        result = md.adjustCount(false);
+        result = md.removeEpisode();
         assertTrue(result);
         assertEquals(MediaCounterStatus.ONGOING, md.getStatus());
 
         // Reduce down to no counts
-        result = md.adjustCount(false);
+        result = md.removeEpisode();
         assertTrue(result);
-        result = md.adjustCount(false);
+        result = md.removeEpisode();
         assertTrue(result);
 
         assertEquals(MediaCounterStatus.NEW, md.getStatus());
@@ -161,13 +179,13 @@ public class MediaDataUnitTest
     {
         Comparator<MediaData> byName = MediaData.BY_NAME;
 
-        MediaData md1 = new MediaData("a");
-        MediaData md2 = new MediaData("b");
+        MediaData md1 = new MediaData("a", MediaCounterStatus.NEW, 1L);
+        MediaData md2 = new MediaData("b", MediaCounterStatus.NEW, 1L);
 
         int result = byName.compare(md1, md2);
         assertTrue(result < 0);
 
-        MediaData md3 = new MediaData("a");
+        MediaData md3 = new MediaData("a", MediaCounterStatus.NEW, 1L);
 
         result = byName.compare(md1, md3);
         assertEquals(0, result);
@@ -212,5 +230,33 @@ public class MediaDataUnitTest
 
         result = byLastEpisode.compare(md6, md2);
         assertEquals(0, result);
+    }
+
+    @Test
+    public void comparator_byLastEpisode_changeEpisodes()
+    {
+        Comparator<MediaData> byLastEpisode = MediaData.BY_LAST_EPISODE;
+
+        MediaData md1 = new MediaData("a", MediaCounterStatus.NEW, 10L);
+        MediaData md2 = new MediaData("b", MediaCounterStatus.NEW, 15L);
+
+        // md2 is newer.
+        assertTrue(byLastEpisode.compare(md1, md2) > 0);
+
+        // Adding a new episode to md1, though older, shouldn't change the ordering.
+        assertTrue(md1.addEpisode(12L));
+        assertTrue(byLastEpisode.compare(md1, md2) > 0);
+
+        // Adding a new episode to md1 that is newer should change the ordering.
+        assertTrue(md1.addEpisode(20L));
+        assertFalse(byLastEpisode.compare(md1, md2) > 0);
+
+        // Adding a new episode to md2 that is equal to md1 should set the ordering to equal.
+        assertTrue(md2.addEpisode(20L));
+        assertEquals(byLastEpisode.compare(md1, md2), 0);
+
+        // Removing an episode from md2 should return the ordering to md1 being newer.
+        assertTrue(md2.removeEpisode());
+        assertFalse(byLastEpisode.compare(md1, md2) > 0);
     }
 }

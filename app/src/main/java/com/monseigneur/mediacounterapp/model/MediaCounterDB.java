@@ -169,12 +169,13 @@ public class MediaCounterDB extends SQLiteOpenHelper
     /**
      * Adds a new Episode to an existing Media
      *
-     * @param mediaName name of the Media to add to
+     * @param mediaName name of the Media
+     * @param date      date the Episode was completed
      */
-    public void addEpisode(String mediaName)
+    public void addEpisode(String mediaName, long date)
     {
         int epNum = getNumEpisodes(mediaName) + 1;
-        addEpisode(mediaName, epNum, getCurrentDate());
+        addEpisode(mediaName, epNum, date);
     }
 
     /**
@@ -607,7 +608,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
      *
      * @return the current date, in milliseconds
      */
-    private long getCurrentDate()
+    public static long getCurrentDate()
     {
         Calendar rightNow = Calendar.getInstance();
 

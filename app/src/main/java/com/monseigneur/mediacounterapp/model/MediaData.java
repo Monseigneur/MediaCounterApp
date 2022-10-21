@@ -13,7 +13,6 @@ public class MediaData implements Serializable
     private static final long serialVersionUID = 0L;
 
     private final String mediaName;
-    private int count;
     private MediaCounterStatus status;
     private final long addedDate;
     private final List<Long> epDates;
@@ -52,8 +51,6 @@ public class MediaData implements Serializable
         {
             this.epDates = epDates;
         }
-
-        this.count = this.epDates.size();
     }
 
     /**
@@ -63,32 +60,41 @@ public class MediaData implements Serializable
      */
     public int getCount()
     {
-        return count;
+        return epDates.size();
     }
 
     /**
-     * @param increment whether to increment or decrement
-     * @return true if update was successful, false otherwise
+     * Add the latest episode
+     *
+     * @param date Date of the episode to add.
+     * @return true if add was successful.
      */
-    public boolean adjustCount(boolean increment)
+    public boolean addEpisode(long date)
     {
-        // This flag was added so that the caller would know if the adjustCount call succeeded and wouldn't updated
-        // the database incorrectly if it failed (such as when the MediaData is already marked as complete and the
-        // count is incremented.
-        // TODO Should a "cleaner" be added to the DB code that will find orphaned episodes and remove them?
         boolean updated = false;
-        if (increment)
+
+        if (status != MediaCounterStatus.COMPLETE)
         {
-            if (status != MediaCounterStatus.COMPLETE)
-            {
-                count++;
-                updateStatus();
-                updated = true;
-            }
+            epDates.add(date);
+            updateStatus();
+            updated = true;
         }
-        else
+
+        return updated;
+    }
+
+    /**
+     * Remove the latest episode
+     *
+     * @return true if there was an episode to remove
+     */
+    public boolean removeEpisode()
+    {
+        boolean updated = false;
+
+        if (!epDates.isEmpty())
         {
-            count--;
+            epDates.remove(epDates.size() - 1);
             updateStatus();
             updated = true;
         }
@@ -149,7 +155,7 @@ public class MediaData implements Serializable
     @Override
     public String toString()
     {
-        return "[" + mediaName + ": " + count + "(" + status + ")]";
+        return "[" + mediaName + ": " + epDates.size() + "(" + status + ")]";
     }
 
     /**
@@ -158,7 +164,7 @@ public class MediaData implements Serializable
     private void updateStatus()
     {
         // TODO Want to do some extra checks to not allow any illegal status transitions?
-        if (count <= 0)
+        if (epDates.isEmpty())
         {
             status = MediaCounterStatus.NEW;
         }
@@ -172,56 +178,47 @@ public class MediaData implements Serializable
      * Comparator to sort by name
      */
     public static final Comparator<MediaData> BY_NAME =
-            new Comparator<MediaData>()
-            {
-                @Override
-                public int compare(MediaData o1, MediaData o2)
-                {
-                    String thisName = o1.mediaName.toLowerCase();
-                    String otherName = o2.getMediaName().toLowerCase();
+            (o1, o2) -> {
+                String thisName = o1.mediaName.toLowerCase();
+                String otherName = o2.getMediaName().toLowerCase();
 
-                    return thisName.compareTo(otherName);
-                }
+                return thisName.compareTo(otherName);
             };
 
     /**
-     * Comparator to sort by latest Episode date
+     * Comparator to sort by latest Episode date. Positive means o2 is newer, negative
+     * means o1 is newer.
      */
     // How do you handle the screen update? If I push + on a show that isn't the first, should it
     // move underneath my hand? Probably not. Do I want to change the way episodes are updated,
     // through the info view?
     public static final Comparator<MediaData> BY_LAST_EPISODE =
-            new Comparator<MediaData>()
-            {
-                @Override
-                public int compare(MediaData o1, MediaData o2)
+            (o1, o2) -> {
+                // Compare by date of latest episode, or add date
+                long o1Date = o1.addedDate;
+                if (o1.getCount() > 0)
                 {
-                    // Compare by date of latest episode, or add date
-                    long o1Date = o1.addedDate;
-                    if (o1.getCount() > 0)
-                    {
-                        o1Date = o1.getEpDates().get(o1.getCount() - 1);
-                    }
-
-                    long o2Date = o2.addedDate;
-                    if (o2.getCount() > 0)
-                    {
-                        o2Date = o2.getEpDates().get(o2.getCount() - 1);
-                    }
-
-                    long delta = o1Date - o2Date;
-
-                    int result = 0;
-                    if (delta < 0)
-                    {
-                        result = 1;
-                    }
-                    else if (delta > 0)
-                    {
-                        result = -1;
-                    }
-
-                    return result;
+                    o1Date = o1.getEpDates().get(o1.getCount() - 1);
                 }
+
+                long o2Date = o2.addedDate;
+                if (o2.getCount() > 0)
+                {
+                    o2Date = o2.getEpDates().get(o2.getCount() - 1);
+                }
+
+                long delta = o1Date - o2Date;
+
+                int result = 0;
+                if (delta < 0)
+                {
+                    result = 1;
+                }
+                else if (delta > 0)
+                {
+                    result = -1;
+                }
+
+                return result;
             };
 }

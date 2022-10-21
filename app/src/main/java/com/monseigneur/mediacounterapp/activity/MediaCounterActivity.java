@@ -394,32 +394,43 @@ public class MediaCounterActivity extends Activity
      */
     private void changeCount(View view, boolean increment)
     {
-        if (!incLocked)
+        if (incLocked)
         {
-            LinearLayout ll = (LinearLayout) view.getParent();
-            int pos = binding.mediaList.getPositionForView(ll);
-            MediaData md = adapter.getItem(pos);
+            Log.i("changeCount", "Locked for increment, exit early. increment = " + increment);
+            return;
+        }
 
-            if (md.adjustCount(increment))
+        LinearLayout ll = (LinearLayout) view.getParent();
+        int pos = binding.mediaList.getPositionForView(ll);
+        MediaData md = adapter.getItem(pos);
+
+        if (md == null)
+        {
+            Log.w("changeCount", "MediaData at " + pos + " is null");
+            return;
+        }
+
+        Log.i("changeCount", "increment " + increment + " " + md);
+
+        if (increment)
+        {
+            long now = MediaCounterDB.getCurrentDate();
+            if (md.addEpisode(now))
             {
+                db.addEpisode(md.getMediaName(), now);
                 db.setStatus(md.getMediaName(), md.getStatus());
-                if (increment)
-                {
-                    db.addEpisode(md.getMediaName());
-                }
-                else
-                {
-                    db.deleteEpisode(md.getMediaName());
-                }
             }
-
-            if (!increment && (md.getCount() < 0))
+        }
+        else
+        {
+            db.deleteEpisode(md.getMediaName());
+            if (!md.removeEpisode())
             {
                 adapter.remove(pos);
             }
-
-            adapter.update();
         }
+
+        adapter.update();
     }
 
     /**
