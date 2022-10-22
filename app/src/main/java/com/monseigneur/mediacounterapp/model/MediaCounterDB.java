@@ -128,42 +128,35 @@ public class MediaCounterDB extends SQLiteOpenHelper
     /**
      * Adds a new Media to the database
      *
-     * @param mediaName name of the Media to add
-     * @return MediaData if the Media was successfully added, null otherwise
+     * @param md the MediaData to add
+     * @return true if successfully added
      */
-    public MediaData addMedia(String mediaName)
+    public boolean addMedia(MediaData md)
     {
-        return addMedia(mediaName, MediaCounterStatus.NEW, getCurrentDate());
-    }
+        if (md == null)
+        {
+            Log.i("addMedia", "MediaData to add is null!");
+            return false;
+        }
 
-    /**
-     * Adds a new Media to the database
-     *
-     * @param mediaName name of the Media to add
-     * @param status    status to set the Media to
-     * @param date      date that the Media was added
-     * @return MediaData if the Media was successfully added, null otherwise
-     */
-    private MediaData addMedia(String mediaName, MediaCounterStatus status, long date)
-    {
-        if (getIdForMedia(mediaName) != UNKNOWN_MEDIA)
+        if (getIdForMedia(md.getMediaName()) != UNKNOWN_MEDIA)
         {
             Log.e("addMedia", "media already exists!");
-            return null;
+            return false;
         }
 
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_TITLE, mediaName);
-        values.put(KEY_STATUS, status.value);
-        values.put(KEY_ADDED_DATE, date);
+        values.put(KEY_TITLE, md.getMediaName());
+        values.put(KEY_STATUS, md.getStatus().value);
+        values.put(KEY_ADDED_DATE, md.getAddedDate());
 
         db.insert(TABLE_TITLES, null, values);
 
         db.close();
 
-        return new MediaData(mediaName, status, date);
+        return true;
     }
 
     /**
@@ -705,6 +698,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
             // First backup the data, in case something goes wrong.
             if (!writeData(backupFile))
             {
+                Log.e("importData", "failed to write backup data!");
                 return false;
             }
 
@@ -773,7 +767,12 @@ public class MediaCounterDB extends SQLiteOpenHelper
                     // Remove the original one. Probably want to change to some kind of merging scheme.
                     deleteMedia(mediaName);
 
-                    addMedia(mediaName, status, addedDate);
+                    MediaData md = new MediaData(mediaName, status, addedDate);
+
+                    if (!addMedia(md))
+                    {
+                        Log.e("readData", "Failed to add MediaData!");
+                    }
 
                     IonList episodes = (IonList) val.get(DATA_FIELD_EPISODES);
                     int i = 1;
@@ -791,6 +790,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
         catch (Exception e)
         {
+            Log.e("readData", "caught exception " + e);
             return false;
         }
 
@@ -832,6 +832,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
         catch (Exception e)
         {
+            Log.e("writeData", "caught exception when building backup data" + e);
             return false;
         }
 
@@ -850,6 +851,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
         catch (Exception e)
         {
+            Log.e("writeData", "caught exception when writing backup date " + e);
             return false;
         }
 

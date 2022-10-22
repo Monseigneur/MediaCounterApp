@@ -68,23 +68,18 @@ public class MediaCounterActivity extends Activity
         adapter = new MediaCounterAdapter(this, R.layout.media_counter_list_entry, mdList);
         binding.mediaList.setAdapter(adapter);
 
-        binding.viewCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-        {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+        binding.viewCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            EnumSet<MediaCounterStatus> filter;
+            if (isChecked)
             {
-                EnumSet<MediaCounterStatus> filter;
-                if (isChecked)
-                {
-                    filter = EnumSet.of(MediaCounterStatus.NEW, MediaCounterStatus.ONGOING);
-                }
-                else
-                {
-                    filter = EnumSet.allOf(MediaCounterStatus.class);
-                }
-
-                adapter.setFilterMask(filter);
+                filter = EnumSet.of(MediaCounterStatus.NEW, MediaCounterStatus.ONGOING);
             }
+            else
+            {
+                filter = EnumSet.allOf(MediaCounterStatus.class);
+            }
+
+            adapter.setFilterMask(filter);
         });
 
         incLocked = true;
@@ -155,8 +150,13 @@ public class MediaCounterActivity extends Activity
 
         LinearLayout ll = (LinearLayout) view.getParent();
         int pos = binding.mediaList.getPositionForView(ll);
-
         MediaData md = adapter.getItem(pos);
+
+        if (md == null)
+        {
+            Log.w("viewMediaInfo", "MediaData in view at pos " + pos + " is null!");
+            return;
+        }
 
         String name = md.getMediaName();
         MediaInfoViewModel viewModel = new MediaInfoViewModel(name, md.getStatus(), md.getAddedDate(), db.getEpDates(name));
@@ -177,39 +177,43 @@ public class MediaCounterActivity extends Activity
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         Log.i("onActivityResult", "requestCode " + requestCode + " resultCode " + resultCode);
-        if (resultCode == RESULT_OK)
+
+        if (resultCode != RESULT_OK)
         {
-            String name;
-            switch (requestCode)
-            {
-                case NEW_MEDIA_COUNTER_REQUEST:
-                    name = data.getStringExtra(MEDIA_COUNTER_NAME);
+            return;
+        }
 
-                    MediaData result = db.addMedia(name);
+        String name;
+        switch (requestCode)
+        {
+            case NEW_MEDIA_COUNTER_REQUEST:
+                name = data.getStringExtra(MEDIA_COUNTER_NAME);
 
-                    if (result != null)
-                    {
-                        adapter.add(result);
-                    }
-                    else
-                    {
-                        // Media already exists, show a toast
-                        showToast(getString(R.string.duplicate_media));
-                    }
+                MediaData newMd = new MediaData(name, MediaCounterDB.getCurrentDate());
 
-                    Log.i("onActivityResult", name);
-                    break;
-                case MEDIA_INFO_STATUS_CHANGE_REQUEST:
-                    MediaCounterStatus newStatus = (MediaCounterStatus) data.getSerializableExtra(MEDIA_INFO_STATUS);
-                    name = data.getStringExtra(MediaCounterActivity.MEDIA_COUNTER_NAME);
-                    Log.i("onActivityResult", "media info status change " + newStatus + " for media [" + name + "]");
-                    db.setStatus(name, newStatus);
-
-                    adapter.getItem(name).setStatus(newStatus);
+                if (db.addMedia(newMd))
+                {
+                    adapter.add(newMd);
                     adapter.update();
-                default:
-                    break;
-            }
+                }
+                else
+                {
+                    // Media already exists, show a toast
+                    showToast(getString(R.string.duplicate_media));
+                }
+
+                Log.i("onActivityResult", name);
+                break;
+            case MEDIA_INFO_STATUS_CHANGE_REQUEST:
+                MediaCounterStatus newStatus = (MediaCounterStatus) data.getSerializableExtra(MEDIA_INFO_STATUS);
+                name = data.getStringExtra(MediaCounterActivity.MEDIA_COUNTER_NAME);
+                Log.i("onActivityResult", "media info status change " + newStatus + " for media [" + name + "]");
+                db.setStatus(name, newStatus);
+
+                adapter.getItem(name).setStatus(newStatus);
+                adapter.update();
+            default:
+                break;
         }
     }
 
@@ -406,7 +410,7 @@ public class MediaCounterActivity extends Activity
 
         if (md == null)
         {
-            Log.w("changeCount", "MediaData at " + pos + " is null");
+            Log.w("changeCount", "MediaData in view at pos " + pos + " is null!");
             return;
         }
 

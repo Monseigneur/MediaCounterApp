@@ -20,7 +20,7 @@ public class MediaDataUnitTest
     public void constructBasic_fieldsInitialized()
     {
         String name = "Test Media";
-        MediaData md = new MediaData(name, MediaCounterStatus.NEW, 1L);
+        MediaData md = new MediaData(name, 1L);
 
         assertNotNull(md);
 
@@ -74,7 +74,7 @@ public class MediaDataUnitTest
     @Test
     public void addAndRemoveEpisodes_modifiesCount()
     {
-        MediaData md = new MediaData("a", MediaCounterStatus.NEW, 1L);
+        MediaData md = new MediaData("a", 1L);
 
         assertEquals(md.getCount(), 0);
 
@@ -115,7 +115,7 @@ public class MediaDataUnitTest
     public void addAndRemoveEpisodes_changesStatus()
     {
         long date = 1L;
-        MediaData md = new MediaData("Test Media", MediaCounterStatus.NEW, date);
+        MediaData md = new MediaData("Test Media", date);
 
         assertNotNull(md);
         assertEquals(MediaCounterStatus.NEW, md.getStatus());
@@ -179,13 +179,13 @@ public class MediaDataUnitTest
     {
         Comparator<MediaData> byName = MediaData.BY_NAME;
 
-        MediaData md1 = new MediaData("a", MediaCounterStatus.NEW, 1L);
-        MediaData md2 = new MediaData("b", MediaCounterStatus.NEW, 1L);
+        MediaData md1 = new MediaData("a", 1L);
+        MediaData md2 = new MediaData("b", 1L);
 
         int result = byName.compare(md1, md2);
         assertTrue(result < 0);
 
-        MediaData md3 = new MediaData("a", MediaCounterStatus.NEW, 1L);
+        MediaData md3 = new MediaData("a", 1L);
 
         result = byName.compare(md1, md3);
         assertEquals(0, result);
@@ -218,9 +218,9 @@ public class MediaDataUnitTest
         assertEquals(0, result);
 
         // Compare 2 medias where one doesn't have any count
-        MediaData md4 = new MediaData("d", MediaCounterStatus.NEW, 250L, new ArrayList<Long>());
-        MediaData md5 = new MediaData("e", MediaCounterStatus.NEW, 150L, new ArrayList<Long>());
-        MediaData md6 = new MediaData("f", MediaCounterStatus.NEW, 200L, new ArrayList<Long>());
+        MediaData md4 = new MediaData("d", 250L);
+        MediaData md5 = new MediaData("e", 150L);
+        MediaData md6 = new MediaData("f", 200L);
 
         result = byLastEpisode.compare(md4, md2);
         assertTrue(result < 0);
@@ -237,8 +237,8 @@ public class MediaDataUnitTest
     {
         Comparator<MediaData> byLastEpisode = MediaData.BY_LAST_EPISODE;
 
-        MediaData md1 = new MediaData("a", MediaCounterStatus.NEW, 10L);
-        MediaData md2 = new MediaData("b", MediaCounterStatus.NEW, 15L);
+        MediaData md1 = new MediaData("a", 10L);
+        MediaData md2 = new MediaData("b", 15L);
 
         // md2 is newer.
         assertTrue(byLastEpisode.compare(md1, md2) > 0);

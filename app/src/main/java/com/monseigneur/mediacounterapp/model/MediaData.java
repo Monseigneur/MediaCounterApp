@@ -21,6 +21,17 @@ public class MediaData implements Serializable
      * Creates a new Media
      *
      * @param name name of the new Media
+     * @param date date the Media was added
+     */
+    public MediaData(String name, long date)
+    {
+        this(name, MediaCounterStatus.NEW, date, new ArrayList<>());
+    }
+
+    /**
+     * Creates a new Media
+     *
+     * @param name name of the new Media
      * @param status status of the Media
      * @param date date the Media was added
      */
