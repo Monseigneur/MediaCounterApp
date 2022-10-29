@@ -1,16 +1,13 @@
-package com.monseigneur.mediacounterapp;
+package com.monseigneur.mediacounterapp.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import com.monseigneur.mediacounterapp.model.DataManager;
-import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
-import com.monseigneur.mediacounterapp.model.MediaData;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,16 +15,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataManagerUnitTest
+public class DataManagerTest
 {
-    @Before
-    public void setup()
+    @BeforeEach
+    public void setUp()
     {
         DataManager.VERBOSE = false;
     }
 
-    @After
-    public void teardown()
+    @AfterEach
+    public void tearDown()
     {
         DataManager.VERBOSE = true;
     }
@@ -74,15 +71,10 @@ public class DataManagerUnitTest
         assertEquals(originalMdList, mdList);
     }
 
-    @Test
-    public void readAndWriteDataText()
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void readAndWriteData(boolean writeBinary)
     {
-        flipData(false);
-    }
-
-    @Test
-    public void readAndWriteDataBinary()
-    {
-        flipData(true);
+        flipData(writeBinary);
     }
 }
