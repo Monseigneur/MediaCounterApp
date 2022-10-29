@@ -13,26 +13,17 @@ import com.monseigneur.mediacounterapp.R;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
-
-import software.amazon.ion.IonInt;
-import software.amazon.ion.IonList;
-import software.amazon.ion.IonStruct;
-import software.amazon.ion.IonSystem;
-import software.amazon.ion.IonText;
-import software.amazon.ion.IonValue;
-import software.amazon.ion.IonWriter;
-import software.amazon.ion.system.IonSystemBuilder;
 
 /**
  * Created by Milan on 6/19/2016.
@@ -66,24 +57,18 @@ public class MediaCounterDB extends SQLiteOpenHelper
     private static final int UNKNOWN_MEDIA = -1;
     private static final long UNKNOWN_DATE = 0;
 
-    // Constants for data import / export
-    private static final String DATA_FIELD_TITLE = "title";
-    private static final String DATA_FIELD_STATUS = "status";
-    private static final String DATA_FIELD_ADDED = "added_date";
-    private static final String DATA_FIELD_EPISODES = "episodes";
-
     private static final String TAG = "MediaCounterDB";
 
     private static final String FILENAME_PREFIX = "media_counter_backup";
     private static final String FILENAME_EXTENSION = ".txt";
 
-    private final IonSystem ionSys;
+    private DataManager dm;
 
     public MediaCounterDB(Context context)
     {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
-        ionSys = IonSystemBuilder.standard().build();
+        dm = new DataManager(false);
     }
 
     @Override
@@ -643,7 +628,8 @@ public class MediaCounterDB extends SQLiteOpenHelper
      *
      * @return timestamp for a filename
      */
-    private String fileTimeStamp() {
+    private String fileTimeStamp()
+    {
         long time = getCurrentDate();
 
         Calendar date = Calendar.getInstance();
@@ -669,17 +655,24 @@ public class MediaCounterDB extends SQLiteOpenHelper
     public boolean backupData()
     {
         File base = getBackupDirectory();
-        if (base != null)
+        if (base == null)
         {
-            String timeStamp = fileTimeStamp();
-
-            String fileName = FILENAME_PREFIX + "_" + timeStamp + FILENAME_EXTENSION;
-
-            File backupFile = new File(base, fileName);
-            return writeData(backupFile);
+            Log.e("backupData", "Failed to get backup directory");
+            return false;
         }
 
-        return false;
+        String fileName = FILENAME_PREFIX + "_" + fileTimeStamp() + FILENAME_EXTENSION;
+
+        try (FileOutputStream fos = new FileOutputStream(new File(base, fileName)))
+        {
+            List<MediaData> backupList = getMediaCounters();
+            return dm.writeData(fos, backupList);
+        }
+        catch (IOException e)
+        {
+            Log.e("backupData", "Caught exception when trying to write backup data " + e);
+            return false;
+        }
     }
 
     /**
@@ -690,24 +683,65 @@ public class MediaCounterDB extends SQLiteOpenHelper
     public boolean importData()
     {
         File base = getBackupDirectory();
-
-        if (base != null)
+        if (base == null)
         {
-            File backupFile = new File(base, "media_counter_backup_TEMP.txt");
-
-            // First backup the data, in case something goes wrong.
-            if (!writeData(backupFile))
-            {
-                Log.e("importData", "failed to write backup data!");
-                return false;
-            }
-
-            File importFile = new File(base, "media_counter_import.txt");
-
-            return readData(importFile);
+            Log.e("importData", "Failed to get backup directory");
+            return false;
         }
 
-        return false;
+        try (FileOutputStream fos = new FileOutputStream(new File(base, "media_counter_backup_TEMP.txt")))
+        {
+            List<MediaData> backupList = getMediaCounters();
+            if (!dm.writeData(fos, backupList))
+            {
+                return false;
+            }
+        }
+        catch (IOException e)
+        {
+            Log.e("importData", "Caught exception when trying to write backup data " + e);
+            return false;
+        }
+
+        List<MediaData> importList = null;
+
+        try (FileInputStream fis = new FileInputStream(new File(base, "media_counter_import.txt")))
+        {
+            importList = dm.readData(fis);
+        }
+        catch (IOException e)
+        {
+            Log.e("importData", "Caught exception when trying to read import data " + e);
+            return false;
+        }
+
+        if (importList == null)
+        {
+            Log.e("importData", "Failed to get import data");
+            return false;
+        }
+
+        for (MediaData md : importList)
+        {
+            // Remove the original one. Probably want to change to some kind of merging scheme.
+            deleteMedia(md.getMediaName());
+
+            if (!addMedia(md))
+            {
+                Log.e("readData", "Failed to add MediaData " + md);
+            }
+
+            int i = 1;
+            for (long epDate : md.getEpDates())
+            {
+                addEpisode(md.getMediaName(), i, epDate);
+                i++;
+            }
+
+            Log.i("importData", "Imported " + md);
+        }
+
+        return true;
     }
 
     /**
@@ -735,126 +769,5 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
 
         return null;
-    }
-
-    /**
-     * Reads from the import file and populates the database
-     *
-     * @param file import file
-     * @return true if all data was successfully imported, false otherwise
-     */
-    private boolean readData(File file)
-    {
-        try
-        {
-            if (file.exists())
-            {
-                FileInputStream fis = new FileInputStream(file);
-
-                Iterator<IonValue> iter = ionSys.iterate(fis);
-
-                IonList elements = (IonList) iter.next();
-
-                for (IonValue iv : elements)
-                {
-                    IonStruct val = (IonStruct) iv;
-                    String mediaName = ((IonText) val.get(DATA_FIELD_TITLE)).stringValue();
-                    int statusVal = ((IonInt) val.get(DATA_FIELD_STATUS)).intValue();
-                    MediaCounterStatus status = MediaCounterStatus.from(statusVal);
-                    long addedDate = ((IonInt) val.get(DATA_FIELD_ADDED)).longValue();
-                    Log.i("import", "[" + mediaName + "] [" + status + "] [" + addedDate + "]");
-
-                    // Remove the original one. Probably want to change to some kind of merging scheme.
-                    deleteMedia(mediaName);
-
-                    MediaData md = new MediaData(mediaName, status, addedDate);
-
-                    if (!addMedia(md))
-                    {
-                        Log.e("readData", "Failed to add MediaData!");
-                    }
-
-                    IonList episodes = (IonList) val.get(DATA_FIELD_EPISODES);
-                    int i = 1;
-                    for (IonValue epIv : episodes)
-                    {
-                        long epDate = ((IonInt) epIv).longValue();
-                        addEpisode(mediaName, i, epDate);
-                        i++;
-                        Log.i("import", "\t" + epDate);
-                    }
-                }
-
-                fis.close();
-            }
-        }
-        catch (Exception e)
-        {
-            Log.e("readData", "caught exception " + e);
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Writes the contents of the database to the backup file
-     *
-     * @param file the backup file
-     * @return true if all data was successfully written, false otherwise
-     */
-    private boolean writeData(File file)
-    {
-        List<MediaData> mdList = getMediaCounters();
-
-        IonList backupData = ionSys.newEmptyList();
-
-        try
-        {
-            for (MediaData md : mdList)
-            {
-                IonStruct media = ionSys.newNullStruct();
-                media.put(DATA_FIELD_TITLE).newString(md.getMediaName());
-                media.put(DATA_FIELD_STATUS).newInt(md.getStatus().value);
-                media.put(DATA_FIELD_ADDED).newInt(md.getAddedDate());
-
-                List<Long> epDates = md.getEpDates();
-                IonList epList = ionSys.newEmptyList();
-                for (int i = 0; i < epDates.size(); i++)
-                {
-                    epList.add(ionSys.newInt(epDates.get(i)));
-                }
-
-                media.put(DATA_FIELD_EPISODES, epList);
-
-                backupData.add(media);
-            }
-        }
-        catch (Exception e)
-        {
-            Log.e("writeData", "caught exception when building backup data" + e);
-            return false;
-        }
-
-        try
-        {
-            Log.i("writeData", backupData.toPrettyString());
-
-            if (file != null)
-            {
-                IonWriter writer = ionSys.newTextWriter(new FileOutputStream(file));
-
-                backupData.writeTo(writer);
-
-                writer.close();
-            }
-        }
-        catch (Exception e)
-        {
-            Log.e("writeData", "caught exception when writing backup date " + e);
-            return false;
-        }
-
-        return true;
     }
 }

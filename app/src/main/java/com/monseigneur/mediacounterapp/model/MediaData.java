@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by Milan on 5/21/2016.
@@ -31,9 +32,9 @@ public class MediaData implements Serializable
     /**
      * Creates a new Media
      *
-     * @param name name of the new Media
+     * @param name   name of the new Media
      * @param status status of the Media
-     * @param date date the Media was added
+     * @param date   date the Media was added
      */
     public MediaData(String name, MediaCounterStatus status, long date)
     {
@@ -232,4 +233,28 @@ public class MediaData implements Serializable
 
                 return result;
             };
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o)
+        {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+
+        MediaData mediaData = (MediaData) o;
+
+        return addedDate == mediaData.addedDate && Objects.equals(mediaName, mediaData.mediaName) && status == mediaData.status && epDates.equals(mediaData.epDates);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(mediaName, status, addedDate, epDates);
+    }
 }
