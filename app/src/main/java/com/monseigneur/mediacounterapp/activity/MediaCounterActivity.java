@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.util.Log;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -20,6 +19,8 @@ import androidx.core.app.ActivityCompat;
 import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.databinding.MainActivityBinding;
 import com.monseigneur.mediacounterapp.model.EpisodeData;
+import com.monseigneur.mediacounterapp.model.IDataManager;
+import com.monseigneur.mediacounterapp.model.IonDataManager;
 import com.monseigneur.mediacounterapp.model.MediaCounterDB;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 import com.monseigneur.mediacounterapp.model.MediaData;
@@ -61,7 +62,9 @@ public class MediaCounterActivity extends Activity
 
         defaultButtonBg = binding.lockButton.getBackground();
 
-        db = new MediaCounterDB(this);
+        IDataManager dm = new IonDataManager(false);
+        db = new MediaCounterDB(this, dm);
+
         List<MediaData> mdList = db.getMediaCounters();
         Log.i("onCreate", "list = " + mdList);
 

@@ -2,16 +2,6 @@ package com.monseigneur.mediacounterapp.model;
 
 import android.util.Log;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import com.amazon.ion.IonInt;
 import com.amazon.ion.IonList;
 import com.amazon.ion.IonReader;
@@ -26,7 +16,14 @@ import com.amazon.ion.system.IonSystemBuilder;
 import com.amazon.ion.system.IonTextWriterBuilder;
 import com.amazon.ion.system.IonWriterBuilder;
 
-public class DataManager
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+public class IonDataManager implements IDataManager
 {
     public static boolean VERBOSE = true;
 
@@ -45,7 +42,7 @@ public class DataManager
      *
      * @param writeBinary whether to write data in binary or text.
      */
-    public DataManager(boolean writeBinary)
+    public IonDataManager(boolean writeBinary)
     {
         this.ionSys = IonSystemBuilder.standard().build();
         this.readerBuilder = IonReaderBuilder.standard();
@@ -60,12 +57,7 @@ public class DataManager
         }
     }
 
-    /**
-     * Read data from input
-     *
-     * @param is input to read from
-     * @return List of MediaData
-     */
+    @Override
     public List<MediaData> readData(InputStream is)
     {
         List<MediaData> mdList = new ArrayList<>();
@@ -123,13 +115,7 @@ public class DataManager
         return mdList;
     }
 
-    /**
-     * Write data to an output
-     *
-     * @param os     output to write to
-     * @param mdList list of MediaData to write
-     * @return true if successful
-     */
+    @Override
     public boolean writeData(OutputStream os, List<MediaData> mdList)
     {
         IonList backupData = ionSys.newEmptyList();

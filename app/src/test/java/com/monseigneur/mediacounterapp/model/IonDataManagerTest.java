@@ -15,18 +15,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataManagerTest
+public class IonDataManagerTest
 {
     @BeforeEach
     public void setUp()
     {
-        DataManager.VERBOSE = false;
+        IonDataManager.VERBOSE = false;
     }
 
     @AfterEach
     public void tearDown()
     {
-        DataManager.VERBOSE = true;
+        IonDataManager.VERBOSE = true;
     }
 
     private List<MediaData> buildList()
@@ -48,7 +48,7 @@ public class DataManagerTest
     private void flipData(boolean writeBinary)
     {
         List<MediaData> originalMdList = buildList();
-        DataManager dm = new DataManager(writeBinary);
+        IDataManager dm = new IonDataManager(writeBinary);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         // Convert data to the serialized format.

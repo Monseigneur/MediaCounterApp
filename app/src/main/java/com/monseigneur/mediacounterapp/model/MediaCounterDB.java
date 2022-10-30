@@ -62,13 +62,13 @@ public class MediaCounterDB extends SQLiteOpenHelper
     private static final String FILENAME_PREFIX = "media_counter_backup";
     private static final String FILENAME_EXTENSION = ".txt";
 
-    private final DataManager dm;
+    private final IDataManager dm;
 
-    public MediaCounterDB(Context context)
+    public MediaCounterDB(Context context, IDataManager dm)
     {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
-        dm = new DataManager(false);
+        this.dm = dm;
     }
 
     @Override
