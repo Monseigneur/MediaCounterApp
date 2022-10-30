@@ -62,7 +62,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
     private static final String FILENAME_PREFIX = "media_counter_backup";
     private static final String FILENAME_EXTENSION = ".txt";
 
-    private DataManager dm;
+    private final DataManager dm;
 
     public MediaCounterDB(Context context)
     {
@@ -344,26 +344,31 @@ public class MediaCounterDB extends SQLiteOpenHelper
         if (tid == UNKNOWN_MEDIA)
         {
             Log.e("getEpDates", "media does not exist");
+            return new ArrayList<>();
         }
-
-        SQLiteDatabase db = this.getReadableDatabase();
 
         List<Long> epDates = new ArrayList<>();
 
-        Cursor cursor = db.query(TABLE_EPISODES, EPISODES_COLUMNS, KEY_TID + SQL_PARAMETER, new String[]{String.valueOf(tid)},
-                null, null, null, null);
-
-        if (cursor != null)
+        try (SQLiteDatabase db = this.getReadableDatabase();
+             Cursor cursor = db.query(TABLE_EPISODES, EPISODES_COLUMNS, KEY_TID + SQL_PARAMETER, new String[]{String.valueOf(tid)},
+                     null, null, null, null))
         {
-            if (cursor.moveToFirst())
+            if (cursor == null || !cursor.moveToFirst())
             {
-                do
-                {
-                    epDates.add(cursor.getLong(cursor.getColumnIndex(KEY_DATE)));
-                } while (cursor.moveToNext());
+                return epDates;
             }
 
-            cursor.close();
+            do
+            {
+                epDates.add(cursor.getLong(cursor.getColumnIndexOrThrow(KEY_DATE)));
+            } while (cursor.moveToNext());
+        }
+        catch (Exception e)
+        {
+            Log.e("getEpDates", "caught exception " + e);
+
+            // Don't return partial data.
+            return new ArrayList<>();
         }
 
         return epDates;
@@ -377,13 +382,9 @@ public class MediaCounterDB extends SQLiteOpenHelper
      */
     private List<MediaData> getMediaCounters(EnumSet<MediaCounterStatus> statuses)
     {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        List<MediaData> mdList = new ArrayList<>();
-
         if (statuses.isEmpty())
         {
-            return mdList;
+            return new ArrayList<>();
         }
 
         StringBuilder selection = new StringBuilder();
@@ -404,28 +405,36 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
         Log.i(TAG, "getMediaCounters(enum): selection [" + selection + "] params " + Arrays.toString(parameters));
 
-        Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, selection.toString(), parameters, null, null, null, null);
+        List<MediaData> mdList = new ArrayList<>();
 
-        if (cursor != null)
+        try (SQLiteDatabase db = this.getReadableDatabase();
+             Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, selection.toString(), parameters, null, null, null, null))
         {
-            if (cursor.moveToFirst())
+            if (cursor == null || !cursor.moveToFirst())
             {
-                do
-                {
-                    String mediaName = cursor.getString(cursor.getColumnIndex(KEY_TITLE));
-                    int statusVal = cursor.getInt(cursor.getColumnIndex(KEY_STATUS));
-                    MediaCounterStatus status = MediaCounterStatus.from(statusVal);
-                    List<Long> epDates = getEpDates(mediaName);
-
-                    long addedDate = cursor.getLong(cursor.getColumnIndex(KEY_ADDED_DATE));
-                    Log.i("getMediaCounters", "name [" + mediaName + "] -> S " + status + ", EP# " + epDates.size() + ", AD " + addedDate);
-
-                    MediaData md = new MediaData(mediaName, status, addedDate, epDates);
-                    mdList.add(md);
-                } while (cursor.moveToNext());
+                return mdList;
             }
 
-            cursor.close();
+            do
+            {
+                String mediaName = cursor.getString(cursor.getColumnIndexOrThrow(KEY_TITLE));
+                int statusVal = cursor.getInt(cursor.getColumnIndexOrThrow(KEY_STATUS));
+                MediaCounterStatus status = MediaCounterStatus.from(statusVal);
+                List<Long> epDates = getEpDates(mediaName);
+
+                long addedDate = cursor.getLong(cursor.getColumnIndexOrThrow(KEY_ADDED_DATE));
+                Log.i("getMediaCounters", "name [" + mediaName + "] -> S " + status + ", EP# " + epDates.size() + ", AD " + addedDate);
+
+                MediaData md = new MediaData(mediaName, status, addedDate, epDates);
+                mdList.add(md);
+            } while (cursor.moveToNext());
+        }
+        catch (Exception e)
+        {
+            Log.e("getMediaCounters", "caught exception " + e);
+
+            // Don't return partial data.
+            return new ArrayList<>();
         }
 
         Collections.sort(mdList, MediaData.BY_LAST_EPISODE);
@@ -490,27 +499,30 @@ public class MediaCounterDB extends SQLiteOpenHelper
     {
         List<EpisodeData> data = new ArrayList<>();
 
-        // Get all media names
-        SQLiteDatabase db = this.getReadableDatabase();
-
         Map<String, MediaCounterStatus> mediaStatus = new HashMap<>();
 
-        Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, null, null, null, null, null, null);
-
-        if (cursor != null)
+        try (SQLiteDatabase db = this.getReadableDatabase();
+             Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, null, null, null, null, null, null))
         {
-            if (cursor.moveToFirst())
+            if (cursor == null || !cursor.moveToFirst())
             {
-                do
-                {
-                    String mediaName = cursor.getString(cursor.getColumnIndex(KEY_TITLE));
-                    int statusVal = cursor.getInt(cursor.getColumnIndex(KEY_STATUS));
-                    MediaCounterStatus status = MediaCounterStatus.from(statusVal);
-                    mediaStatus.put(mediaName, status);
-                } while (cursor.moveToNext());
+                return data;
             }
 
-            cursor.close();
+            do
+            {
+                String mediaName = cursor.getString(cursor.getColumnIndexOrThrow(KEY_TITLE));
+                int statusVal = cursor.getInt(cursor.getColumnIndexOrThrow(KEY_STATUS));
+                MediaCounterStatus status = MediaCounterStatus.from(statusVal);
+                mediaStatus.put(mediaName, status);
+            } while (cursor.moveToNext());
+        }
+        catch (Exception e)
+        {
+            Log.e("getEpisodeData", "caught exception " + e);
+
+            // Don't return partial data.
+            return new ArrayList<>();
         }
 
         // For each media, add its episodes to the list.
@@ -527,10 +539,11 @@ public class MediaCounterDB extends SQLiteOpenHelper
                     status = mediaStatus.get(name);
                 }
 
-                Log.i("getEpData", "[" + name + "]->" + (i + 1) + " " + status);
                 EpisodeData ed = new EpisodeData(name, i + 1, epDates.get(i), status);
                 data.add(ed);
             }
+
+            Log.i("getEpisodeData", "[" + name + "]->" + epDates.size() + " " + status);
         }
 
         Collections.sort(data);
@@ -547,38 +560,29 @@ public class MediaCounterDB extends SQLiteOpenHelper
      */
     private int getIdForMedia(String mediaName)
     {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, KEY_TITLE + SQL_PARAMETER, new String[]{mediaName},
-                null, null, null, null);
-
-        if (cursor == null)
+        try (SQLiteDatabase db = this.getReadableDatabase();
+             Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, KEY_TITLE + SQL_PARAMETER, new String[]{mediaName},
+                     null, null, null, null))
         {
-            return UNKNOWN_MEDIA;
-        }
+            if (cursor == null || !cursor.moveToFirst())
+            {
+                return UNKNOWN_MEDIA;
+            }
 
-        int result;
-
-        if (cursor.getCount() == 0)
-        {
-            result = UNKNOWN_MEDIA;
-        }
-        else
-        {
             if (cursor.getCount() > 1)
             {
                 // We have a problem
                 Log.e("getIdForMedia", "More than one media with the name [" + mediaName + "]!");
             }
 
-            cursor.moveToFirst();
-
-            result = cursor.getInt(cursor.getColumnIndex(KEY_TID));
-
-            cursor.close();
+            return cursor.getInt(cursor.getColumnIndexOrThrow(KEY_TID));
         }
+        catch (Exception e)
+        {
+            Log.e("getIdForMedia", "caught exception " + e);
 
-        return result;
+            return UNKNOWN_MEDIA;
+        }
     }
 
     /**
@@ -703,7 +707,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
             return false;
         }
 
-        List<MediaData> importList = null;
+        List<MediaData> importList;
 
         try (FileInputStream fis = new FileInputStream(new File(base, "media_counter_import.txt")))
         {
