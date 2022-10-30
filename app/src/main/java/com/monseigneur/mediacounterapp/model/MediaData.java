@@ -167,7 +167,7 @@ public class MediaData implements Serializable
     @Override
     public String toString()
     {
-        return "[" + mediaName + ": " + epDates.size() + "(" + status + ")]";
+        return "[" + mediaName + ": " + epDates.size() + " (" + status + ")]";
     }
 
     /**

@@ -707,11 +707,14 @@ public class MediaCounterDB extends SQLiteOpenHelper
             return false;
         }
 
-        List<MediaData> importList;
+        List<MediaData> importList = new ArrayList<>();
 
         try (FileInputStream fis = new FileInputStream(new File(base, "media_counter_import.txt")))
         {
-            importList = dm.readData(fis);
+            if (!dm.readData(fis, importList))
+            {
+                return false;
+            }
         }
         catch (IOException e)
         {

@@ -58,9 +58,14 @@ public class IonDataManager implements IDataManager
     }
 
     @Override
-    public List<MediaData> readData(InputStream is)
+    public boolean readData(InputStream is, List<MediaData> mdList)
     {
-        List<MediaData> mdList = new ArrayList<>();
+        if (is == null || mdList == null)
+        {
+            return false;
+        }
+
+        mdList.clear();
 
         try (IonReader reader = readerBuilder.build(is))
         {
@@ -75,7 +80,7 @@ public class IonDataManager implements IDataManager
                     Log.i("readData", "No data to read");
                 }
 
-                return null;
+                return false;
             }
 
             for (IonValue iv : elements)
@@ -103,21 +108,27 @@ public class IonDataManager implements IDataManager
                 mdList.add(md);
             }
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             if (VERBOSE)
             {
                 Log.e("readData", "caught exception " + e);
             }
-            return null;
+
+            return false;
         }
 
-        return mdList;
+        return !mdList.isEmpty();
     }
 
     @Override
     public boolean writeData(OutputStream os, List<MediaData> mdList)
     {
+        if (os == null || mdList == null || mdList.isEmpty())
+        {
+            return false;
+        }
+
         IonList backupData = ionSys.newEmptyList();
 
         for (MediaData md : mdList)

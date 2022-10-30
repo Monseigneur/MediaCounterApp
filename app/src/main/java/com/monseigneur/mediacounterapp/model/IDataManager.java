@@ -9,10 +9,11 @@ public interface IDataManager
     /**
      * Read data from input
      *
-     * @param is input to read from
-     * @return List of MediaData
+     * @param is     input to read from
+     * @param mdList list to add MediaData to
+     * @return true if successful
      */
-    List<MediaData> readData(InputStream is);
+    boolean readData(InputStream is, List<MediaData> mdList);
 
     /**
      * Write data to an output
