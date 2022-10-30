@@ -249,121 +249,37 @@ public class MediaCounterActivity extends Activity
      */
     public void buttonOnClick(View view)
     {
-        switch (view.getId())
+        int id = view.getId();
+
+        if (id == R.id.import_data_button)
         {
-            case R.id.import_data_button:
-                if (!incLocked)
-                {
-                    if (checkPermissions(this))
-                    {
-                        if (db.importData())
-                        {
-                            showToast("Import complete");
-                        }
-                        else
-                        {
-                            showToast("Import failed");
-                        }
-                    }
-                    else
-                    {
-                        showToast("Import failed due to missing permissions");
-                    }
-
-                }
-                break;
-            case R.id.export_data_button:
-                if (!incLocked)
-                {
-                    if (checkPermissions(this))
-                    {
-                        if (db.backupData())
-                        {
-                            showToast("Export complete");
-                        }
-                        else
-                        {
-                            showToast("Export failed");
-                        }
-                    }
-                    else
-                    {
-                        showToast("Export failed due to missing permissions");
-                    }
-
-                }
-                break;
-            case R.id.random_media_button:
-                String randomMedia = db.getRandomMedia();
-                showToast(randomMedia);
-                break;
-            case R.id.stats_button:
-                Log.i("showStats", "start!");
-                List<EpisodeData> epData = db.getEpisodeData();
-                Log.i("showStats", "epData size " + epData.size());
-
-                Intent statsIntent = new Intent(this, MediaStatsActivity.class);
-                Bundle b = new Bundle();
-
-                try
-                {
-                    List<Long> edList = new ArrayList<>();
-                    Map<String, Integer> namesMap = new HashMap<>();
-
-                    int nameIndex = 1;
-                    for (EpisodeData ed : epData)
-                    {
-                        int nameKey;
-                        if (namesMap.containsKey(ed.getMediaName()))
-                        {
-                            nameKey = namesMap.get(ed.getMediaName());
-                        }
-                        else
-                        {
-                            nameKey = nameIndex;
-                            nameIndex++;
-
-                            namesMap.put(ed.getMediaName(), nameKey);
-                        }
-
-                        edList.add((long) nameKey);
-                        edList.add((long) ed.getEpNum());
-                        edList.add(ed.getEpDate());
-                        edList.add((long) ed.getMediaStatus().value);
-                    }
-
-                    // Create a list of the names to be used in the reverse mapping
-                    Map<Integer, String> reverseNameMap = new HashMap<>();
-
-                    for (String name : namesMap.keySet())
-                    {
-                        reverseNameMap.put(namesMap.get(name), name);
-                    }
-
-                    b.putSerializable(MediaStatsActivity.MEDIA_STATS, (Serializable) edList);
-                    b.putSerializable(MediaStatsActivity.MEDIA_NAMES, (Serializable) reverseNameMap);
-                    statsIntent.putExtras(b);
-
-                    Parcel p = Parcel.obtain();
-                    p.writeBundle(b);
-                    Log.i("showStats", "size2 " + p.dataSize() + " num keys " + reverseNameMap.keySet().size());
-                    p.recycle();
-
-                    startActivity(statsIntent);
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-                break;
-            case R.id.lock_button:
-                setLockState(!incLocked);
-                break;
-            case R.id.new_media_button:
-                Log.i("newMediaCounter", "send!");
-                Intent newMediaIntent = new Intent(this, MediaCounterAddActivity.class);
-                startActivityForResult(newMediaIntent, NEW_MEDIA_COUNTER_REQUEST);
-                break;
+            importData();
+        }
+        else if (id == R.id.export_data_button)
+        {
+            exportData();
+        }
+        else if (id == R.id.random_media_button)
+        {
+            String randomMedia = db.getRandomMedia();
+            showToast(randomMedia);
+        }
+        else if (id == R.id.stats_button)
+        {
+            showStats();
+        }
+        else if (id == R.id.lock_button)
+        {
+            setLockState(!incLocked);
+        }
+        else if (id == R.id.new_media_button)
+        {
+            Intent newMediaIntent = new Intent(this, MediaCounterAddActivity.class);
+            startActivityForResult(newMediaIntent, NEW_MEDIA_COUNTER_REQUEST);
+        }
+        else
+        {
+            Log.e("buttonOnClick", "received click from unknown view " + id);
         }
     }
 
@@ -449,5 +365,114 @@ public class MediaCounterActivity extends Activity
     {
         Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
         toast.show();
+    }
+
+    private void showStats()
+    {
+        Log.i("showStats", "start!");
+        List<EpisodeData> epData = db.getEpisodeData();
+        Log.i("showStats", "epData size " + epData.size());
+
+        Intent statsIntent = new Intent(this, MediaStatsActivity.class);
+        Bundle b = new Bundle();
+
+        try
+        {
+            List<Long> edList = new ArrayList<>();
+            Map<String, Integer> namesMap = new HashMap<>();
+
+            int nameIndex = 1;
+            for (EpisodeData ed : epData)
+            {
+                int nameKey;
+                if (namesMap.containsKey(ed.getMediaName()))
+                {
+                    nameKey = namesMap.get(ed.getMediaName());
+                }
+                else
+                {
+                    nameKey = nameIndex;
+                    nameIndex++;
+
+                    namesMap.put(ed.getMediaName(), nameKey);
+                }
+
+                edList.add((long) nameKey);
+                edList.add((long) ed.getEpNum());
+                edList.add(ed.getEpDate());
+                edList.add((long) ed.getMediaStatus().value);
+            }
+
+            // Create a list of the names to be used in the reverse mapping
+            Map<Integer, String> reverseNameMap = new HashMap<>();
+
+            for (String name : namesMap.keySet())
+            {
+                reverseNameMap.put(namesMap.get(name), name);
+            }
+
+            b.putSerializable(MediaStatsActivity.MEDIA_STATS, (Serializable) edList);
+            b.putSerializable(MediaStatsActivity.MEDIA_NAMES, (Serializable) reverseNameMap);
+            statsIntent.putExtras(b);
+
+            Parcel p = Parcel.obtain();
+            p.writeBundle(b);
+            Log.i("showStats", "size2 " + p.dataSize() + " num keys " + reverseNameMap.keySet().size());
+            p.recycle();
+
+            startActivity(statsIntent);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private void importData()
+    {
+        if (incLocked)
+        {
+            return;
+        }
+
+        if (checkPermissions(this))
+        {
+            if (db.importData())
+            {
+                showToast("Import complete");
+            }
+            else
+            {
+                showToast("Import failed");
+            }
+        }
+        else
+        {
+            showToast("Import failed due to missing permissions");
+        }
+    }
+
+    private void exportData()
+    {
+        if (incLocked)
+        {
+            return;
+        }
+
+        if (checkPermissions(this))
+        {
+            if (db.backupData())
+            {
+                showToast("Export complete");
+            }
+            else
+            {
+                showToast("Export failed");
+            }
+        }
+        else
+        {
+            showToast("Export failed due to missing permissions");
+        }
     }
 }
