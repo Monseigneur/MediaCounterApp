@@ -145,82 +145,87 @@ public class MediaCounterActivity extends Activity
             return;
         }
 
-        String name;
-        switch (requestCode)
+        if (requestCode == NEW_MEDIA_COUNTER_REQUEST)
         {
-            case NEW_MEDIA_COUNTER_REQUEST:
-                name = data.getStringExtra(MEDIA_COUNTER_NAME);
+            String name = data.getStringExtra(MEDIA_COUNTER_NAME);
 
-                MediaData newMd = new MediaData(name, MediaCounterDB.getCurrentDate());
+            if (name == null || name.isEmpty())
+            {
+                showToast("Invalid name");
+                return;
+            }
 
-                if (db.addMedia(newMd))
-                {
-                    adapter.add(newMd);
-                    adapter.update();
-                }
-                else
-                {
-                    // Media already exists, show a toast
-                    showToast(getString(R.string.duplicate_media));
-                }
+            MediaData newMd = new MediaData(name, MediaCounterDB.getCurrentDate());
 
-                Log.i("onActivityResult", name);
-                break;
-            case MEDIA_INFO_STATUS_CHANGE_REQUEST:
-                MediaCounterStatus newStatus = (MediaCounterStatus) data.getSerializableExtra(MEDIA_INFO_STATUS);
-                name = data.getStringExtra(MediaCounterActivity.MEDIA_COUNTER_NAME);
-                Log.i("onActivityResult", "media info status change " + newStatus + " for media [" + name + "]");
-                db.setStatus(name, newStatus);
-
-                adapter.getItem(name).setStatus(newStatus);
+            if (db.addMedia(newMd))
+            {
+                adapter.add(newMd);
                 adapter.update();
-                break;
-            case CREATE_BACKUP_FILE:
-            case CREATE_BACKUP_FILE_IMPORT:
-                boolean importPath = (requestCode == CREATE_BACKUP_FILE_IMPORT);
+            }
+            else
+            {
+                // Media already exists, show a toast
+                showToast(getString(R.string.duplicate_media));
+            }
 
-                Log.i("onActivityResult", "write backup data file, importPath " + importPath);
-                if (data != null)
-                {
-                    Uri uri = data.getData();
-                    boolean success = exportData(uri);
+            Log.i("onActivityResult", name);
+        }
+        else if (requestCode == MEDIA_INFO_STATUS_CHANGE_REQUEST)
+        {
+            MediaCounterStatus newStatus = (MediaCounterStatus) data.getSerializableExtra(MEDIA_INFO_STATUS);
+            String name = data.getStringExtra(MediaCounterActivity.MEDIA_COUNTER_NAME);
+            Log.i("onActivityResult", "media info status change " + newStatus + " for media [" + name + "]");
+            db.setStatus(name, newStatus);
 
-                    showFileMetadata(uri);
+            adapter.getItem(name).setStatus(newStatus);
+            adapter.update();
+        }
+        else if (requestCode == CREATE_BACKUP_FILE || requestCode == CREATE_BACKUP_FILE_IMPORT)
+        {
+            boolean importPath = (requestCode == CREATE_BACKUP_FILE_IMPORT);
 
-                    showToast(success, "Export succeeded", "Export failed");
-                }
+            Log.i("onActivityResult", "write backup data file, importPath " + importPath);
+            if (data != null)
+            {
+                Uri uri = data.getData();
+                boolean success = exportData(uri);
 
-                if (importPath)
-                {
-                    // If import, kick off the open import path.
-                    openImportFile();
-                }
-                else
-                {
-                    // Return to a locked state if just exporting.
-                    setLockState(true);
-                }
+                showFileMetadata(uri);
 
-                break;
-            case OPEN_IMPORT_FILE:
-                Log.i("onActivityResult", "open import data file");
-                if (data != null)
-                {
-                    Uri uri = data.getData();
+                showToast(success, "Export succeeded", "Export failed");
+            }
 
-                    showFileMetadata(uri);
+            if (importPath)
+            {
+                // If import, kick off the open import path.
+                openImportFile();
+            }
+            else
+            {
+                // Return to a locked state if just exporting.
+                setLockState(true);
+            }
+        }
+        else if (requestCode == OPEN_IMPORT_FILE)
+        {
+            Log.i("onActivityResult", "open import data file");
+            if (data != null)
+            {
+                Uri uri = data.getData();
 
-                    boolean success = importData(uri);
+                showFileMetadata(uri);
 
-                    showToast(success, "Import succeeded", "Import failed");
+                boolean success = importData(uri);
 
-                    // Return to a locked state.
-                    setLockState(true);
-                }
-                break;
-            default:
-                Log.e("onActivityResult", "unknown requestCode " + requestCode);
-                break;
+                showToast(success, "Import succeeded", "Import failed");
+
+                // Return to a locked state.
+                setLockState(true);
+            }
+        }
+        else
+        {
+            Log.e("onActivityResult", "unknown requestCode " + requestCode);
         }
     }
 

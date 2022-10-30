@@ -31,8 +31,8 @@ public class MediaCounterDB extends SQLiteOpenHelper
     private static final String DATABASE_NAME = "media_counter_db";
 
     // Have 2 dbs:
-    // Titles: tid, title, status, added date
-    // Episodes: tid, epid, date
+    // titles(tid INTEGER, title TEXT, status INTEGER, added date INTEGER)
+    // episodes(tid INTEGER, epNum INTEGER, date INTEGER)
     private static final String TABLE_TITLES = "titles";
 
     private static final String KEY_TID = "tid";
@@ -54,9 +54,22 @@ public class MediaCounterDB extends SQLiteOpenHelper
     private static final int UNKNOWN_MEDIA = -1;
     private static final long UNKNOWN_DATE = 0;
 
+    private SQLiteDatabase db;
+
     public MediaCounterDB(Context context)
     {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+
+        db = getWritableDatabase();
+    }
+
+    @Override
+    public synchronized void close()
+    {
+        Log.i("close", "closing database");
+        db.close();
+
+        super.close();
     }
 
     @Override
@@ -118,16 +131,12 @@ public class MediaCounterDB extends SQLiteOpenHelper
             return false;
         }
 
-        SQLiteDatabase db = this.getWritableDatabase();
-
         ContentValues values = new ContentValues();
         values.put(KEY_TITLE, md.getMediaName());
         values.put(KEY_STATUS, md.getStatus().value);
         values.put(KEY_ADDED_DATE, md.getAddedDate());
 
         db.insert(TABLE_TITLES, null, values);
-
-        db.close();
 
         return true;
     }
@@ -161,8 +170,6 @@ public class MediaCounterDB extends SQLiteOpenHelper
             return;
         }
 
-        SQLiteDatabase db = this.getWritableDatabase();
-
         ContentValues values = new ContentValues();
         values.put(KEY_TID, tid);
         values.put(KEY_EPNUM, num);
@@ -171,8 +178,6 @@ public class MediaCounterDB extends SQLiteOpenHelper
         Log.i("addEpisode", values.toString());
 
         db.insert(TABLE_EPISODES, null, values);
-
-        db.close();
     }
 
     /**
@@ -191,8 +196,6 @@ public class MediaCounterDB extends SQLiteOpenHelper
             Log.e("setStatus", "media does not exist");
             return;
         }
-
-        SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(KEY_STATUS, status.value);
@@ -231,8 +234,6 @@ public class MediaCounterDB extends SQLiteOpenHelper
             deleteEpisode(mediaName);
         }
 
-        SQLiteDatabase db = this.getWritableDatabase();
-
         db.beginTransaction();
         int rowsDeleted = db.delete(TABLE_TITLES, KEY_TID + SQL_PARAMETER, new String[]{String.valueOf(tid)});
 
@@ -246,8 +247,6 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
 
         db.endTransaction();
-
-        db.close();
     }
 
     /**
@@ -266,8 +265,6 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
 
         List<Long> epDates = getEpDates(mediaName);
-
-        SQLiteDatabase db = this.getWritableDatabase();
 
         if (!epDates.isEmpty())
         {
@@ -303,7 +300,6 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
             db.endTransaction();
         }
-        db.close();
     }
 
     /**
@@ -337,9 +333,8 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
         List<Long> epDates = new ArrayList<>();
 
-        try (SQLiteDatabase db = this.getReadableDatabase();
-             Cursor cursor = db.query(TABLE_EPISODES, EPISODES_COLUMNS, KEY_TID + SQL_PARAMETER, new String[]{String.valueOf(tid)},
-                     null, null, null, null))
+        try (Cursor cursor = db.query(TABLE_EPISODES, EPISODES_COLUMNS, KEY_TID + SQL_PARAMETER, new String[]{String.valueOf(tid)},
+                null, null, null, null))
         {
             if (cursor == null || !cursor.moveToFirst())
             {
@@ -395,8 +390,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
         List<MediaData> mdList = new ArrayList<>();
 
-        try (SQLiteDatabase db = this.getReadableDatabase();
-             Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, selection.toString(), parameters, null, null, null, null))
+        try (Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, selection.toString(), parameters, null, null, null, null))
         {
             if (cursor == null || !cursor.moveToFirst())
             {
@@ -489,8 +483,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
         Map<String, MediaCounterStatus> mediaStatus = new HashMap<>();
 
-        try (SQLiteDatabase db = this.getReadableDatabase();
-             Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, null, null, null, null, null, null))
+        try (Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, null, null, null, null, null, null))
         {
             if (cursor == null || !cursor.moveToFirst())
             {
@@ -548,9 +541,8 @@ public class MediaCounterDB extends SQLiteOpenHelper
      */
     private int getIdForMedia(String mediaName)
     {
-        try (SQLiteDatabase db = this.getReadableDatabase();
-             Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, KEY_TITLE + SQL_PARAMETER, new String[]{mediaName},
-                     null, null, null, null))
+        try (Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, KEY_TITLE + SQL_PARAMETER, new String[]{mediaName},
+                null, null, null, null))
         {
             if (cursor == null || !cursor.moveToFirst())
             {
