@@ -50,11 +50,17 @@ public class IonDataManagerTest
         mdList.add(new MediaData("First media", 100L));
         mdList.add(new MediaData("Second media", MediaCounterStatus.DROPPED, 200L));
 
-        List<Long> episodes = new ArrayList<>();
-        episodes.add(1000L);
-        episodes.add(2000L);
-        episodes.add(3000L);
-        mdList.add(new MediaData("Third media", MediaCounterStatus.ONGOING, 300L, episodes));
+        List<Long> episodesOngoing = new ArrayList<>();
+        episodesOngoing.add(1000L);
+        episodesOngoing.add(2000L);
+        episodesOngoing.add(3000L);
+        mdList.add(new MediaData("Third media", MediaCounterStatus.ONGOING, 300L, episodesOngoing));
+
+        List<Long> episodesComplete = new ArrayList<>();
+        episodesComplete.add(1500L);
+        episodesComplete.add(2500L);
+        episodesComplete.add(3500L);
+        mdList.add(new MediaData("Fourth media", MediaCounterStatus.COMPLETE, 400L, episodesComplete));
 
         return mdList;
     }

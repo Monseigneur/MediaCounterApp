@@ -11,9 +11,6 @@ import android.util.Log;
 import com.monseigneur.mediacounterapp.R;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -57,18 +54,9 @@ public class MediaCounterDB extends SQLiteOpenHelper
     private static final int UNKNOWN_MEDIA = -1;
     private static final long UNKNOWN_DATE = 0;
 
-    private static final String TAG = "MediaCounterDB";
-
-    private static final String FILENAME_PREFIX = "media_counter_backup";
-    private static final String FILENAME_EXTENSION = ".txt";
-
-    private final IDataManager dm;
-
-    public MediaCounterDB(Context context, IDataManager dm)
+    public MediaCounterDB(Context context)
     {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-
-        this.dm = dm;
     }
 
     @Override
@@ -403,7 +391,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
             i++;
         }
-        Log.i(TAG, "getMediaCounters(enum): selection [" + selection + "] params " + Arrays.toString(parameters));
+        Log.i("getMediaCounters", "getMediaCounters(enum): selection [" + selection + "] params " + Arrays.toString(parameters));
 
         List<MediaData> mdList = new ArrayList<>();
 
@@ -628,103 +616,16 @@ public class MediaCounterDB extends SQLiteOpenHelper
     }
 
     /**
-     * Generates a filename timestamp
-     *
-     * @return timestamp for a filename
-     */
-    private String fileTimeStamp()
-    {
-        long time = getCurrentDate();
-
-        Calendar date = Calendar.getInstance();
-        date.setTimeInMillis(time);
-
-        int dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
-        int month = date.get(Calendar.MONTH) + 1;       // January is 0?
-        int year = date.get(Calendar.YEAR);
-        int hour = date.get(Calendar.HOUR_OF_DAY);
-        int minute = date.get(Calendar.MINUTE);
-        int second = date.get(Calendar.SECOND);
-
-        Log.i("fileTimestamp", "DATE STRING: Y=" + year + " M=" + month + " D=" + dayOfMonth + " H=" + hour + " M=" + minute + " S=" + second);
-
-        return String.format(Locale.US, "%d%02d%02d_%02d%02d%02d", year, month, dayOfMonth, hour, minute, second);
-    }
-
-    /**
-     * Backs up the database
-     *
-     * @return true if successfully backed up, false otherwise
-     */
-    public boolean backupData()
-    {
-        File base = getBackupDirectory();
-        if (base == null)
-        {
-            Log.e("backupData", "Failed to get backup directory");
-            return false;
-        }
-
-        String fileName = FILENAME_PREFIX + "_" + fileTimeStamp() + FILENAME_EXTENSION;
-
-        try (FileOutputStream fos = new FileOutputStream(new File(base, fileName)))
-        {
-            List<MediaData> backupList = getMediaCounters();
-            return dm.writeData(fos, backupList);
-        }
-        catch (IOException e)
-        {
-            Log.e("backupData", "Caught exception when trying to write backup data " + e);
-            return false;
-        }
-    }
-
-    /**
      * Imports data into the database
      *
-     * @return true if successfully imported, false otherwise
+     * @param importList list of MediaData to import
+     * @return true if successful
      */
-    public boolean importData()
+    public boolean importData(List<MediaData> importList)
     {
-        File base = getBackupDirectory();
-        if (base == null)
-        {
-            Log.e("importData", "Failed to get backup directory");
-            return false;
-        }
-
-        try (FileOutputStream fos = new FileOutputStream(new File(base, "media_counter_backup_TEMP.txt")))
-        {
-            List<MediaData> backupList = getMediaCounters();
-            if (!dm.writeData(fos, backupList))
-            {
-                return false;
-            }
-        }
-        catch (IOException e)
-        {
-            Log.e("importData", "Caught exception when trying to write backup data " + e);
-            return false;
-        }
-
-        List<MediaData> importList = new ArrayList<>();
-
-        try (FileInputStream fis = new FileInputStream(new File(base, "media_counter_import.txt")))
-        {
-            if (!dm.readData(fis, importList))
-            {
-                return false;
-            }
-        }
-        catch (IOException e)
-        {
-            Log.e("importData", "Caught exception when trying to read import data " + e);
-            return false;
-        }
-
         if (importList == null)
         {
-            Log.e("importData", "Failed to get import data");
+            Log.e("importData", "No import data!");
             return false;
         }
 
@@ -749,32 +650,5 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
 
         return true;
-    }
-
-    /**
-     * Gets the storage directory for the backup files
-     *
-     * @return The backup storage directory
-     */
-    private File getBackupDirectory()
-    {
-        try
-        {
-            File backupDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "MediaCounterData");
-            Log.i("getBackupDirectory", "base pub dir = [" + backupDir + "]");
-            if (!backupDir.exists())
-            {
-                boolean res = backupDir.mkdirs();
-                Log.i("getBackupDirectory", "mkdir res " + res);
-            }
-
-            return backupDir;
-        }
-        catch (Exception e)
-        {
-            Log.i("getBackupDirectory", "error");
-        }
-
-        return null;
     }
 }

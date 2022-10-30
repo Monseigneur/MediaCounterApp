@@ -1,20 +1,18 @@
 package com.monseigneur.mediacounterapp.activity;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
 
 import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.databinding.MainActivityBinding;
@@ -26,11 +24,16 @@ import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 import com.monseigneur.mediacounterapp.model.MediaData;
 import com.monseigneur.mediacounterapp.viewmodel.MediaInfoViewModel;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class MediaCounterActivity extends Activity
@@ -38,15 +41,18 @@ public class MediaCounterActivity extends Activity
     // Activity message identifiers
     private static final int NEW_MEDIA_COUNTER_REQUEST = 1;
     private static final int MEDIA_INFO_STATUS_CHANGE_REQUEST = 2;
+    private static final int CREATE_BACKUP_FILE = 3;
+    private static final int CREATE_BACKUP_FILE_IMPORT = 4;
+    private static final int OPEN_IMPORT_FILE = 5;
+
     public static final String MEDIA_COUNTER_NAME = "media_name";
     public static final String MEDIA_INFO_STATUS = "media_info_status";
 
-    private static final int PERMISSION_MANIPULATE_EXTERNAL_STORAGE_REQUEST = 1;
-
     private MainActivityBinding binding;
 
-    private MediaCounterAdapter adapter;
+    private IDataManager dm;
     private MediaCounterDB db;
+    private MediaCounterAdapter adapter;
 
     private boolean incLocked;
     private Drawable defaultButtonBg;
@@ -58,12 +64,10 @@ public class MediaCounterActivity extends Activity
         binding = MainActivityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        verifyStoragePermissions(this);
-
         defaultButtonBg = binding.lockButton.getBackground();
 
-        IDataManager dm = new IonDataManager(false);
-        db = new MediaCounterDB(this, dm);
+        dm = new IonDataManager(false);
+        db = new MediaCounterDB(this);
 
         List<MediaData> mdList = db.getMediaCounters();
         Log.i("onCreate", "list = " + mdList);
@@ -93,51 +97,6 @@ public class MediaCounterActivity extends Activity
     public void onPause()
     {
         super.onPause();
-    }
-
-    /**
-     * Verify and prompt for storage permissions
-     *
-     * @param act the Activity
-     */
-    private void verifyStoragePermissions(Activity act)
-    {
-        if (!checkPermissions(act))
-        {
-            String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
-            ActivityCompat.requestPermissions(act, permissions, PERMISSION_MANIPULATE_EXTERNAL_STORAGE_REQUEST);
-        }
-    }
-
-    /**
-     * Check storage permissions
-     *
-     * @param act activity
-     * @return true if storage permissions are granted, false otherwise
-     */
-    private boolean checkPermissions(Activity act)
-    {
-        int readPermission = ActivityCompat.checkSelfPermission(act, android.Manifest.permission.READ_EXTERNAL_STORAGE);
-        int writePermission = ActivityCompat.checkSelfPermission(act, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        return ((readPermission == PackageManager.PERMISSION_GRANTED) && (writePermission == PackageManager.PERMISSION_GRANTED));
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
-    {
-        if (requestCode == PERMISSION_MANIPULATE_EXTERNAL_STORAGE_REQUEST)
-        {
-            for (int i = 0; i < permissions.length; i++)
-            {
-                Log.i("requestPermissions", "Permission " + permissions[i] + " result " + grantResults[i]);
-            }
-        }
-        else
-        {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
     }
 
     /**
@@ -215,7 +174,52 @@ public class MediaCounterActivity extends Activity
 
                 adapter.getItem(name).setStatus(newStatus);
                 adapter.update();
+                break;
+            case CREATE_BACKUP_FILE:
+            case CREATE_BACKUP_FILE_IMPORT:
+                boolean importPath = (requestCode == CREATE_BACKUP_FILE_IMPORT);
+
+                Log.i("onActivityResult", "write backup data file, importPath " + importPath);
+                if (data != null)
+                {
+                    Uri uri = data.getData();
+                    boolean success = exportData(uri);
+
+                    showFileMetadata(uri);
+
+                    showToast(success, "Export succeeded", "Export failed");
+                }
+
+                if (importPath)
+                {
+                    // If import, kick off the open import path.
+                    openImportFile();
+                }
+                else
+                {
+                    // Return to a locked state if just exporting.
+                    setLockState(true);
+                }
+
+                break;
+            case OPEN_IMPORT_FILE:
+                Log.i("onActivityResult", "open import data file");
+                if (data != null)
+                {
+                    Uri uri = data.getData();
+
+                    showFileMetadata(uri);
+
+                    boolean success = importData(uri);
+
+                    showToast(success, "Import succeeded", "Import failed");
+
+                    // Return to a locked state.
+                    setLockState(true);
+                }
+                break;
             default:
+                Log.e("onActivityResult", "unknown requestCode " + requestCode);
                 break;
         }
     }
@@ -253,11 +257,12 @@ public class MediaCounterActivity extends Activity
 
         if (id == R.id.import_data_button)
         {
-            importData();
+            // First create a backup, and then try to import.
+            createBackupFile(true);
         }
         else if (id == R.id.export_data_button)
         {
-            exportData();
+            createBackupFile(false);
         }
         else if (id == R.id.random_media_button)
         {
@@ -367,6 +372,18 @@ public class MediaCounterActivity extends Activity
         toast.show();
     }
 
+    /**
+     * Show a toast message based on a condition
+     *
+     * @param condition condition for message
+     * @param trueText  text when condition is true
+     * @param falseText text when condition is false
+     */
+    private void showToast(boolean condition, String trueText, String falseText)
+    {
+        showToast(condition ? trueText : falseText);
+    }
+
     private void showStats()
     {
         Log.i("showStats", "start!");
@@ -428,51 +445,142 @@ public class MediaCounterActivity extends Activity
         }
     }
 
-    private void importData()
+    private void openImportFile()
     {
-        if (incLocked)
-        {
-            return;
-        }
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("text/plain");
 
-        if (checkPermissions(this))
-        {
-            if (db.importData())
-            {
-                showToast("Import complete");
-            }
-            else
-            {
-                showToast("Import failed");
-            }
-        }
-        else
-        {
-            showToast("Import failed due to missing permissions");
-        }
+        startActivityForResult(intent, OPEN_IMPORT_FILE);
     }
 
-    private void exportData()
+    private void createBackupFile(boolean importPath)
     {
         if (incLocked)
         {
             return;
         }
 
-        if (checkPermissions(this))
+        String fileName = "MCB_" + fileTimeStamp() + ".txt";
+
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TITLE, fileName);
+
+        Log.i("createBackupFile", "importPath " + importPath);
+
+        startActivityForResult(intent, importPath ? CREATE_BACKUP_FILE_IMPORT : CREATE_BACKUP_FILE);
+    }
+
+    private boolean importData(Uri uri)
+    {
+        if (uri == null)
         {
-            if (db.backupData())
+            return false;
+        }
+
+        Log.i("importData", "uri " + uri.getPath());
+
+        List<MediaData> mdList = new ArrayList<>();
+        try (InputStream is = getContentResolver().openInputStream(uri))
+        {
+            if (!dm.readData(is, mdList))
             {
-                showToast("Export complete");
+                return false;
+            }
+        }
+        catch (IOException e)
+        {
+            Log.e("importData", "caught exception " + e);
+            return false;
+        }
+
+        return db.importData(mdList);
+    }
+
+    private boolean exportData(Uri uri)
+    {
+        if (uri == null)
+        {
+            return false;
+        }
+
+        Log.i("exportData", "uri " + uri.getPath());
+
+        List<MediaData> mdList = db.getMediaCounters();
+
+        if (mdList == null || mdList.isEmpty())
+        {
+            return false;
+        }
+
+        boolean success = false;
+        try (OutputStream os = getContentResolver().openOutputStream(uri))
+        {
+            success = dm.writeData(os, mdList);
+        }
+        catch (IOException e)
+        {
+            Log.e("exportData", "caught exception " + e);
+        }
+
+        return success;
+    }
+
+    private static String fileTimeStamp()
+    {
+        Calendar date = Calendar.getInstance();
+
+        int dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
+        int month = date.get(Calendar.MONTH) + 1;       // January is 0?
+        int year = date.get(Calendar.YEAR);
+        int hour = date.get(Calendar.HOUR_OF_DAY);
+        int minute = date.get(Calendar.MINUTE);
+        int second = date.get(Calendar.SECOND);
+
+        Log.i("fileTimestamp", "DATE STRING: Y=" + year + " M=" + month + " D=" + dayOfMonth + " H=" + hour + " M=" + minute + " S=" + second);
+
+        return String.format(Locale.US, "%d%02d%02d_%02d%02d%02d", year, month, dayOfMonth, hour, minute, second);
+    }
+
+    private void showFileMetadata(Uri uri)
+    {
+        // Leveraged from example in documentation:
+        // https://developer.android.com/training/data-storage/shared/documents-files#examine-metadata
+
+        if (uri == null)
+        {
+            return;
+        }
+
+        try (Cursor cursor = getContentResolver().query(uri, null, null, null, null, null))
+        {
+            if (cursor == null || !cursor.moveToFirst())
+            {
+                return;
+            }
+
+            String displayName = cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
+
+            // Size may be not exist, so check if it is null first.
+            int sizeIndex = cursor.getColumnIndexOrThrow(OpenableColumns.SIZE);
+
+            String size;
+            if (!cursor.isNull(sizeIndex))
+            {
+                size = cursor.getString(sizeIndex);
             }
             else
             {
-                showToast("Export failed");
+                size = "Unknown";
             }
+
+            Log.i("showFileMetadata", "Display name: " + displayName + " size: " + size);
         }
-        else
+        catch (Exception e)
         {
-            showToast("Export failed due to missing permissions");
+            Log.e("showFileMetadata", "caught exception " + e);
         }
     }
 }

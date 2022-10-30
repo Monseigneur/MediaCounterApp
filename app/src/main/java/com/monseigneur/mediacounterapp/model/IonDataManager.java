@@ -19,7 +19,6 @@ import com.amazon.ion.system.IonWriterBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -91,14 +90,20 @@ public class IonDataManager implements IDataManager
                 MediaCounterStatus status = MediaCounterStatus.from(statusVal);
                 long addedDate = ((IonInt) val.get(DATA_FIELD_ADDED)).longValue();
 
-                MediaData md = new MediaData(mediaName, status, addedDate);
+                // Don't set status initially so that episodes can be added without being blocked.
+                MediaData md = new MediaData(mediaName, addedDate);
 
                 IonList episodes = (IonList) val.get(DATA_FIELD_EPISODES);
                 for (IonValue epIv : episodes)
                 {
                     long epDate = ((IonInt) epIv).longValue();
-                    md.addEpisode(epDate);
+                    if (!md.addEpisode(epDate))
+                    {
+                        return false;
+                    }
                 }
+
+                md.setStatus(status);
 
                 if (VERBOSE)
                 {
