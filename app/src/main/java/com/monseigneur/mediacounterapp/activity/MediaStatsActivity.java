@@ -47,7 +47,7 @@ public class MediaStatsActivity extends Activity
         ByteArrayInputStream bis = new ByteArrayInputStream(arr);
 
         List<EpisodeData> edList = new ArrayList<>();
-        if (!dm.readData(bis, edList))
+        if (!dm.deserialize(bis, edList))
         {
             Log.i("statsActivity", "failed to decode");
         }

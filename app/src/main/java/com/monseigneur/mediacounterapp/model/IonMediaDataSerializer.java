@@ -66,7 +66,7 @@ public class IonMediaDataSerializer implements IDataSerializer<MediaData>
     }
 
     @Override
-    public boolean readData(InputStream is, List<MediaData> itemList)
+    public boolean deserialize(InputStream is, List<MediaData> itemList)
     {
         if (is == null || itemList == null)
         {
@@ -85,7 +85,7 @@ public class IonMediaDataSerializer implements IDataSerializer<MediaData>
             {
                 if (VERBOSE)
                 {
-                    Log.i("readData", "No data to read");
+                    Log.i("deserialize", "No data to read");
                 }
 
                 return false;
@@ -116,7 +116,7 @@ public class IonMediaDataSerializer implements IDataSerializer<MediaData>
 
                 if (VERBOSE)
                 {
-                    Log.i("readData", "imported " + md);
+                    Log.i("deserialize", "imported " + md);
                 }
 
                 itemList.add(md);
@@ -126,7 +126,7 @@ public class IonMediaDataSerializer implements IDataSerializer<MediaData>
         {
             if (VERBOSE)
             {
-                Log.e("readData", "caught exception " + e);
+                Log.e("deserialize", "caught exception " + e);
             }
 
             return false;
@@ -136,7 +136,7 @@ public class IonMediaDataSerializer implements IDataSerializer<MediaData>
     }
 
     @Override
-    public boolean writeData(OutputStream os, List<MediaData> itemList)
+    public boolean serialize(OutputStream os, List<MediaData> itemList)
     {
         if (os == null || itemList == null || itemList.isEmpty())
         {
@@ -172,7 +172,7 @@ public class IonMediaDataSerializer implements IDataSerializer<MediaData>
         {
             if (VERBOSE)
             {
-                Log.e("writeData", "caught exception while writing backup data " + e);
+                Log.e("serialize", "caught exception while writing backup data " + e);
             }
 
             return false;

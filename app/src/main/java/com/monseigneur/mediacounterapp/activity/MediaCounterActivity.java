@@ -398,7 +398,7 @@ public class MediaCounterActivity extends Activity
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-        if (!episodeDataSerializer.writeData(bos, epData))
+        if (!episodeDataSerializer.serialize(bos, epData))
         {
             Log.e("showStats", "failed to serialize episode data");
             return;
@@ -475,7 +475,7 @@ public class MediaCounterActivity extends Activity
         List<MediaData> mdList = new ArrayList<>();
         try (InputStream is = getContentResolver().openInputStream(uri))
         {
-            if (!mediaDataSerializer.readData(is, mdList))
+            if (!mediaDataSerializer.deserialize(is, mdList))
             {
                 return false;
             }
@@ -508,7 +508,7 @@ public class MediaCounterActivity extends Activity
         boolean success = false;
         try (OutputStream os = getContentResolver().openOutputStream(uri))
         {
-            success = mediaDataSerializer.writeData(os, mdList);
+            success = mediaDataSerializer.serialize(os, mdList);
         }
         catch (IOException e)
         {

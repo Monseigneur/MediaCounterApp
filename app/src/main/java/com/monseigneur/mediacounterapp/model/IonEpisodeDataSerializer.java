@@ -72,7 +72,7 @@ public class IonEpisodeDataSerializer implements IDataSerializer<EpisodeData>
     }
 
     @Override
-    public boolean readData(InputStream is, List<EpisodeData> itemList)
+    public boolean deserialize(InputStream is, List<EpisodeData> itemList)
     {
         if (is == null || itemList == null)
         {
@@ -91,7 +91,7 @@ public class IonEpisodeDataSerializer implements IDataSerializer<EpisodeData>
             {
                 if (VERBOSE)
                 {
-                    Log.i("readData", "No data to read");
+                    Log.i("deserialize", "No data to read");
                 }
 
                 return false;
@@ -126,7 +126,7 @@ public class IonEpisodeDataSerializer implements IDataSerializer<EpisodeData>
 
                 if (VERBOSE)
                 {
-                    Log.i("readData", "imported " + ed);
+                    Log.i("deserialize", "imported " + ed);
                 }
 
                 itemList.add(ed);
@@ -136,7 +136,7 @@ public class IonEpisodeDataSerializer implements IDataSerializer<EpisodeData>
         {
             if (VERBOSE)
             {
-                Log.e("readData", "caught exception " + e);
+                Log.e("deserialize", "caught exception " + e);
             }
 
             return false;
@@ -146,7 +146,7 @@ public class IonEpisodeDataSerializer implements IDataSerializer<EpisodeData>
     }
 
     @Override
-    public boolean writeData(OutputStream os, List<EpisodeData> itemList)
+    public boolean serialize(OutputStream os, List<EpisodeData> itemList)
     {
         if (os == null || itemList == null || itemList.isEmpty())
         {
@@ -195,7 +195,7 @@ public class IonEpisodeDataSerializer implements IDataSerializer<EpisodeData>
         {
             if (VERBOSE)
             {
-                Log.e("writeData", "caught exception while writing backup data " + e);
+                Log.e("serialize", "caught exception while writing backup data " + e);
             }
 
             return false;

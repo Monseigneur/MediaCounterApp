@@ -7,20 +7,20 @@ import java.util.List;
 public interface IDataSerializer<T>
 {
     /**
-     * Read data from input
+     * Deserialize data from an input
      *
      * @param is       input to read from
      * @param itemList list to add items to
      * @return true if successful
      */
-    boolean readData(InputStream is, List<T> itemList);
+    boolean deserialize(InputStream is, List<T> itemList);
 
     /**
-     * Write data to an output
+     * Serialize data to an output
      *
      * @param os       output to write to
      * @param itemList list of items to write
      * @return true if successful
      */
-    boolean writeData(OutputStream os, List<T> itemList);
+    boolean serialize(OutputStream os, List<T> itemList);
 }

@@ -74,7 +74,7 @@ class IonEpisodeDataSerializerTest
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         // Convert data to the serialized format.
-        assertTrue(dm.writeData(bos, originalEdList));
+        assertTrue(dm.serialize(bos, originalEdList));
 
         try
         {
@@ -89,7 +89,7 @@ class IonEpisodeDataSerializerTest
 
         // Convert back to the structured format.
         List<EpisodeData> edList = new ArrayList<>();
-        assertTrue(dm.readData(bis, edList));
+        assertTrue(dm.deserialize(bis, edList));
 
         assertEquals(originalEdList, edList);
     }
@@ -104,18 +104,18 @@ class IonEpisodeDataSerializerTest
         List<EpisodeData> edList = new ArrayList<>();
 
         // Reading data will fail if any parameters are null.
-        assertFalse(dm.readData(null, null));
-        assertFalse(dm.readData(bis, null));
-        assertFalse(dm.readData(null, edList));
-        assertTrue(dm.readData(bis, edList));
+        assertFalse(dm.deserialize(null, null));
+        assertFalse(dm.deserialize(bis, null));
+        assertFalse(dm.deserialize(null, edList));
+        assertTrue(dm.deserialize(bis, edList));
 
         // Reading bad data should fail.
         ByteArrayInputStream bad = new ByteArrayInputStream("bad data".getBytes(StandardCharsets.UTF_8));
-        assertFalse(dm.readData(bad, edList));
+        assertFalse(dm.deserialize(bad, edList));
 
         // Reading data that would produce empty results should fail.
         ByteArrayInputStream empty = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
-        assertFalse(dm.readData(empty, edList));
+        assertFalse(dm.deserialize(empty, edList));
     }
 
     @ParameterizedTest
@@ -128,12 +128,12 @@ class IonEpisodeDataSerializerTest
         List<EpisodeData> edList = buildList();
 
         // Writing data will fail if any parameters are null.
-        assertFalse(dm.writeData(null, null));
-        assertFalse(dm.writeData(bos, null));
-        assertFalse(dm.writeData(null, edList));
-        assertTrue(dm.writeData(bos, edList));
+        assertFalse(dm.serialize(null, null));
+        assertFalse(dm.serialize(bos, null));
+        assertFalse(dm.serialize(null, edList));
+        assertTrue(dm.serialize(bos, edList));
 
         // Writing an empty list should fail.
-        assertFalse(dm.writeData(bos, new ArrayList<>()));
+        assertFalse(dm.serialize(bos, new ArrayList<>()));
     }
 }
