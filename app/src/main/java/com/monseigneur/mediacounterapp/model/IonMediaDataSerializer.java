@@ -22,11 +22,20 @@ import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.List;
 
-public class IonDataManager implements IDataManager
+public class IonMediaDataSerializer implements IDataSerializer<MediaData>
 {
     public static boolean VERBOSE = true;
 
-    // Constants for data import / export
+    // Ion structure:
+    // [{
+    //      title:<NAME>,
+    //      status:<STATUS>,
+    //      added_date:<ADDED_DATE>
+    //      episodes:[<EP_1_DATE>, <EP_2_DATE>, ...]
+    //  },
+    //  ...]
+
+    // Constants for data serialization
     private static final String DATA_FIELD_TITLE = "title";
     private static final String DATA_FIELD_STATUS = "status";
     private static final String DATA_FIELD_ADDED = "added_date";
@@ -41,7 +50,7 @@ public class IonDataManager implements IDataManager
      *
      * @param writeBinary whether to write data in binary or text.
      */
-    public IonDataManager(boolean writeBinary)
+    public IonMediaDataSerializer(boolean writeBinary)
     {
         this.ionSys = IonSystemBuilder.standard().build();
         this.readerBuilder = IonReaderBuilder.standard();
@@ -57,14 +66,14 @@ public class IonDataManager implements IDataManager
     }
 
     @Override
-    public boolean readData(InputStream is, List<MediaData> mdList)
+    public boolean readData(InputStream is, List<MediaData> itemList)
     {
-        if (is == null || mdList == null)
+        if (is == null || itemList == null)
         {
             return false;
         }
 
-        mdList.clear();
+        itemList.clear();
 
         try (IonReader reader = readerBuilder.build(is))
         {
@@ -110,7 +119,7 @@ public class IonDataManager implements IDataManager
                     Log.i("readData", "imported " + md);
                 }
 
-                mdList.add(md);
+                itemList.add(md);
             }
         }
         catch (Exception e)
@@ -123,20 +132,20 @@ public class IonDataManager implements IDataManager
             return false;
         }
 
-        return !mdList.isEmpty();
+        return !itemList.isEmpty();
     }
 
     @Override
-    public boolean writeData(OutputStream os, List<MediaData> mdList)
+    public boolean writeData(OutputStream os, List<MediaData> itemList)
     {
-        if (os == null || mdList == null || mdList.isEmpty())
+        if (os == null || itemList == null || itemList.isEmpty())
         {
             return false;
         }
 
         IonList backupData = ionSys.newEmptyList();
 
-        for (MediaData md : mdList)
+        for (MediaData md : itemList)
         {
             IonStruct media = ionSys.newNullStruct();
             media.put(DATA_FIELD_TITLE).newString(md.getMediaName());

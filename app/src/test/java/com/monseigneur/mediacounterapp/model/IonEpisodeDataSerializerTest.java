@@ -17,64 +17,62 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IonDataManagerTest
+class IonEpisodeDataSerializerTest
 {
     public static String validInput = "[" +
-            "{title:\"First media\"," +
+            "{media_name:\"First media\"," +
+            "ep_num:1," +
             "status:0," +
-            "added_date:10," +
-            "episodes:[]" +
+            "episode_date:100" +
             "}," +
-            "{title:\"Second media\"," +
+            "{media_name:\"First media\"," +
+            "ep_num:2," +
             "status:1," +
-            "added_date:20," +
-            "episodes:[25, 30, 35]}" +
+            "episode_date:200" +
+            "}," +
+            "{media_name:\"Second media\"," +
+            "ep_num:1," +
+            "status:1," +
+            "episode_date:300" +
+            "}" +
             "]";
 
     @BeforeEach
-    public void setUp()
+    void setUp()
     {
-        IonDataManager.VERBOSE = false;
+        IonEpisodeDataSerializer.VERBOSE = false;
     }
 
     @AfterEach
-    public void tearDown()
+    void tearDown()
     {
-        IonDataManager.VERBOSE = true;
+        IonEpisodeDataSerializer.VERBOSE = true;
     }
 
-    private List<MediaData> buildList()
+    private List<EpisodeData> buildList()
     {
-        List<MediaData> mdList = new ArrayList<>();
+        List<EpisodeData> edList = new ArrayList<>();
 
-        mdList.add(new MediaData("First media", 100L));
-        mdList.add(new MediaData("Second media", MediaCounterStatus.DROPPED, 200L));
+        edList.add(new EpisodeData("First media", 1, 100L, MediaCounterStatus.NEW));
+        edList.add(new EpisodeData("First media", 2, 200L, MediaCounterStatus.ONGOING));
+        edList.add(new EpisodeData("Second media", 1, 200L, MediaCounterStatus.DROPPED));
+        edList.add(new EpisodeData("Third media", 1, 300L, MediaCounterStatus.NEW));
+        edList.add(new EpisodeData("Third media", 2, 400L, MediaCounterStatus.NEW));
+        edList.add(new EpisodeData("Third media", 3, 500L, MediaCounterStatus.COMPLETE));
 
-        List<Long> episodesOngoing = new ArrayList<>();
-        episodesOngoing.add(1000L);
-        episodesOngoing.add(2000L);
-        episodesOngoing.add(3000L);
-        mdList.add(new MediaData("Third media", MediaCounterStatus.ONGOING, 300L, episodesOngoing));
-
-        List<Long> episodesComplete = new ArrayList<>();
-        episodesComplete.add(1500L);
-        episodesComplete.add(2500L);
-        episodesComplete.add(3500L);
-        mdList.add(new MediaData("Fourth media", MediaCounterStatus.COMPLETE, 400L, episodesComplete));
-
-        return mdList;
+        return edList;
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     public void readAndWriteData(boolean writeBinary)
     {
-        List<MediaData> originalMdList = buildList();
-        IDataManager dm = new IonDataManager(writeBinary);
+        List<EpisodeData> originalEdList = buildList();
+        IDataSerializer<EpisodeData> dm = new IonEpisodeDataSerializer(writeBinary);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         // Convert data to the serialized format.
-        assertTrue(dm.writeData(bos, originalMdList));
+        assertTrue(dm.writeData(bos, originalEdList));
 
         try
         {
@@ -88,50 +86,50 @@ public class IonDataManagerTest
         ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
 
         // Convert back to the structured format.
-        List<MediaData> mdList = new ArrayList<>();
-        assertTrue(dm.readData(bis, mdList));
+        List<EpisodeData> edList = new ArrayList<>();
+        assertTrue(dm.readData(bis, edList));
 
-        assertEquals(originalMdList, mdList);
+        assertEquals(originalEdList, edList);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     public void readDataConditions(boolean writeBinary)
     {
-        IDataManager dm = new IonDataManager(writeBinary);
+        IDataSerializer<EpisodeData> dm = new IonEpisodeDataSerializer(writeBinary);
 
         ByteArrayInputStream bis = new ByteArrayInputStream(validInput.getBytes(StandardCharsets.UTF_8));
-        List<MediaData> mdList = new ArrayList<>();
+        List<EpisodeData> edList = new ArrayList<>();
 
         // Reading data will fail if any parameters are null.
         assertFalse(dm.readData(null, null));
         assertFalse(dm.readData(bis, null));
-        assertFalse(dm.readData(null, mdList));
-        assertTrue(dm.readData(bis, mdList));
+        assertFalse(dm.readData(null, edList));
+        assertTrue(dm.readData(bis, edList));
 
         // Reading bad data should fail.
         ByteArrayInputStream bad = new ByteArrayInputStream("bad data".getBytes(StandardCharsets.UTF_8));
-        assertFalse(dm.readData(bad, mdList));
+        assertFalse(dm.readData(bad, edList));
 
         // Reading data that would produce empty results should fail.
         ByteArrayInputStream empty = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
-        assertFalse(dm.readData(empty, mdList));
+        assertFalse(dm.readData(empty, edList));
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     public void writeDataConditions(boolean writeBinary)
     {
-        IDataManager dm = new IonDataManager(writeBinary);
+        IDataSerializer<EpisodeData> dm = new IonEpisodeDataSerializer(writeBinary);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        List<MediaData> mdList = buildList();
+        List<EpisodeData> edList = buildList();
 
         // Writing data will fail if any parameters are null.
         assertFalse(dm.writeData(null, null));
         assertFalse(dm.writeData(bos, null));
-        assertFalse(dm.writeData(null, mdList));
-        assertTrue(dm.writeData(bos, mdList));
+        assertFalse(dm.writeData(null, edList));
+        assertTrue(dm.writeData(bos, edList));
 
         // Writing an empty list should fail.
         assertFalse(dm.writeData(bos, new ArrayList<>()));

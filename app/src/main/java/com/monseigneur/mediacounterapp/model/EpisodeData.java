@@ -1,6 +1,7 @@
 package com.monseigneur.mediacounterapp.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Created by Milan on 8/5/2016.
@@ -69,4 +70,26 @@ public class EpisodeData implements Comparable<EpisodeData>, Serializable
                 '}';
     }
 
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o)
+        {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+
+        EpisodeData that = (EpisodeData) o;
+        return epNum == that.epNum && epDate == that.epDate && Objects.equals(mediaName, that.mediaName) && mediaStatus == that.mediaStatus;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(mediaName, epNum, epDate, mediaStatus);
+    }
 }

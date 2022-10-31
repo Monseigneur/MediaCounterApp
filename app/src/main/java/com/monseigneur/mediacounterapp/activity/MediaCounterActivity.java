@@ -17,13 +17,15 @@ import android.widget.Toast;
 import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.databinding.MainActivityBinding;
 import com.monseigneur.mediacounterapp.model.EpisodeData;
-import com.monseigneur.mediacounterapp.model.IDataManager;
-import com.monseigneur.mediacounterapp.model.IonDataManager;
+import com.monseigneur.mediacounterapp.model.IDataSerializer;
+import com.monseigneur.mediacounterapp.model.IonEpisodeDataSerializer;
+import com.monseigneur.mediacounterapp.model.IonMediaDataSerializer;
 import com.monseigneur.mediacounterapp.model.MediaCounterDB;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 import com.monseigneur.mediacounterapp.model.MediaData;
 import com.monseigneur.mediacounterapp.viewmodel.MediaInfoViewModel;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,10 +33,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 public class MediaCounterActivity extends Activity
 {
@@ -50,7 +50,8 @@ public class MediaCounterActivity extends Activity
 
     private MainActivityBinding binding;
 
-    private IDataManager dm;
+    private IDataSerializer<MediaData> mediaDataSerializer;
+    private IDataSerializer<EpisodeData> episodeDataSerializer;
     private MediaCounterDB db;
     private MediaCounterAdapter adapter;
 
@@ -66,7 +67,8 @@ public class MediaCounterActivity extends Activity
 
         defaultButtonBg = binding.lockButton.getBackground();
 
-        dm = new IonDataManager(false);
+        mediaDataSerializer = new IonMediaDataSerializer(false);
+        episodeDataSerializer = new IonEpisodeDataSerializer(MediaStatsActivity.STATS_USE_BINARY_SERIALIZATION);
         db = new MediaCounterDB(this);
 
         List<MediaData> mdList = db.getMediaCounters();
@@ -391,63 +393,46 @@ public class MediaCounterActivity extends Activity
 
     private void showStats()
     {
-        Log.i("showStats", "start!");
         List<EpisodeData> epData = db.getEpisodeData();
         Log.i("showStats", "epData size " + epData.size());
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+        if (!episodeDataSerializer.writeData(bos, epData))
+        {
+            Log.e("showStats", "failed to serialize episode data");
+            return;
+        }
+
+        try
+        {
+            bos.flush();
+        }
+        catch (IOException e)
+        {
+            Log.e("showStats", "caught exception " + e);
+            return;
+        }
 
         Intent statsIntent = new Intent(this, MediaStatsActivity.class);
         Bundle b = new Bundle();
 
-        try
-        {
-            List<Long> edList = new ArrayList<>();
-            Map<String, Integer> namesMap = new HashMap<>();
+        b.putSerializable(MediaStatsActivity.EPISODE_DATA, (Serializable) bos.toByteArray());
 
-            int nameIndex = 1;
-            for (EpisodeData ed : epData)
-            {
-                int nameKey;
-                if (namesMap.containsKey(ed.getMediaName()))
-                {
-                    nameKey = namesMap.get(ed.getMediaName());
-                }
-                else
-                {
-                    nameKey = nameIndex;
-                    nameIndex++;
+        statsIntent.putExtras(b);
+        showDataSize(b);
 
-                    namesMap.put(ed.getMediaName(), nameKey);
-                }
+        startActivity(statsIntent);
+    }
 
-                edList.add((long) nameKey);
-                edList.add((long) ed.getEpNum());
-                edList.add(ed.getEpDate());
-                edList.add((long) ed.getMediaStatus().value);
-            }
+    private void showDataSize(Bundle b)
+    {
+        Parcel p = Parcel.obtain();
+        p.writeBundle(b);
 
-            // Create a list of the names to be used in the reverse mapping
-            Map<Integer, String> reverseNameMap = new HashMap<>();
+        Log.i("showDataSize", "data size: " + p.dataSize());
 
-            for (String name : namesMap.keySet())
-            {
-                reverseNameMap.put(namesMap.get(name), name);
-            }
-
-            b.putSerializable(MediaStatsActivity.MEDIA_STATS, (Serializable) edList);
-            b.putSerializable(MediaStatsActivity.MEDIA_NAMES, (Serializable) reverseNameMap);
-            statsIntent.putExtras(b);
-
-            Parcel p = Parcel.obtain();
-            p.writeBundle(b);
-            Log.i("showStats", "size2 " + p.dataSize() + " num keys " + reverseNameMap.keySet().size());
-            p.recycle();
-
-            startActivity(statsIntent);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        p.recycle();
     }
 
     private void openImportFile()
@@ -490,7 +475,7 @@ public class MediaCounterActivity extends Activity
         List<MediaData> mdList = new ArrayList<>();
         try (InputStream is = getContentResolver().openInputStream(uri))
         {
-            if (!dm.readData(is, mdList))
+            if (!mediaDataSerializer.readData(is, mdList))
             {
                 return false;
             }
@@ -523,7 +508,7 @@ public class MediaCounterActivity extends Activity
         boolean success = false;
         try (OutputStream os = getContentResolver().openOutputStream(uri))
         {
-            success = dm.writeData(os, mdList);
+            success = mediaDataSerializer.writeData(os, mdList);
         }
         catch (IOException e)
         {

@@ -8,20 +8,21 @@ import android.util.Log;
 import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.databinding.MediaStatsActivityBinding;
 import com.monseigneur.mediacounterapp.model.EpisodeData;
-import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
+import com.monseigneur.mediacounterapp.model.IDataSerializer;
+import com.monseigneur.mediacounterapp.model.IonEpisodeDataSerializer;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Milan on 8/5/2016.
  */
 public class MediaStatsActivity extends Activity
 {
-    public static final String MEDIA_STATS = "media_stats";
-    public static final String MEDIA_NAMES = "media_names";
+    public static final String EPISODE_DATA = "episode_date";
+
+    public static final boolean STATS_USE_BINARY_SERIALIZATION = true;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -31,39 +32,30 @@ public class MediaStatsActivity extends Activity
         MediaStatsActivityBinding binding = MediaStatsActivityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-
         Intent i = getIntent();
         Bundle b = i.getExtras();
 
-        Log.i("statsActivity", "oncreate");
+        Log.i("statsActivity", "onCreate");
 
-        List<EpisodeData> edList = new ArrayList<>();
-        List<Long> lData = new ArrayList<>();
-        Map<Integer, String> nameData = new HashMap<>();
-
+        byte[] arr = null;
         if (b != null)
         {
-            try
-            {
-                lData = (List<Long>) b.getSerializable(MEDIA_STATS);
-                nameData = (Map<Integer, String>) b.getSerializable(MEDIA_NAMES);
-            }
-            catch (Exception e)
-            {
-                Log.i("onCreate", "Unable to deserialize");
-            }
+            arr = (byte[]) b.getSerializable(EPISODE_DATA);
         }
 
-        // For the best performance, the data comes across as a list of Longs: [name ID, episode number, date, status]
-        for (int j = 0; j < lData.size(); j += 4)
+        IDataSerializer<EpisodeData> dm = new IonEpisodeDataSerializer(STATS_USE_BINARY_SERIALIZATION);
+        ByteArrayInputStream bis = new ByteArrayInputStream(arr);
+
+        List<EpisodeData> edList = new ArrayList<>();
+        if (!dm.readData(bis, edList))
         {
-            String name = nameData.get(lData.get(j).intValue());
-            edList.add(new EpisodeData(name, lData.get(j + 1).intValue(), lData.get(j + 2), MediaCounterStatus.from(lData.get(j + 3).intValue())));
+            Log.i("statsActivity", "failed to decode");
         }
 
-        Log.i("statsActivity", edList.toString());
+        Log.i("statsActivity", "num episodes: " + edList.size());
 
-        binding.mediaStatsTotalLabel.setText("Total episodes: " + edList.size());
+        String text = "Total episodes: " + edList.size();
+        binding.mediaStatsTotalLabel.setText(text);
 
         MediaStatsAdapter adapter = new MediaStatsAdapter(this, R.layout.media_stats_list_entry, edList);
 
