@@ -19,23 +19,25 @@ import java.util.List;
 
 class IonEpisodeDataSerializerTest
 {
-    public static String validInput = "[" +
-            "{media_name:\"First media\"," +
+    public static String validInput = "{" +
+            "names:[\"First media\", \"Second media\"]," +
+            "data:[" +
+            "{media_name_idx:0," +
             "ep_num:1," +
             "status:0," +
             "episode_date:100" +
             "}," +
-            "{media_name:\"First media\"," +
+            "{media_name_idx:0," +
             "ep_num:2," +
             "status:1," +
             "episode_date:200" +
             "}," +
-            "{media_name:\"Second media\"," +
+            "{media_name_idx:1," +
             "ep_num:1," +
             "status:1," +
             "episode_date:300" +
             "}" +
-            "]";
+            "]}";
 
     @BeforeEach
     void setUp()

@@ -19,24 +19,30 @@ import com.amazon.ion.system.IonWriterBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class IonEpisodeDataSerializer implements IDataSerializer<EpisodeData>
 {
     public static boolean VERBOSE = true;
 
-    // Ion structure:
-    // [{
-    //      media_name:<NAME>,
-    //      ep_num:<EP_NUM>,
-    //      status:<STATUS>
-    //      episode_date:<DATE>
-    //  },
-    //  ...]
+    // Ion structure v2:
+    // {
+    //      names:[<NAME_1>, <NAME_2>, ...],
+    //      data:[{
+    //                media_name_idx:<NAME_IDX>,
+    //                ep_num:<EP_NUM>,
+    //                status:<STATUS>
+    //                episode_date:<DATE>
+    //            },
+    //            ...]
 
     // Constants for data serialization
-    private static final String DATA_FIELD_NAME = "media_name";
+    private static final String DATA_FIELD_NAME_LIST = "names";
+    private static final String DATA_FIELD_DATA_LIST = "data";
+    private static final String DATA_FIELD_NAME_IDX = "media_name_idx";
     private static final String DATA_FIELD_EPNUM = "ep_num";
     private static final String DATA_FIELD_STATUS = "status";
     private static final String DATA_FIELD_EPDATE = "episode_date";
@@ -79,9 +85,9 @@ public class IonEpisodeDataSerializer implements IDataSerializer<EpisodeData>
         {
             Iterator<IonValue> iter = ionSys.iterate(reader);
 
-            IonList elements = (IonList) iter.next();
+            IonStruct data = (IonStruct) iter.next();
 
-            if (elements == null)
+            if (data == null)
             {
                 if (VERBOSE)
                 {
@@ -91,10 +97,26 @@ public class IonEpisodeDataSerializer implements IDataSerializer<EpisodeData>
                 return false;
             }
 
-            for (IonValue iv : elements)
+            IonList nameList = (IonList) data.get(DATA_FIELD_NAME_LIST);
+            IonList dataList = (IonList) data.get(DATA_FIELD_DATA_LIST);
+
+            if (nameList == null || dataList == null)
+            {
+                return false;
+            }
+
+            HashMap<Integer, String> reverseNameMap = new HashMap<>();
+
+            for (int i = 0; i < nameList.size(); i++)
+            {
+                reverseNameMap.put(i, ((IonText) nameList.get(i)).stringValue());
+            }
+
+            for (IonValue iv : dataList)
             {
                 IonStruct val = (IonStruct) iv;
-                String mediaName = ((IonText) val.get(DATA_FIELD_NAME)).stringValue();
+                int nameIdx = ((IonInt) val.get(DATA_FIELD_NAME_IDX)).intValue();
+                String mediaName = reverseNameMap.get(nameIdx);
                 int epNum = ((IonInt) val.get(DATA_FIELD_EPNUM)).intValue();
                 int statusVal = ((IonInt) val.get(DATA_FIELD_STATUS)).intValue();
                 MediaCounterStatus status = MediaCounterStatus.from(statusVal);
@@ -131,22 +153,43 @@ public class IonEpisodeDataSerializer implements IDataSerializer<EpisodeData>
             return false;
         }
 
-        IonList backupData = ionSys.newEmptyList();
+        Map<String, Integer> nameMap = new HashMap<>();
+
+        IonList nameList = ionSys.newEmptyList();
+        IonList dataList = ionSys.newEmptyList();
 
         for (EpisodeData ed : itemList)
         {
+            Integer nameIdx;
+            if (!nameMap.containsKey(ed.getMediaName()))
+            {
+                nameIdx = nameList.size();
+
+                nameList.add(ionSys.newString(ed.getMediaName()));
+                nameMap.put(ed.getMediaName(), nameIdx);
+            }
+            else
+            {
+                nameIdx = nameMap.get(ed.getMediaName());
+            }
+
             IonStruct episode = ionSys.newNullStruct();
-            episode.put(DATA_FIELD_NAME).newString(ed.getMediaName());
+            episode.put(DATA_FIELD_NAME_IDX).newInt(nameIdx);
             episode.put(DATA_FIELD_EPNUM).newInt(ed.getEpNum());
             episode.put(DATA_FIELD_STATUS).newInt(ed.getMediaStatus().value);
             episode.put(DATA_FIELD_EPDATE).newInt(ed.getEpDate());
 
-            backupData.add(episode);
+            dataList.add(episode);
         }
+
+        IonStruct data = ionSys.newNullStruct();
+
+        data.put(DATA_FIELD_NAME_LIST, nameList);
+        data.put(DATA_FIELD_DATA_LIST, dataList);
 
         try (IonWriter writer = writerBuilder.build(os))
         {
-            backupData.writeTo(writer);
+            data.writeTo(writer);
         }
         catch (IOException e)
         {
