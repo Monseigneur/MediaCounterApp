@@ -49,14 +49,12 @@ public class MediaInfoActivity extends Activity
         name = viewModel.mediaName;
         binding.mediaInfoName.setText(name);
 
-        String addedDate = MediaCounterDB.dateString(this, viewModel.addedDate);
+        String addedDate = MediaCounterDB.dateString(viewModel.addedDate);
         binding.mediaInfoAddedDate.setText("Added: " + addedDate);
 
         binding.mediaInfoCount.setText(String.valueOf(viewModel.epDates.size()));
 
-        binding.mediaInfoStatusButton.setOnClickListener(view -> {
-            changeStatus(view);
-        });
+        binding.mediaInfoStatusButton.setOnClickListener(this::changeStatus);
 
         currentStatus = viewModel.status;
         // Set the initial state
@@ -145,7 +143,6 @@ public class MediaInfoActivity extends Activity
     {
         private final String TAG = "MediaInfoEpisodeAdapter";
 
-        private final Context context;
         private final LayoutInflater inflater;
         private final int resource;
 
@@ -153,7 +150,7 @@ public class MediaInfoActivity extends Activity
         {
             super(c, R.layout.media_info_list_entry, epDates);
             Log.i(TAG, "Constructor: " + R.layout.media_info_list_entry + " " + epDates);
-            context = c;
+
             inflater = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             resource = R.layout.media_info_list_entry;
         }
@@ -165,11 +162,7 @@ public class MediaInfoActivity extends Activity
             if (convertView == null)
             {
                 convertView = inflater.inflate(resource, parent, false);
-
-                vh = new ViewHolder();
-
-                vh.name = convertView.findViewById(R.id.episode_number);
-                vh.count = convertView.findViewById(R.id.episode_date);
+                vh = new ViewHolder(convertView);
 
                 convertView.setTag(vh);
             }
@@ -180,11 +173,7 @@ public class MediaInfoActivity extends Activity
 
             long date = getItem(position);
 
-            TextView name = vh.name;
-            name.setText(String.valueOf(position + 1));
-
-            TextView count = vh.count;
-            count.setText(String.valueOf(MediaCounterDB.dateString(context, date)));
+            vh.setData(position, date);
 
             return convertView;
         }
@@ -192,8 +181,20 @@ public class MediaInfoActivity extends Activity
         // ViewHolder pattern to increase Adapter performance
         private static class ViewHolder
         {
-            TextView name;
-            TextView count;
+            private final TextView name;
+            private final TextView count;
+
+            ViewHolder(View view)
+            {
+                name = view.findViewById(R.id.episode_number);
+                count = view.findViewById(R.id.episode_date);
+            }
+
+            public void setData(int position, long date)
+            {
+                name.setText(String.valueOf(position + 1));
+                count.setText(MediaCounterDB.dateString(date));
+            }
         }
     }
 }

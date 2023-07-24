@@ -47,10 +47,7 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
         if (convertView == null)
         {
             convertView = inflater.inflate(resource, parent, false);
-            vh = new ViewHolder();
-
-            vh.name = convertView.findViewById(R.id.name_label);
-            vh.count = convertView.findViewById(R.id.count_label);
+            vh = new ViewHolder(convertView);
 
             convertView.setTag(vh);
         }
@@ -61,31 +58,7 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
 
         MediaData md = getItem(position);
 
-        TextView name = vh.name;
-        name.setText(md.getMediaName());
-
-        int nameColor;
-        switch (md.getStatus())
-        {
-            default:
-            case NEW:
-                nameColor = Color.WHITE;
-                break;
-            case ONGOING:
-                nameColor = Color.YELLOW;
-                break;
-            case COMPLETE:
-                nameColor = Color.GREEN;
-                break;
-            case DROPPED:
-                nameColor = Color.RED;
-                break;
-        }
-
-        name.setTextColor(nameColor);
-
-        TextView count = vh.count;
-        count.setText(String.valueOf(md.getCount()));
+        vh.setData(md);
 
         return convertView;
     }
@@ -165,7 +138,40 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
     // ViewHolder pattern to increase Adapter performance
     private static class ViewHolder
     {
-        TextView name;
-        TextView count;
+        private final TextView name;
+        private final TextView count;
+
+        ViewHolder(View view)
+        {
+            name = view.findViewById(R.id.name_label);
+            count = view.findViewById(R.id.count_label);
+        }
+
+        public void setData(MediaData md)
+        {
+            name.setText(md.getMediaName());
+
+            int nameColor;
+            switch (md.getStatus())
+            {
+                default:
+                case NEW:
+                    nameColor = Color.WHITE;
+                    break;
+                case ONGOING:
+                    nameColor = Color.YELLOW;
+                    break;
+                case COMPLETE:
+                    nameColor = Color.GREEN;
+                    break;
+                case DROPPED:
+                    nameColor = Color.RED;
+                    break;
+            }
+
+            name.setTextColor(nameColor);
+
+            count.setText(String.valueOf(md.getCount()));
+        }
     }
 }

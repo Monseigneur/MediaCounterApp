@@ -580,15 +580,14 @@ public class MediaCounterDB extends SQLiteOpenHelper
     /**
      * Converts a millisecond time into a date string
      *
-     * @param c   context
      * @param val millisecond time
      * @return the date string for the given time
      */
-    public static String dateString(Context c, long val)
+    public static String dateString(long val)
     {
         if (val == MediaCounterDB.UNKNOWN_DATE)
         {
-            return c.getString(R.string.unknown_date);
+            return "Unknown date";
         }
         else
         {

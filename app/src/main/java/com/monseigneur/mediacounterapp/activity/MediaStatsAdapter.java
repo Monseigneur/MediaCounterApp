@@ -19,14 +19,12 @@ import java.util.List;
  */
 public class MediaStatsAdapter extends BaseAdapter
 {
-    private final Context context;
     private final LayoutInflater inflater;
     private final int resource;
     private final List<EpisodeData> edList;
 
     public MediaStatsAdapter(Context c, int r, List<EpisodeData> edl)
     {
-        context = c;
         inflater = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         resource = r;
 
@@ -58,12 +56,7 @@ public class MediaStatsAdapter extends BaseAdapter
         if (convertView == null)
         {
             convertView = inflater.inflate(resource, parent, false);
-
-            vh = new ViewHolder();
-
-            vh.num = convertView.findViewById(R.id.stats_episode_number);
-            vh.name = convertView.findViewById(R.id.stats_media_name);
-            vh.date = convertView.findViewById(R.id.stats_episode_date);
+            vh = new ViewHolder(convertView);
 
             convertView.setTag(vh);
         }
@@ -74,34 +67,7 @@ public class MediaStatsAdapter extends BaseAdapter
 
         EpisodeData ed = (EpisodeData) getItem(position);
 
-        int textColor;
-        switch (ed.getMediaStatus())
-        {
-            case COMPLETE:
-                textColor = Color.GREEN;
-                break;
-            case DROPPED:
-                textColor = Color.RED;
-                break;
-            case ONGOING:
-                textColor = Color.YELLOW;
-                break;
-            default:
-                textColor = Color.WHITE;
-                break;
-        }
-
-        TextView num = vh.num;
-        num.setText(String.valueOf(ed.getEpNum()));
-        num.setTextColor(textColor);
-
-        TextView name = vh.name;
-        name.setText(ed.getMediaName());
-        name.setTextColor(textColor);
-
-        TextView date = vh.date;
-        date.setText(String.valueOf(MediaCounterDB.dateString(context, ed.getEpDate())));
-        date.setTextColor(textColor);
+        vh.setData(ed);
 
         return convertView;
     }
@@ -120,8 +86,44 @@ public class MediaStatsAdapter extends BaseAdapter
     // ViewHolder pattern to increase Adapter performance
     private static class ViewHolder
     {
-        TextView num;
-        TextView name;
-        TextView date;
+        private final TextView num;
+        private final TextView name;
+        private final TextView date;
+
+        public ViewHolder(View view)
+        {
+            num = view.findViewById(R.id.stats_episode_number);
+            name = view.findViewById(R.id.stats_media_name);
+            date = view.findViewById(R.id.stats_episode_date);
+        }
+
+        public void setData(EpisodeData ed)
+        {
+            int textColor;
+            switch (ed.getMediaStatus())
+            {
+                case COMPLETE:
+                    textColor = Color.GREEN;
+                    break;
+                case DROPPED:
+                    textColor = Color.RED;
+                    break;
+                case ONGOING:
+                    textColor = Color.YELLOW;
+                    break;
+                default:
+                    textColor = Color.WHITE;
+                    break;
+            }
+
+            num.setText(String.valueOf(ed.getEpNum()));
+            num.setTextColor(textColor);
+
+            name.setText(ed.getMediaName());
+            name.setTextColor(textColor);
+
+            date.setText(MediaCounterDB.dateString(ed.getEpDate()));
+            date.setTextColor(textColor);
+        }
     }
 }
