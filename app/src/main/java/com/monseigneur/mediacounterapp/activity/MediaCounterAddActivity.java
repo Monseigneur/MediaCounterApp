@@ -10,7 +10,8 @@ import com.monseigneur.mediacounterapp.databinding.MediaCounterAddActivityBindin
 /**
  * Created by Milan on 5/21/2016.
  */
-public class MediaCounterAddActivity extends Activity {
+public class MediaCounterAddActivity extends Activity
+{
     private MediaCounterAddActivityBinding binding;
 
     @Override
@@ -20,17 +21,15 @@ public class MediaCounterAddActivity extends Activity {
 
         binding = MediaCounterAddActivityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-    }
 
-    public void addNewMediaCounter(View view)
-    {
-        Intent result = new Intent();
+        binding.addMediaButton.setOnClickListener(view -> {
+            Intent result = new Intent();
 
-        String mediaName = binding.mediaName.getText().toString();
+            String mediaName = binding.mediaName.getText().toString();
+            result.putExtra(MediaCounterActivity.MEDIA_COUNTER_NAME, mediaName);
 
-        result.putExtra(MediaCounterActivity.MEDIA_COUNTER_NAME, mediaName);
-
-        setResult(Activity.RESULT_OK, result);
-        finish();
+            setResult(Activity.RESULT_OK, result);
+            finish();
+        });
     }
 }

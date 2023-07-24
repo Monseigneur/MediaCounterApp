@@ -54,6 +54,10 @@ public class MediaInfoActivity extends Activity
 
         binding.mediaInfoCount.setText(String.valueOf(viewModel.epDates.size()));
 
+        binding.mediaInfoStatusButton.setOnClickListener(view -> {
+            changeStatus(view);
+        });
+
         currentStatus = viewModel.status;
         // Set the initial state
         setButtonText();
@@ -89,12 +93,7 @@ public class MediaInfoActivity extends Activity
         binding.mediaInfoStatusButton.setText(textId);
     }
 
-    /**
-     * Changes the status
-     *
-     * @param view view
-     */
-    public void changeStatus(View view)
+    private void changeStatus(View view)
     {
         Log.i(TAG, "changeStatus: changing status");
 

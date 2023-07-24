@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent">
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
 
     <TextView
         android:layout_width="fill_parent"
@@ -11,7 +11,10 @@
         android:paddingEnd="@dimen/edge_padding"
         android:text="@string/add_new_media_label"
         android:textAppearance="?android:attr/textAppearanceLarge" />
-    <Space android:layout_width="fill_parent" android:layout_height="@dimen/space_height"/>
+
+    <Space
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/space_height" />
 
     <EditText
         android:id="@+id/media_name"
@@ -23,10 +26,11 @@
         android:inputType="text"
         android:paddingStart="@dimen/edge_padding"
         android:paddingEnd="@dimen/edge_padding" />
+
     <Button
+        android:id="@+id/add_media_button"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/add_new_media_button"
-        android:onClick="addNewMediaCounter"/>
+        android:text="@string/add_new_media_button" />
 </LinearLayout>
 

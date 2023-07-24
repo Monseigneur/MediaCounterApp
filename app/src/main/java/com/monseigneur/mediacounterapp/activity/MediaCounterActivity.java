@@ -91,6 +91,33 @@ public class MediaCounterActivity extends Activity
             adapter.setFilterMask(filter);
         });
 
+        binding.importDataButton.setOnClickListener(view -> {
+            // First create a backup and then try to import.
+            createBackupFile(true);
+        });
+
+        binding.exportDataButton.setOnClickListener(view -> {
+            createBackupFile(false);
+        });
+
+        binding.randomMediaButton.setOnClickListener(view -> {
+            String randomMedia = db.getRandomMedia();
+            showToast(randomMedia);
+        });
+
+        binding.statsButton.setOnClickListener(view -> {
+            showStats();
+        });
+
+        binding.lockButton.setOnClickListener(view -> {
+            setLockState(!incLocked);
+        });
+
+        binding.newMediaButton.setOnClickListener(view -> {
+            Intent newMediaIntent = new Intent(this, MediaCounterAddActivity.class);
+            startActivityForResult(newMediaIntent, NEW_MEDIA_COUNTER_REQUEST);
+        });
+
         incLocked = true;
         setLockState(true);
     }
@@ -251,48 +278,6 @@ public class MediaCounterActivity extends Activity
     {
         Log.i("decMediaCount", "start");
         changeCount(view, false);
-    }
-
-    /**
-     * Button handler
-     *
-     * @param view the tapped view
-     */
-    public void buttonOnClick(View view)
-    {
-        int id = view.getId();
-
-        if (id == R.id.import_data_button)
-        {
-            // First create a backup, and then try to import.
-            createBackupFile(true);
-        }
-        else if (id == R.id.export_data_button)
-        {
-            createBackupFile(false);
-        }
-        else if (id == R.id.random_media_button)
-        {
-            String randomMedia = db.getRandomMedia();
-            showToast(randomMedia);
-        }
-        else if (id == R.id.stats_button)
-        {
-            showStats();
-        }
-        else if (id == R.id.lock_button)
-        {
-            setLockState(!incLocked);
-        }
-        else if (id == R.id.new_media_button)
-        {
-            Intent newMediaIntent = new Intent(this, MediaCounterAddActivity.class);
-            startActivityForResult(newMediaIntent, NEW_MEDIA_COUNTER_REQUEST);
-        }
-        else
-        {
-            Log.e("buttonOnClick", "received click from unknown view " + id);
-        }
     }
 
     /**

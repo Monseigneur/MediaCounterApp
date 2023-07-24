@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent">
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
 
     <LinearLayout
         style="?android:attr/buttonBarStyle"
@@ -15,7 +15,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.15"
-            android:onClick="buttonOnClick"
             android:text="@string/import_data"
             android:visibility="gone" />
 
@@ -25,7 +24,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:onClick="buttonOnClick"
             android:text="@string/new_media_name" />
 
         <Button
@@ -34,7 +32,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.15"
-            android:onClick="buttonOnClick"
             android:text="@string/export_data"
             android:visibility="gone" />
 
@@ -57,7 +54,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
-            android:onClick="buttonOnClick"
             android:text="@string/random_button_name" />
 
         <Button
@@ -66,7 +62,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
-            android:onClick="buttonOnClick"
             android:text="@string/stats_button_name" />
 
         <Button
@@ -75,14 +70,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
-            android:onClick="buttonOnClick"
             android:text="@string/unlock_inc" />
     </LinearLayout>
 
     <ListView
         android:id="@+id/media_list"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-    </ListView>
+        android:layout_height="wrap_content" />
 </LinearLayout>
 
