@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.databinding.MediaStatsActivityBinding;
 import com.monseigneur.mediacounterapp.model.EpisodeData;
@@ -57,9 +59,10 @@ public class MediaStatsActivity extends Activity
         String text = "Total episodes: " + edList.size();
         binding.mediaStatsTotalLabel.setText(text);
 
-        MediaStatsAdapter adapter = new MediaStatsAdapter(this, R.layout.media_stats_list_entry, edList);
+        MediaStatsAdapter adapter = new MediaStatsAdapter(edList);
 
         binding.mediaStatsList.setAdapter(adapter);
+        binding.mediaStatsList.setLayoutManager(new LinearLayoutManager(this));
 
     }
 }
