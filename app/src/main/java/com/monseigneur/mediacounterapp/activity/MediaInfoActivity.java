@@ -1,24 +1,19 @@
 package com.monseigneur.mediacounterapp.activity;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.databinding.MediaInfoActivityBinding;
 import com.monseigneur.mediacounterapp.model.MediaCounterDB;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 import com.monseigneur.mediacounterapp.viewmodel.MediaInfoViewModel;
-
-import java.util.List;
 
 public class MediaInfoActivity extends Activity
 {
@@ -60,9 +55,10 @@ public class MediaInfoActivity extends Activity
         // Set the initial state
         setButtonText();
 
-        MediaInfoEpisodeAdapter adapter = new MediaInfoEpisodeAdapter(this, viewModel.epDates);
+        MediaInfoAdapter adapter = new MediaInfoAdapter(viewModel.epDates);
 
         binding.mediaInfoEpList.setAdapter(adapter);
+        binding.mediaInfoEpList.setLayoutManager(new LinearLayoutManager(this));
     }
 
     /**
@@ -137,64 +133,5 @@ public class MediaInfoActivity extends Activity
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    static class MediaInfoEpisodeAdapter extends ArrayAdapter<Long>
-    {
-        private final String TAG = "MediaInfoEpisodeAdapter";
-
-        private final LayoutInflater inflater;
-        private final int resource;
-
-        MediaInfoEpisodeAdapter(Context c, List<Long> epDates)
-        {
-            super(c, R.layout.media_info_list_entry, epDates);
-            Log.i(TAG, "Constructor: " + R.layout.media_info_list_entry + " " + epDates);
-
-            inflater = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            resource = R.layout.media_info_list_entry;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent)
-        {
-            MediaInfoEpisodeAdapter.ViewHolder vh;
-            if (convertView == null)
-            {
-                convertView = inflater.inflate(resource, parent, false);
-                vh = new ViewHolder(convertView);
-
-                convertView.setTag(vh);
-            }
-            else
-            {
-                vh = (MediaInfoEpisodeAdapter.ViewHolder) convertView.getTag();
-            }
-
-            long date = getItem(position);
-
-            vh.setData(position, date);
-
-            return convertView;
-        }
-
-        // ViewHolder pattern to increase Adapter performance
-        private static class ViewHolder
-        {
-            private final TextView name;
-            private final TextView count;
-
-            ViewHolder(View view)
-            {
-                name = view.findViewById(R.id.episode_number);
-                count = view.findViewById(R.id.episode_date);
-            }
-
-            public void setData(int position, long date)
-            {
-                name.setText(String.valueOf(position + 1));
-                count.setText(MediaCounterDB.dateString(date));
-            }
-        }
     }
 }

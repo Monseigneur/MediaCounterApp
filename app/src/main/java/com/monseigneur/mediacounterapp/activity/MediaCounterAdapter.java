@@ -150,27 +150,10 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
 
         public void setData(MediaData md)
         {
-            name.setText(md.getMediaName());
-
-            int nameColor;
-            switch (md.getStatus())
-            {
-                default:
-                case NEW:
-                    nameColor = Color.WHITE;
-                    break;
-                case ONGOING:
-                    nameColor = Color.YELLOW;
-                    break;
-                case COMPLETE:
-                    nameColor = Color.GREEN;
-                    break;
-                case DROPPED:
-                    nameColor = Color.RED;
-                    break;
-            }
+            int nameColor = Util.getStatusColor(md.getStatus());
 
             name.setTextColor(nameColor);
+            name.setText(md.getMediaName());
 
             count.setText(String.valueOf(md.getCount()));
         }
