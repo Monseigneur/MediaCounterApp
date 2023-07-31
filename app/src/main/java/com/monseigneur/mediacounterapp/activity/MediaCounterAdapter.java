@@ -64,17 +64,27 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
         return filteredData.get(position);
     }
 
-    public MediaData getItem(String mediaName)
+    public void updateStatus(String mediaName, MediaCounterStatus newStatus)
     {
-        for (MediaData md : originalData)
+        int foundIndex = -1;
+        for (int i = 0; i < originalData.size(); i++)
         {
-            if (md.getMediaName().equals(mediaName))
+            if (originalData.get(i).getMediaName().equals(mediaName))
             {
-                return md;
+                foundIndex = i;
+                break;
             }
         }
 
-        return null;
+        if (foundIndex == -1)
+        {
+            return;
+        }
+
+        MediaData md = originalData.get(foundIndex);
+        md.setStatus(newStatus);
+
+        setFilterMask(currentFilter);
     }
 
     public void setFilterMask(EnumSet<MediaCounterStatus> filterMask)
@@ -101,17 +111,10 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
         setFilterMask(currentFilter);
     }
 
-    public void remove(MediaData md)
+    public void remove(int position)
     {
         // If an element is removed from the filtered view, it needs to be removed from the original data as well.
-        for (int i = 0; i < filteredData.size(); i++)
-        {
-            if (filteredData.get(i).getMediaName().equals(md.getMediaName()))
-            {
-                filteredData.remove(i);
-                break;
-            }
-        }
+        MediaData md = filteredData.remove(position);
 
         for (int i = 0; i < originalData.size(); i++)
         {
@@ -121,13 +124,8 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
                 break;
             }
         }
-    }
 
-    public void update()
-    {
-        setFilterMask(currentFilter);
-
-        notifyDataSetChanged();
+        notifyItemRemoved(position);
     }
 
     // ViewHolder pattern to increase Adapter performance

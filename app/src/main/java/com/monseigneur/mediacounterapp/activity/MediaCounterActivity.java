@@ -78,19 +78,19 @@ public class MediaCounterActivity extends Activity
         View.OnClickListener onClickListener = view -> {
             MediaCounterAdapter.ViewHolder vh = (MediaCounterAdapter.ViewHolder) view.getTag();
             int position = vh.getAbsoluteAdapterPosition();
-            MediaData md = adapter.getItem(position);
 
             if (view.getId() == R.id.name_label)
             {
+                MediaData md = adapter.getItem(position);
                 viewMediaInfo(md);
             }
             else if (view.getId() == R.id.inc_button)
             {
-                changeCount(md, true);
+                changeCount(position, true);
             }
             else if (view.getId() == R.id.dec_button)
             {
-                changeCount(md, false);
+                changeCount(position, false);
             }
             else
             {
@@ -204,7 +204,6 @@ public class MediaCounterActivity extends Activity
             if (db.addMedia(newMd))
             {
                 adapter.add(newMd);
-                adapter.update();
             }
             else
             {
@@ -221,8 +220,7 @@ public class MediaCounterActivity extends Activity
             Log.i("onActivityResult", "media info status change " + newStatus + " for media [" + name + "]");
             db.setStatus(name, newStatus);
 
-            adapter.getItem(name).setStatus(newStatus);
-            adapter.update();
+            adapter.updateStatus(name, newStatus);
         }
         else if (requestCode == CREATE_BACKUP_FILE || requestCode == CREATE_BACKUP_FILE_IMPORT)
         {
@@ -302,10 +300,10 @@ public class MediaCounterActivity extends Activity
     /**
      * Change the count of a tapped Media
      *
-     * @param md        the MediaData in the tapped view
+     * @param position  the position of the tapped view
      * @param increment true to increment, false to decrement
      */
-    private void changeCount(MediaData md, boolean increment)
+    private void changeCount(int position, boolean increment)
     {
         if (incLocked)
         {
@@ -313,14 +311,17 @@ public class MediaCounterActivity extends Activity
             return;
         }
 
+        MediaData md = adapter.getItem(position);
+
         if (md == null)
         {
-            Log.w("changeCount", "tapped MediaData in view is null!");
+            Log.w("changeCount", "MediaData in view at position " + position + " is null!");
             return;
         }
 
         Log.i("changeCount", "increment " + increment + " " + md);
 
+        boolean removed = false;
         if (increment)
         {
             long now = MediaCounterDB.getCurrentDate();
@@ -335,11 +336,15 @@ public class MediaCounterActivity extends Activity
             db.deleteEpisode(md.getMediaName());
             if (!md.removeEpisode())
             {
-                adapter.remove(md);
+                adapter.remove(position);
+                removed = true;
             }
         }
 
-        adapter.update();
+        if (!removed)
+        {
+            adapter.notifyItemChanged(position);
+        }
     }
 
     /**
