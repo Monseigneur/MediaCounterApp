@@ -1,12 +1,11 @@
 package com.monseigneur.mediacounterapp.model;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * Created by Milan on 8/5/2016.
  */
-public class EpisodeData implements Comparable<EpisodeData>, Serializable
+public class EpisodeData implements Comparable<EpisodeData>
 {
     private final String mediaName;
     private final int epNum;

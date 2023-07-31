@@ -1,6 +1,5 @@
 package com.monseigneur.mediacounterapp.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -9,10 +8,8 @@ import java.util.Objects;
 /**
  * Created by Milan on 5/21/2016.
  */
-public class MediaData implements Serializable
+public class MediaData
 {
-    private static final long serialVersionUID = 0L;
-
     private final String mediaName;
     private MediaCounterStatus status;
     private final long addedDate;
