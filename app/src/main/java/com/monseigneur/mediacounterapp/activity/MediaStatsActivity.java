@@ -7,7 +7,6 @@ import android.util.Log;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.databinding.MediaStatsActivityBinding;
 import com.monseigneur.mediacounterapp.model.EpisodeData;
 import com.monseigneur.mediacounterapp.model.IDataSerializer;
@@ -63,6 +62,5 @@ public class MediaStatsActivity extends Activity
 
         binding.mediaStatsList.setAdapter(adapter);
         binding.mediaStatsList.setLayoutManager(new LinearLayoutManager(this));
-
     }
 }

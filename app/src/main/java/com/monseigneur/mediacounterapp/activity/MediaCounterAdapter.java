@@ -1,16 +1,14 @@
 package com.monseigneur.mediacounterapp.activity;
 
-import android.content.Context;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.monseigneur.mediacounterapp.R;
+import com.monseigneur.mediacounterapp.databinding.MediaCounterListEntryBinding;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 import com.monseigneur.mediacounterapp.model.MediaData;
 import com.monseigneur.mediacounterapp.model.Util;
@@ -20,58 +18,47 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
-public class MediaCounterAdapter extends ArrayAdapter<MediaData>
+public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapter.ViewHolder>
 {
-    private final LayoutInflater inflater;
-    private final int resource;
     private final List<MediaData> originalData;
     private final List<MediaData> filteredData;
+    private final View.OnClickListener onItemClickListener;
 
     private EnumSet<MediaCounterStatus> currentFilter;
 
-    public MediaCounterAdapter(Context c, int r, List<MediaData> mdl)
+    public MediaCounterAdapter(List<MediaData> mdl, View.OnClickListener itemClickListener)
     {
-        super(c, r, mdl);
-        inflater = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        resource = r;
-
         originalData = mdl;
         filteredData = new ArrayList<>(mdl);
+        onItemClickListener = itemClickListener;
 
         currentFilter = EnumSet.allOf(MediaCounterStatus.class);
     }
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent)
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
-        MediaCounterAdapter.ViewHolder vh;
-        if (convertView == null)
-        {
-            convertView = inflater.inflate(resource, parent, false);
-            vh = new ViewHolder(convertView);
+        MediaCounterListEntryBinding binding = MediaCounterListEntryBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
 
-            convertView.setTag(vh);
-        }
-        else
-        {
-            vh = (MediaCounterAdapter.ViewHolder) convertView.getTag();
-        }
-
-        MediaData md = getItem(position);
-
-        vh.setData(md);
-
-        return convertView;
+        return new ViewHolder(binding, onItemClickListener);
     }
 
     @Override
-    public int getCount()
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position)
+    {
+        MediaData md = filteredData.get(position);
+
+        holder.setData(md);
+    }
+
+    @Override
+    public int getItemCount()
     {
         return filteredData.size();
     }
 
     @Nullable
-    @Override
     public MediaData getItem(int position)
     {
         return filteredData.get(position);
@@ -114,10 +101,17 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
         setFilterMask(currentFilter);
     }
 
-    public void remove(int position)
+    public void remove(MediaData md)
     {
         // If an element is removed from the filtered view, it needs to be removed from the original data as well.
-        MediaData md = filteredData.remove(position);
+        for (int i = 0; i < filteredData.size(); i++)
+        {
+            if (filteredData.get(i).getMediaName().equals(md.getMediaName()))
+            {
+                filteredData.remove(i);
+                break;
+            }
+        }
 
         for (int i = 0; i < originalData.size(); i++)
         {
@@ -137,25 +131,35 @@ public class MediaCounterAdapter extends ArrayAdapter<MediaData>
     }
 
     // ViewHolder pattern to increase Adapter performance
-    private static class ViewHolder
+    public static class ViewHolder extends RecyclerView.ViewHolder
     {
-        private final TextView name;
-        private final TextView count;
+        private final MediaCounterListEntryBinding binding;
 
-        ViewHolder(View view)
+        ViewHolder(@NonNull MediaCounterListEntryBinding b, View.OnClickListener onItemClickListener)
         {
-            name = view.findViewById(R.id.name_label);
-            count = view.findViewById(R.id.count_label);
+            super(b.getRoot());
+
+            binding = b;
+
+            setOnClickListener(binding.nameLabel, onItemClickListener);
+            setOnClickListener(binding.incButton, onItemClickListener);
+            setOnClickListener(binding.decButton, onItemClickListener);
         }
 
         public void setData(MediaData md)
         {
             int nameColor = Util.getStatusColor(md.getStatus());
 
-            name.setTextColor(nameColor);
-            name.setText(md.getMediaName());
+            binding.nameLabel.setTextColor(nameColor);
+            binding.nameLabel.setText(md.getMediaName());
 
-            count.setText(String.valueOf(md.getCount()));
+            binding.countLabel.setText(String.valueOf(md.getCount()));
+        }
+
+        private void setOnClickListener(View view, View.OnClickListener onItemClickListener)
+        {
+            view.setTag(this);
+            view.setOnClickListener(onItemClickListener);
         }
     }
 }

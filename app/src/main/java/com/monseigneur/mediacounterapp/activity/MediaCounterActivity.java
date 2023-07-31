@@ -11,8 +11,9 @@ import android.os.Parcel;
 import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.Toast;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.databinding.MainActivityBinding;
@@ -74,8 +75,32 @@ public class MediaCounterActivity extends Activity
         List<MediaData> mdList = db.getMediaCounters();
         Log.i("onCreate", "list = " + mdList);
 
-        adapter = new MediaCounterAdapter(this, R.layout.media_counter_list_entry, mdList);
+        View.OnClickListener onClickListener = view -> {
+            MediaCounterAdapter.ViewHolder vh = (MediaCounterAdapter.ViewHolder) view.getTag();
+            int position = vh.getAbsoluteAdapterPosition();
+            MediaData md = adapter.getItem(position);
+
+            if (view.getId() == R.id.name_label)
+            {
+                viewMediaInfo(md);
+            }
+            else if (view.getId() == R.id.inc_button)
+            {
+                changeCount(md, true);
+            }
+            else if (view.getId() == R.id.dec_button)
+            {
+                changeCount(md, false);
+            }
+            else
+            {
+                Log.i("onClickListener", "Unknown view click, id: " + view.getId());
+            }
+        };
+
+        adapter = new MediaCounterAdapter(mdList, onClickListener);
         binding.mediaList.setAdapter(adapter);
+        binding.mediaList.setLayoutManager(new LinearLayoutManager(this));
 
         binding.viewCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             EnumSet<MediaCounterStatus> filter;
@@ -96,22 +121,16 @@ public class MediaCounterActivity extends Activity
             createBackupFile(true);
         });
 
-        binding.exportDataButton.setOnClickListener(view -> {
-            createBackupFile(false);
-        });
+        binding.exportDataButton.setOnClickListener(view -> createBackupFile(false));
 
         binding.randomMediaButton.setOnClickListener(view -> {
             String randomMedia = db.getRandomMedia();
             showToast(randomMedia);
         });
 
-        binding.statsButton.setOnClickListener(view -> {
-            showStats();
-        });
+        binding.statsButton.setOnClickListener(view -> showStats());
 
-        binding.lockButton.setOnClickListener(view -> {
-            setLockState(!incLocked);
-        });
+        binding.lockButton.setOnClickListener(view -> setLockState(!incLocked));
 
         binding.newMediaButton.setOnClickListener(view -> {
             Intent newMediaIntent = new Intent(this, MediaCounterAddActivity.class);
@@ -131,21 +150,17 @@ public class MediaCounterActivity extends Activity
     /**
      * Start the Media Info view for a selected Media view
      *
-     * @param view the tapped view
+     * @param md the MediaData in the tapped view
      */
-    public void viewMediaInfo(View view)
+    public void viewMediaInfo(MediaData md)
     {
         Intent intent = new Intent(this, MediaInfoActivity.class);
 
         Bundle b = new Bundle();
 
-        LinearLayout ll = (LinearLayout) view.getParent();
-        int pos = binding.mediaList.getPositionForView(ll);
-        MediaData md = adapter.getItem(pos);
-
         if (md == null)
         {
-            Log.w("viewMediaInfo", "MediaData in view at pos " + pos + " is null!");
+            Log.w("viewMediaInfo", "tapped MediaData in view is null!");
             return;
         }
 
@@ -259,28 +274,6 @@ public class MediaCounterActivity extends Activity
     }
 
     /**
-     * Increment Media count touch handler
-     *
-     * @param view the tapped Media view
-     */
-    public void incMediaCount(View view)
-    {
-        Log.i("incMediaCount", "start");
-        changeCount(view, true);
-    }
-
-    /**
-     * Decrement Media count touch handler
-     *
-     * @param view the tapped Media view
-     */
-    public void decMediaCount(View view)
-    {
-        Log.i("decMediaCount", "start");
-        changeCount(view, false);
-    }
-
-    /**
      * Change the update lock state
      *
      * @param lock true to lock, false to unlock
@@ -309,10 +302,10 @@ public class MediaCounterActivity extends Activity
     /**
      * Change the count of a tapped Media
      *
-     * @param view      the tapped Media view
+     * @param md        the MediaData in the tapped view
      * @param increment true to increment, false to decrement
      */
-    private void changeCount(View view, boolean increment)
+    private void changeCount(MediaData md, boolean increment)
     {
         if (incLocked)
         {
@@ -320,13 +313,9 @@ public class MediaCounterActivity extends Activity
             return;
         }
 
-        LinearLayout ll = (LinearLayout) view.getParent();
-        int pos = binding.mediaList.getPositionForView(ll);
-        MediaData md = adapter.getItem(pos);
-
         if (md == null)
         {
-            Log.w("changeCount", "MediaData in view at pos " + pos + " is null!");
+            Log.w("changeCount", "tapped MediaData in view is null!");
             return;
         }
 
@@ -346,7 +335,7 @@ public class MediaCounterActivity extends Activity
             db.deleteEpisode(md.getMediaName());
             if (!md.removeEpisode())
             {
-                adapter.remove(pos);
+                adapter.remove(md);
             }
         }
 
