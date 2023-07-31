@@ -23,16 +23,17 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
     private final List<MediaData> originalData;
     private final List<MediaData> filteredData;
     private final View.OnClickListener onItemClickListener;
+    private boolean showAll;
 
-    private EnumSet<MediaCounterStatus> currentFilter;
+    private static final EnumSet<MediaCounterStatus> ALL_STATUSES = EnumSet.allOf(MediaCounterStatus.class);
+    private static final EnumSet<MediaCounterStatus> WATCHABLE_STATUSES = EnumSet.of(MediaCounterStatus.NEW, MediaCounterStatus.ONGOING);
 
     public MediaCounterAdapter(List<MediaData> mdl, View.OnClickListener itemClickListener)
     {
         originalData = mdl;
         filteredData = new ArrayList<>(mdl);
         onItemClickListener = itemClickListener;
-
-        currentFilter = EnumSet.allOf(MediaCounterStatus.class);
+        showAll = true;
     }
 
     @NonNull
@@ -84,12 +85,14 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
         MediaData md = originalData.get(foundIndex);
         md.setStatus(newStatus);
 
-        setFilterMask(currentFilter);
+        setFilterMask(showAll);
     }
 
-    public void setFilterMask(EnumSet<MediaCounterStatus> filterMask)
+    public void setFilterMask(boolean filterShowAll)
     {
-        currentFilter = filterMask;
+        EnumSet<MediaCounterStatus> filterMask = filterShowAll ? ALL_STATUSES : WATCHABLE_STATUSES;
+
+        showAll = filterShowAll;
         filteredData.clear();
         for (MediaData md : originalData)
         {
@@ -108,7 +111,7 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
 
         Collections.sort(originalData, MediaData.BY_LAST_EPISODE);
 
-        setFilterMask(currentFilter);
+        setFilterMask(showAll);
     }
 
     public void remove(int position)

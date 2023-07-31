@@ -102,19 +102,7 @@ public class MediaCounterActivity extends Activity
         binding.mediaList.setAdapter(adapter);
         binding.mediaList.setLayoutManager(new LinearLayoutManager(this));
 
-        binding.viewCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            EnumSet<MediaCounterStatus> filter;
-            if (isChecked)
-            {
-                filter = EnumSet.of(MediaCounterStatus.NEW, MediaCounterStatus.ONGOING);
-            }
-            else
-            {
-                filter = EnumSet.allOf(MediaCounterStatus.class);
-            }
-
-            adapter.setFilterMask(filter);
-        });
+        binding.viewCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> adapter.setFilterMask(!isChecked));
 
         binding.importDataButton.setOnClickListener(view -> {
             // First create a backup and then try to import.
