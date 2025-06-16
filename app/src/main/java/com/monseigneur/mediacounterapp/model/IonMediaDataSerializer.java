@@ -79,6 +79,13 @@ public class IonMediaDataSerializer implements IDataSerializer<MediaData>
         {
             Iterator<IonValue> iter = ionSys.iterate(reader);
 
+            if (!iter.hasNext())
+            {
+                Log.i("deserialize", "top level iterator doesn't have anything");
+
+                return false;
+            }
+
             IonList elements = (IonList) iter.next();
 
             if (elements == null)

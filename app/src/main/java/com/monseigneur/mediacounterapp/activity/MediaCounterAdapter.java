@@ -20,8 +20,8 @@ import java.util.List;
 
 public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapter.ViewHolder>
 {
-    private final List<MediaData> originalData;
-    private final List<MediaData> filteredData;
+    private List<MediaData> originalData;
+    private List<MediaData> filteredData;
     private final View.OnClickListener onItemClickListener;
     private boolean showAll;
 
@@ -30,10 +30,10 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
 
     public MediaCounterAdapter(List<MediaData> mdl, View.OnClickListener itemClickListener)
     {
-        originalData = mdl;
-        filteredData = new ArrayList<>(mdl);
         onItemClickListener = itemClickListener;
         showAll = true;
+
+        update(mdl);
     }
 
     @NonNull
@@ -129,6 +129,14 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
         }
 
         notifyItemRemoved(position);
+    }
+
+    public void update(List<MediaData> newMdList)
+    {
+        originalData = newMdList;
+        filteredData = new ArrayList<>(newMdList);
+
+        notifyItemRangeChanged(0, originalData.size());
     }
 
     // ViewHolder pattern to increase Adapter performance

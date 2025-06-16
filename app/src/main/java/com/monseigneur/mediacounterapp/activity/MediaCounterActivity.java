@@ -222,7 +222,7 @@ public class MediaCounterActivity extends Activity
 
                 showFileMetadata(uri);
 
-                showToast(success, "Export succeeded", "Export failed");
+                showToast(success, getString(R.string.export_succeeded), getString(R.string.export_failed));
             }
 
             if (importPath)
@@ -247,7 +247,14 @@ public class MediaCounterActivity extends Activity
 
                 boolean success = importData(uri);
 
-                showToast(success, "Import succeeded", "Import failed");
+                showToast(success, getString(R.string.import_succeeded), getString(R.string.import_failed));
+
+                if (success)
+                {
+                    List<MediaData> mdList = db.getMediaCounters();
+
+                    adapter.update(mdList);
+                }
 
                 // Return to a locked state.
                 setLockState(true);
@@ -322,7 +329,11 @@ public class MediaCounterActivity extends Activity
         else
         {
             db.deleteEpisode(md.getMediaName());
-            if (!md.removeEpisode())
+            if (md.removeEpisode())
+            {
+                db.setStatus(md.getMediaName(), md.getStatus());
+            }
+            else
             {
                 adapter.remove(position);
                 removed = true;
@@ -411,10 +422,29 @@ public class MediaCounterActivity extends Activity
         startActivityForResult(intent, OPEN_IMPORT_FILE);
     }
 
-    private void createBackupFile(boolean importPath)
+    private void createBackupFile(boolean isImport)
     {
         if (incLocked)
         {
+            return;
+        }
+
+        boolean mediaCountersEmpty = db.isEmpty();
+
+        Log.i("createBackupFile", "isImport " + isImport + " mediaCountersEmpty " + mediaCountersEmpty);
+
+        if (mediaCountersEmpty)
+        {
+            if (isImport)
+            {
+                // Empty on the import path, skip trying to export the existing data.
+                openImportFile();
+            }
+            else
+            {
+                showToast(getString(R.string.export_empty));
+            }
+
             return;
         }
 
@@ -425,9 +455,7 @@ public class MediaCounterActivity extends Activity
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TITLE, fileName);
 
-        Log.i("createBackupFile", "importPath " + importPath);
-
-        startActivityForResult(intent, importPath ? CREATE_BACKUP_FILE_IMPORT : CREATE_BACKUP_FILE);
+        startActivityForResult(intent, isImport ? CREATE_BACKUP_FILE_IMPORT : CREATE_BACKUP_FILE);
     }
 
     private boolean importData(Uri uri)
