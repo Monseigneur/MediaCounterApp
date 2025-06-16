@@ -28,5 +28,7 @@
     <string name="export_failed">Export failed</string>
     <string name="import_succeeded">Import succeeded</string>
     <string name="import_failed">Import failed</string>
+    <string name="no_stats">No stats to show!</string>
+    <string name="no_random">"No media counters to select from!"</string>
 
 </resources>

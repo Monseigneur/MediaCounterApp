@@ -111,10 +111,7 @@ public class MediaCounterActivity extends Activity
 
         binding.exportDataButton.setOnClickListener(view -> createBackupFile(false));
 
-        binding.randomMediaButton.setOnClickListener(view -> {
-            String randomMedia = db.getRandomMedia();
-            showToast(randomMedia);
-        });
+        binding.randomMediaButton.setOnClickListener(view -> getRandomMedia());
 
         binding.statsButton.setOnClickListener(view -> showStats());
 
@@ -369,10 +366,31 @@ public class MediaCounterActivity extends Activity
         showToast(condition ? trueText : falseText);
     }
 
+    private void getRandomMedia()
+    {
+        String randomMedia = db.getRandomMedia();
+
+        if (randomMedia != null)
+        {
+            showToast(randomMedia);
+        }
+        else
+        {
+            showToast(getString(R.string.no_random));
+        }
+    }
+
     private void showStats()
     {
         List<EpisodeData> epData = db.getEpisodeData();
         Log.i("showStats", "epData size " + epData.size());
+
+        if (epData.isEmpty())
+        {
+            showToast(getString(R.string.no_stats));
+
+            return;
+        }
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 

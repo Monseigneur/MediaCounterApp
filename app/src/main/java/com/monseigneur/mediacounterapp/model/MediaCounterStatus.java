@@ -1,5 +1,7 @@
 package com.monseigneur.mediacounterapp.model;
 
+import java.util.EnumSet;
+
 public enum MediaCounterStatus
 {
     NEW(0),
@@ -9,6 +11,9 @@ public enum MediaCounterStatus
 
     public final int value;
     private static MediaCounterStatus[] cachedValues = null;
+
+    public static final EnumSet<MediaCounterStatus> ALL_STATUSES = EnumSet.allOf(MediaCounterStatus.class);
+    public static final EnumSet<MediaCounterStatus> WATCHABLE_STATUSES = EnumSet.of(MediaCounterStatus.NEW, MediaCounterStatus.ONGOING);
 
     MediaCounterStatus(int value)
     {

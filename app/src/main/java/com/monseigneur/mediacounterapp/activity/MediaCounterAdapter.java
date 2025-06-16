@@ -25,9 +25,6 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
     private final View.OnClickListener onItemClickListener;
     private boolean showAll;
 
-    private static final EnumSet<MediaCounterStatus> ALL_STATUSES = EnumSet.allOf(MediaCounterStatus.class);
-    private static final EnumSet<MediaCounterStatus> WATCHABLE_STATUSES = EnumSet.of(MediaCounterStatus.NEW, MediaCounterStatus.ONGOING);
-
     public MediaCounterAdapter(List<MediaData> mdl, View.OnClickListener itemClickListener)
     {
         onItemClickListener = itemClickListener;
@@ -90,7 +87,7 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
 
     public void setFilterMask(boolean filterShowAll)
     {
-        EnumSet<MediaCounterStatus> filterMask = filterShowAll ? ALL_STATUSES : WATCHABLE_STATUSES;
+        EnumSet<MediaCounterStatus> filterMask = filterShowAll ? MediaCounterStatus.ALL_STATUSES : MediaCounterStatus.WATCHABLE_STATUSES;
 
         showAll = filterShowAll;
         filteredData.clear();

@@ -431,9 +431,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
      */
     public List<MediaData> getMediaCounters()
     {
-        EnumSet<MediaCounterStatus> statuses = EnumSet.allOf(MediaCounterStatus.class);
-
-        return getMediaCounters(statuses);
+        return getMediaCounters(MediaCounterStatus.ALL_STATUSES);
     }
 
     /**
@@ -451,37 +449,21 @@ public class MediaCounterDB extends SQLiteOpenHelper
     /**
      * Chooses a random Media that is not Complete or Dropped
      *
-     * @return a random Media
+     * @return a random Media, or null if none available
      */
     public String getRandomMedia()
     {
-        List<MediaData> mdList = getMediaCounters();
+        List<MediaData> watchable = getMediaCounters(MediaCounterStatus.WATCHABLE_STATUSES);
 
-        List<MediaData> incomplete = new ArrayList<>();
-
-        for (MediaData md : mdList)
+        if (watchable.isEmpty())
         {
-            MediaCounterStatus status = md.getStatus();
-            if ((status != MediaCounterStatus.COMPLETE) && (status != MediaCounterStatus.DROPPED))
-            {
-                incomplete.add(md);
-            }
+            return null;
         }
 
-        String randomMediaName;
-        if (!incomplete.isEmpty())
-        {
-            Random rand = new Random();
-            int index = rand.nextInt(incomplete.size());
+        Random rand = new Random();
+        int index = rand.nextInt(watchable.size());
 
-            randomMediaName = incomplete.get(index).getMediaName();
-        }
-        else
-        {
-            randomMediaName = "No media counters to select from!";
-        }
-
-        return randomMediaName;
+        return watchable.get(index).getMediaName();
     }
 
     /**
