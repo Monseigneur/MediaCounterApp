@@ -200,7 +200,7 @@ public class MediaCounterActivity extends Activity
         }
         else if (requestCode == MEDIA_INFO_STATUS_CHANGE_REQUEST)
         {
-            MediaCounterStatus newStatus = (MediaCounterStatus) data.getSerializableExtra(MEDIA_INFO_STATUS);
+            MediaCounterStatus newStatus = data.getSerializableExtra(MEDIA_INFO_STATUS, MediaCounterStatus.class);
             String name = data.getStringExtra(MediaCounterActivity.MEDIA_COUNTER_NAME);
             Log.i("onActivityResult", "media info status change " + newStatus + " for media [" + name + "]");
             db.setStatus(name, newStatus);

@@ -37,7 +37,7 @@ public class MediaInfoActivity extends Activity
         Intent i = getIntent();
         Bundle b = i.getExtras();
 
-        MediaInfoViewModel viewModel = (MediaInfoViewModel) b.getSerializable(MEDIA_INFO);
+        MediaInfoViewModel viewModel = b.getSerializable(MEDIA_INFO, MediaInfoViewModel.class);
 
         Log.i(TAG, "onCreate: " + viewModel.toString());
 

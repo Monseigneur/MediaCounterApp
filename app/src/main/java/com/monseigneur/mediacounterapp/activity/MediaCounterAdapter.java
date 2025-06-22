@@ -20,9 +20,9 @@ import java.util.List;
 
 public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapter.ViewHolder>
 {
+    private final View.OnClickListener onItemClickListener;
     private List<MediaData> originalData;
     private List<MediaData> filteredData;
-    private final View.OnClickListener onItemClickListener;
     private boolean showAll;
 
     public MediaCounterAdapter(List<MediaData> mdl, View.OnClickListener itemClickListener)

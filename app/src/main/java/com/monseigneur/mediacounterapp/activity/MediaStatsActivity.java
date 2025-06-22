@@ -41,7 +41,7 @@ public class MediaStatsActivity extends Activity
         byte[] arr = null;
         if (b != null)
         {
-            arr = (byte[]) b.getSerializable(EPISODE_DATA);
+            arr = b.getSerializable(EPISODE_DATA, byte[].class);
         }
 
         IDataSerializer<EpisodeData> dm = new IonEpisodeDataSerializer(STATS_USE_BINARY_SERIALIZATION);
