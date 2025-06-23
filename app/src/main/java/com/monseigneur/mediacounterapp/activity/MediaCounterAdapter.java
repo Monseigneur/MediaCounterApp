@@ -154,9 +154,9 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
 
         public void setData(MediaData md)
         {
-            int nameColor = Util.getStatusColor(md.getStatus());
+            int statusAppearance = Util.getStatusAppearance(md.getStatus());
 
-            binding.nameLabel.setTextColor(nameColor);
+            binding.nameLabel.setTextAppearance(statusAppearance);
             binding.nameLabel.setText(md.getMediaName());
 
             binding.countLabel.setText(String.valueOf(md.getCount()));

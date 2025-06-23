@@ -1,16 +1,12 @@
 package com.monseigneur.mediacounterapp.activity;
 
-import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.databinding.MediaStatsListEntryBinding;
 import com.monseigneur.mediacounterapp.model.EpisodeData;
 import com.monseigneur.mediacounterapp.model.MediaCounterDB;
@@ -70,16 +66,16 @@ public class MediaStatsAdapter extends RecyclerView.Adapter<MediaStatsAdapter.Vi
 
         public void setData(EpisodeData ed)
         {
-            int textColor = Util.getStatusColor(ed.getMediaStatus());
+            int statusAppearance = Util.getStatusAppearance(ed.getMediaStatus());
 
             binding.statsEpisodeNumber.setText(String.valueOf(ed.getEpNum()));
-            binding.statsEpisodeNumber.setTextColor(textColor);
+            binding.statsEpisodeNumber.setTextAppearance(statusAppearance);
 
             binding.statsMediaName.setText(ed.getMediaName());
-            binding.statsMediaName.setTextColor(textColor);
+            binding.statsMediaName.setTextAppearance(statusAppearance);
 
             binding.statsEpisodeDate.setText(MediaCounterDB.dateString(ed.getEpDate()));
-            binding.statsEpisodeDate.setTextColor(textColor);
+            binding.statsEpisodeDate.setTextAppearance(statusAppearance);
         }
     }
 }

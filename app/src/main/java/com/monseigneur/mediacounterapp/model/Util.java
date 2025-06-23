@@ -1,22 +1,22 @@
 package com.monseigneur.mediacounterapp.model;
 
-import android.graphics.Color;
+import com.monseigneur.mediacounterapp.R;
 
 public class Util
 {
-    public static int getStatusColor(MediaCounterStatus status)
+    public static int getStatusAppearance(MediaCounterStatus status)
     {
         switch (status)
         {
-            default:
-            case NEW:
-                return Color.WHITE;
             case ONGOING:
-                return Color.YELLOW;
+                return R.style.MediaStatus_Ongoing;
             case COMPLETE:
-                return Color.GREEN;
+                return R.style.MediaStatus_Complete;
             case DROPPED:
-                return Color.RED;
+                return R.style.MediaStatus_Dropped;
+            case NEW:
+            default:
+                return R.style.MediaStatus_Default;
         }
     }
 }

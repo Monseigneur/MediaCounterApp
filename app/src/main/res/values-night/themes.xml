@@ -1,8 +1,24 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="Theme.AppTheme" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <item name="colorPrimary">@color/green_200</item>
-        <item name="colorPrimaryVariant">@color/green_700</item>
+        <item name="colorPrimary">@color/blue_200</item>
+        <item name="colorPrimaryVariant">@color/blue_700</item>
         <item name="colorOnPrimary">@color/black</item>
+    </style>
+
+    <style name="MediaStatus.Dropped" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="android:textColor">@color/red_500</item>
+    </style>
+
+    <style name="MediaStatus.Ongoing" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="android:textColor">@color/yellow_500</item>
+    </style>
+
+    <style name="MediaStatus.New" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="android:textColor">@color/green_500</item>
+    </style>
+
+    <style name="MediaStatus.Default" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="android:textColor">?attr/colorPrimary</item>
     </style>
 </resources>
