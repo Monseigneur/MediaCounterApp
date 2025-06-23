@@ -29,10 +29,18 @@
         android:text="@string/increment"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
+    <Space
+        android:layout_width="@dimen/space_width"
+        android:layout_height="wrap_content" />
+
     <Button
         android:id="@+id/dec_button"
         android:text="@string/decrement"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_width="@dimen/view_button_height"
+        android:layout_height="wrap_content" />
+
+    <Space
+        android:layout_width="@dimen/edge_padding"
         android:layout_height="wrap_content" />
 </LinearLayout>
