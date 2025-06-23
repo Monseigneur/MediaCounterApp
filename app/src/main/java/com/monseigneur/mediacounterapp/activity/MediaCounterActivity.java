@@ -1,6 +1,5 @@
 package com.monseigneur.mediacounterapp.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -13,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.monseigneur.mediacounterapp.R;
@@ -33,11 +33,10 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 
-public class MediaCounterActivity extends Activity
+public class MediaCounterActivity extends AppCompatActivity
 {
     // Activity message identifiers
     private static final int NEW_MEDIA_COUNTER_REQUEST = 1;

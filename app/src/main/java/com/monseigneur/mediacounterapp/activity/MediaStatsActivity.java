@@ -1,10 +1,10 @@
 package com.monseigneur.mediacounterapp.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.monseigneur.mediacounterapp.databinding.MediaStatsActivityBinding;
@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * Created by Milan on 8/5/2016.
  */
-public class MediaStatsActivity extends Activity
+public class MediaStatsActivity extends AppCompatActivity
 {
     public static final String EPISODE_DATA = "episode_date";
 

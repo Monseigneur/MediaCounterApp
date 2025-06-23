@@ -1,12 +1,12 @@
 package com.monseigneur.mediacounterapp.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.monseigneur.mediacounterapp.R;
@@ -15,7 +15,7 @@ import com.monseigneur.mediacounterapp.model.MediaCounterDB;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 import com.monseigneur.mediacounterapp.viewmodel.MediaInfoViewModel;
 
-public class MediaInfoActivity extends Activity
+public class MediaInfoActivity extends AppCompatActivity
 {
     private static final String TAG = "MediaInfoActivity";
 
@@ -119,7 +119,7 @@ public class MediaInfoActivity extends Activity
         Intent result = new Intent();
         result.putExtra(MediaCounterActivity.MEDIA_INFO_STATUS, currentStatus);
         result.putExtra(MediaCounterActivity.MEDIA_COUNTER_NAME, name);
-        setResult(Activity.RESULT_OK, result);
+        setResult(AppCompatActivity.RESULT_OK, result);
         super.finish();
     }
 

@@ -49,4 +49,6 @@ dependencies {
     })
     implementation 'androidx.appcompat:appcompat:1.7.1'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.13.1'
+
+    implementation 'com.google.android.material:material:1.12.0'
 }

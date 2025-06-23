@@ -1,16 +1,16 @@
 package com.monseigneur.mediacounterapp.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.monseigneur.mediacounterapp.databinding.MediaCounterAddActivityBinding;
 
 /**
  * Created by Milan on 5/21/2016.
  */
-public class MediaCounterAddActivity extends Activity
+public class MediaCounterAddActivity extends AppCompatActivity
 {
     private MediaCounterAddActivityBinding binding;
 
@@ -28,7 +28,7 @@ public class MediaCounterAddActivity extends Activity
             String mediaName = binding.mediaName.getText().toString();
             result.putExtra(MediaCounterActivity.MEDIA_COUNTER_NAME, mediaName);
 
-            setResult(Activity.RESULT_OK, result);
+            setResult(AppCompatActivity.RESULT_OK, result);
             finish();
         });
     }
