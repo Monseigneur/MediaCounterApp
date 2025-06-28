@@ -1,17 +1,17 @@
 package com.monseigneur.mediacounterapp.activity;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
-import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -41,9 +41,6 @@ public class MediaCounterActivity extends AppCompatActivity
     // Activity message identifiers
     private static final int NEW_MEDIA_COUNTER_REQUEST = 1;
     private static final int MEDIA_INFO_STATUS_CHANGE_REQUEST = 2;
-    private static final int CREATE_BACKUP_FILE = 3;
-    private static final int CREATE_BACKUP_FILE_IMPORT = 4;
-    private static final int OPEN_IMPORT_FILE = 5;
 
     public static final String MEDIA_COUNTER_NAME = "media_name";
     public static final String MEDIA_INFO_STATUS = "media_info_status";
@@ -57,6 +54,30 @@ public class MediaCounterActivity extends AppCompatActivity
 
     private boolean incLocked;
     private Drawable defaultButtonBg;
+
+    private final ActivityResultLauncher<String> exportLauncher = registerForActivityResult(new ActivityResultContracts.CreateDocument("text/plain"),
+            uri -> {
+                boolean exportSuccess = exportData(uri);
+
+                showToast(exportSuccess, getString(R.string.export_succeeded), getString(R.string.export_failed));
+
+                setLockState(true);
+            });
+
+    private final ActivityResultLauncher<String[]> importLauncher = registerForActivityResult(new ActivityResultContracts.OpenDocument(),
+            uri -> {
+                boolean importSuccess = importData(uri);
+
+                showToast(importSuccess, getString(R.string.import_succeeded), getString(R.string.import_failed));
+
+                if (importSuccess)
+                {
+                    List<MediaData> media = db.getMediaCounters();
+                    adapter.update(media);
+                }
+
+                setLockState(true);
+            });
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -103,12 +124,20 @@ public class MediaCounterActivity extends AppCompatActivity
 
         binding.viewCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> adapter.setFilterMask(!isChecked));
 
-        binding.importDataButton.setOnClickListener(view -> {
-            // First create a backup and then try to import.
-            createBackupFile(true);
+        binding.importDataButton.setOnClickListener(_ -> {
+            importLauncher.launch(new String[]{"text/plain"});
         });
 
-        binding.exportDataButton.setOnClickListener(view -> createBackupFile(false));
+        binding.exportDataButton.setOnClickListener(_ -> {
+            if (db.isEmpty())
+            {
+                showToast(getString(R.string.export_empty));
+
+                return;
+            }
+
+            exportLauncher.launch(getDefaultExportFilename());
+        });
 
         binding.randomMediaButton.setOnClickListener(view -> getRandomMedia());
 
@@ -206,59 +235,9 @@ public class MediaCounterActivity extends AppCompatActivity
 
             adapter.updateStatus(name, newStatus);
         }
-        else if (requestCode == CREATE_BACKUP_FILE || requestCode == CREATE_BACKUP_FILE_IMPORT)
-        {
-            boolean importPath = (requestCode == CREATE_BACKUP_FILE_IMPORT);
-
-            Log.i("onActivityResult", "write backup data file, importPath " + importPath);
-            if (data != null)
-            {
-                Uri uri = data.getData();
-                boolean success = exportData(uri);
-
-                showFileMetadata(uri);
-
-                showToast(success, getString(R.string.export_succeeded), getString(R.string.export_failed));
-            }
-
-            if (importPath)
-            {
-                // If import, kick off the open import path.
-                openImportFile();
-            }
-            else
-            {
-                // Return to a locked state if just exporting.
-                setLockState(true);
-            }
-        }
-        else if (requestCode == OPEN_IMPORT_FILE)
-        {
-            Log.i("onActivityResult", "open import data file");
-            if (data != null)
-            {
-                Uri uri = data.getData();
-
-                showFileMetadata(uri);
-
-                boolean success = importData(uri);
-
-                showToast(success, getString(R.string.import_succeeded), getString(R.string.import_failed));
-
-                if (success)
-                {
-                    List<MediaData> mdList = db.getMediaCounters();
-
-                    adapter.update(mdList);
-                }
-
-                // Return to a locked state.
-                setLockState(true);
-            }
-        }
         else
         {
-            Log.e("onActivityResult", "unknown requestCode " + requestCode);
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -349,6 +328,7 @@ public class MediaCounterActivity extends AppCompatActivity
      */
     private void showToast(String text)
     {
+        Log.i("showToast", "showing toast [" + text + "]");
         Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
         toast.show();
     }
@@ -430,51 +410,6 @@ public class MediaCounterActivity extends AppCompatActivity
         p.recycle();
     }
 
-    private void openImportFile()
-    {
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("text/plain");
-
-        startActivityForResult(intent, OPEN_IMPORT_FILE);
-    }
-
-    private void createBackupFile(boolean isImport)
-    {
-        if (incLocked)
-        {
-            return;
-        }
-
-        boolean mediaCountersEmpty = db.isEmpty();
-
-        Log.i("createBackupFile", "isImport " + isImport + " mediaCountersEmpty " + mediaCountersEmpty);
-
-        if (mediaCountersEmpty)
-        {
-            if (isImport)
-            {
-                // Empty on the import path, skip trying to export the existing data.
-                openImportFile();
-            }
-            else
-            {
-                showToast(getString(R.string.export_empty));
-            }
-
-            return;
-        }
-
-        String fileName = "MCB_" + fileTimeStamp() + ".txt";
-
-        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TITLE, fileName);
-
-        startActivityForResult(intent, isImport ? CREATE_BACKUP_FILE_IMPORT : CREATE_BACKUP_FILE);
-    }
-
     private boolean importData(Uri uri)
     {
         if (uri == null)
@@ -530,7 +465,7 @@ public class MediaCounterActivity extends AppCompatActivity
         return success;
     }
 
-    private static String fileTimeStamp()
+    private static String getDefaultExportFilename()
     {
         Calendar date = Calendar.getInstance();
 
@@ -543,46 +478,6 @@ public class MediaCounterActivity extends AppCompatActivity
 
         Log.i("fileTimestamp", "DATE STRING: Y=" + year + " M=" + month + " D=" + dayOfMonth + " H=" + hour + " M=" + minute + " S=" + second);
 
-        return String.format(Locale.US, "%d%02d%02d_%02d%02d%02d", year, month, dayOfMonth, hour, minute, second);
-    }
-
-    private void showFileMetadata(Uri uri)
-    {
-        // Leveraged from example in documentation:
-        // https://developer.android.com/training/data-storage/shared/documents-files#examine-metadata
-
-        if (uri == null)
-        {
-            return;
-        }
-
-        try (Cursor cursor = getContentResolver().query(uri, null, null, null, null, null))
-        {
-            if (cursor == null || !cursor.moveToFirst())
-            {
-                return;
-            }
-
-            String displayName = cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
-
-            // Size may be not exist, so check if it is null first.
-            int sizeIndex = cursor.getColumnIndexOrThrow(OpenableColumns.SIZE);
-
-            String size;
-            if (!cursor.isNull(sizeIndex))
-            {
-                size = cursor.getString(sizeIndex);
-            }
-            else
-            {
-                size = "Unknown";
-            }
-
-            Log.i("showFileMetadata", "Display name: " + displayName + " size: " + size);
-        }
-        catch (Exception e)
-        {
-            Log.e("showFileMetadata", "caught exception " + e);
-        }
+        return String.format(Locale.US, "MCB_%d%02d%02d_%02d%02d%02d.txt", year, month, dayOfMonth, hour, minute, second);
     }
 }
