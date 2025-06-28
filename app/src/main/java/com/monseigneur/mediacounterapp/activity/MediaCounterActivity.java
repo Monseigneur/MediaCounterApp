@@ -39,7 +39,6 @@ import java.util.Locale;
 public class MediaCounterActivity extends AppCompatActivity
 {
     // Activity message identifiers
-    private static final int NEW_MEDIA_COUNTER_REQUEST = 1;
     private static final int MEDIA_INFO_STATUS_CHANGE_REQUEST = 2;
 
     public static final String MEDIA_COUNTER_NAME = "media_name";
@@ -54,6 +53,14 @@ public class MediaCounterActivity extends AppCompatActivity
 
     private boolean incLocked;
     private Drawable defaultButtonBg;
+
+    private final ActivityResultLauncher<Intent> newMediaLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == AppCompatActivity.RESULT_OK)
+                {
+                    handleNewMedia(result.getData());
+                }
+            });
 
     private final ActivityResultLauncher<String> exportLauncher = registerForActivityResult(new ActivityResultContracts.CreateDocument("text/plain"),
             uri -> {
@@ -146,8 +153,7 @@ public class MediaCounterActivity extends AppCompatActivity
         binding.lockButton.setOnClickListener(view -> setLockState(!incLocked));
 
         binding.newMediaButton.setOnClickListener(view -> {
-            Intent newMediaIntent = new Intent(this, MediaCounterAddActivity.class);
-            startActivityForResult(newMediaIntent, NEW_MEDIA_COUNTER_REQUEST);
+            newMediaLauncher.launch(new Intent(this, MediaCounterAddActivity.class));
         });
 
         incLocked = true;
@@ -202,31 +208,7 @@ public class MediaCounterActivity extends AppCompatActivity
             return;
         }
 
-        if (requestCode == NEW_MEDIA_COUNTER_REQUEST)
-        {
-            String name = data.getStringExtra(MEDIA_COUNTER_NAME);
-
-            if (name == null || name.isEmpty())
-            {
-                showToast("Invalid name");
-                return;
-            }
-
-            MediaData newMd = new MediaData(name, MediaCounterDB.getCurrentDate());
-
-            if (db.addMedia(newMd))
-            {
-                adapter.add(newMd);
-            }
-            else
-            {
-                // Media already exists, show a toast
-                showToast(getString(R.string.duplicate_media));
-            }
-
-            Log.i("onActivityResult", name);
-        }
-        else if (requestCode == MEDIA_INFO_STATUS_CHANGE_REQUEST)
+        if (requestCode == MEDIA_INFO_STATUS_CHANGE_REQUEST)
         {
             MediaCounterStatus newStatus = data.getSerializableExtra(MEDIA_INFO_STATUS, MediaCounterStatus.class);
             String name = data.getStringExtra(MediaCounterActivity.MEDIA_COUNTER_NAME);
@@ -318,6 +300,34 @@ public class MediaCounterActivity extends AppCompatActivity
         if (!removed)
         {
             adapter.notifyItemChanged(position);
+        }
+    }
+
+    private void handleNewMedia(Intent newMediaIntent)
+    {
+        if (newMediaIntent == null)
+        {
+            return;
+        }
+
+        String name = newMediaIntent.getStringExtra(MEDIA_COUNTER_NAME);
+
+        if (name == null || name.isEmpty())
+        {
+            showToast("Invalid name");
+            return;
+        }
+
+        MediaData newMedia = new MediaData(name, MediaCounterDB.getCurrentDate());
+
+        if (db.addMedia(newMedia))
+        {
+            adapter.add(newMedia);
+        }
+        else
+        {
+            // Media already exists, show a toast
+            showToast(getString(R.string.duplicate_media));
         }
     }
 
