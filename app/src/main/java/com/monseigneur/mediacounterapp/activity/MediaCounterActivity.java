@@ -38,9 +38,6 @@ import java.util.Locale;
 
 public class MediaCounterActivity extends AppCompatActivity
 {
-    // Activity message identifiers
-    private static final int MEDIA_INFO_STATUS_CHANGE_REQUEST = 2;
-
     public static final String MEDIA_COUNTER_NAME = "media_name";
     public static final String MEDIA_INFO_STATUS = "media_info_status";
 
@@ -59,6 +56,14 @@ public class MediaCounterActivity extends AppCompatActivity
                 if (result.getResultCode() == AppCompatActivity.RESULT_OK)
                 {
                     handleNewMedia(result.getData());
+                }
+            });
+
+    private final ActivityResultLauncher<Intent> showInfoLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == AppCompatActivity.RESULT_OK)
+                {
+                    handleStatusChange(result.getData());
                 }
             });
 
@@ -189,38 +194,7 @@ public class MediaCounterActivity extends AppCompatActivity
         b.putSerializable(MediaInfoActivity.MEDIA_INFO, viewModel);
         intent.putExtras(b);
 
-        startActivityForResult(intent, MEDIA_INFO_STATUS_CHANGE_REQUEST);
-    }
-
-    /**
-     * Handle Activity results
-     *
-     * @param requestCode the Activity request code
-     * @param resultCode  the Activity result code
-     * @param data        return data
-     */
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        Log.i("onActivityResult", "requestCode " + requestCode + " resultCode " + resultCode);
-
-        if (resultCode != RESULT_OK)
-        {
-            return;
-        }
-
-        if (requestCode == MEDIA_INFO_STATUS_CHANGE_REQUEST)
-        {
-            MediaCounterStatus newStatus = data.getSerializableExtra(MEDIA_INFO_STATUS, MediaCounterStatus.class);
-            String name = data.getStringExtra(MediaCounterActivity.MEDIA_COUNTER_NAME);
-            Log.i("onActivityResult", "media info status change " + newStatus + " for media [" + name + "]");
-            db.setStatus(name, newStatus);
-
-            adapter.updateStatus(name, newStatus);
-        }
-        else
-        {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
+        showInfoLauncher.launch(intent);
     }
 
     /**
@@ -329,6 +303,22 @@ public class MediaCounterActivity extends AppCompatActivity
             // Media already exists, show a toast
             showToast(getString(R.string.duplicate_media));
         }
+    }
+
+    private void handleStatusChange(Intent statusChangeIntent)
+    {
+        if (statusChangeIntent == null)
+        {
+            return;
+        }
+
+        MediaCounterStatus newStatus = statusChangeIntent.getSerializableExtra(MEDIA_INFO_STATUS, MediaCounterStatus.class);
+        String name = statusChangeIntent.getStringExtra(MediaCounterActivity.MEDIA_COUNTER_NAME);
+
+        Log.i("handleStatusChange", "media info status change " + newStatus + " for media [" + name + "]");
+        db.setStatus(name, newStatus);
+
+        adapter.updateStatus(name, newStatus);
     }
 
     /**
