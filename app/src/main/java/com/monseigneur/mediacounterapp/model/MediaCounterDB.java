@@ -143,7 +143,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
      */
     public boolean addNewMedia(String mediaName)
     {
-        MediaData media = new MediaData(mediaName, getCurrentDate());
+        MediaData media = new MediaData(mediaName, Util.getTimeNow());
 
         return addMedia(media);
     }
@@ -156,7 +156,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
     public void addEpisodeNow(String mediaName)
     {
         int episodeNumber = getNumEpisodes(mediaName) + 1;
-        addEpisode(mediaName, episodeNumber, getCurrentDate());
+        addEpisode(mediaName, episodeNumber, Util.getTimeNow());
     }
 
     /**
@@ -544,7 +544,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
         try (Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, KEY_TITLE + SQL_PARAMETER, new String[]{mediaName},
                 null, null, null, null))
         {
-            if (cursor == null || !cursor.moveToFirst())
+            if (!cursor.moveToFirst())
             {
                 return UNKNOWN_MEDIA;
             }
@@ -562,47 +562,6 @@ public class MediaCounterDB extends SQLiteOpenHelper
             Log.e("getIdForMedia", "caught exception " + e);
 
             return UNKNOWN_MEDIA;
-        }
-    }
-
-    /**
-     * Gets the current date
-     *
-     * @return the current date, in milliseconds
-     */
-    private static long getCurrentDate()
-    {
-        Calendar rightNow = Calendar.getInstance();
-
-        return rightNow.getTimeInMillis();
-    }
-
-    /**
-     * Converts a millisecond time into a date string
-     *
-     * @param val millisecond time
-     * @return the date string for the given time
-     */
-    public static String dateString(long val)
-    {
-        if (val == MediaCounterDB.UNKNOWN_DATE)
-        {
-            return "Unknown date";
-        }
-        else
-        {
-            Calendar date = Calendar.getInstance();
-            date.setTimeInMillis(val);
-
-            int dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
-            int month = date.get(Calendar.MONTH) + 1;       // January is 0?
-            int year = date.get(Calendar.YEAR);
-            int hour = date.get(Calendar.HOUR_OF_DAY);
-            int minute = date.get(Calendar.MINUTE);
-
-            Log.i("dateString", "DATE STRING: M=" + month + " D=" + dayOfMonth + " Y=" + year + " H=" + hour + " M=" + minute);
-
-            return String.format(Locale.US, "%d-%d-%d %02d:%02d", month, dayOfMonth, year, hour, minute);
         }
     }
 

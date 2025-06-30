@@ -74,7 +74,7 @@ public class MediaStatsAdapter extends RecyclerView.Adapter<MediaStatsAdapter.Vi
             binding.statsMediaName.setText(ed.getMediaName());
             binding.statsMediaName.setTextAppearance(statusAppearance);
 
-            binding.statsEpisodeDate.setText(MediaCounterDB.dateString(ed.getEpDate()));
+            binding.statsEpisodeDate.setText(Util.timestampToString(ed.getEpDate()));
             binding.statsEpisodeDate.setTextAppearance(statusAppearance);
         }
     }

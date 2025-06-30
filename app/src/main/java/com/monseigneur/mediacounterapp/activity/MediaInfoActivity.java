@@ -13,6 +13,7 @@ import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.databinding.MediaInfoActivityBinding;
 import com.monseigneur.mediacounterapp.model.MediaCounterDB;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
+import com.monseigneur.mediacounterapp.model.Util;
 import com.monseigneur.mediacounterapp.viewmodel.MediaInfoViewModel;
 
 public class MediaInfoActivity extends AppCompatActivity
@@ -44,7 +45,7 @@ public class MediaInfoActivity extends AppCompatActivity
         name = viewModel.mediaName;
         binding.mediaInfoName.setText(name);
 
-        String addedDate = MediaCounterDB.dateString(viewModel.addedDate);
+        String addedDate = Util.timestampToString(viewModel.addedDate);
         binding.mediaInfoAddedDate.setText("Added: " + addedDate);
 
         binding.mediaInfoCount.setText(String.valueOf(viewModel.epDates.size()));

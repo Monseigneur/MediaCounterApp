@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.monseigneur.mediacounterapp.databinding.MediaInfoListEntryBinding;
 import com.monseigneur.mediacounterapp.model.MediaCounterDB;
+import com.monseigneur.mediacounterapp.model.Util;
 
 import java.util.List;
 
@@ -62,7 +63,7 @@ public class MediaInfoAdapter extends RecyclerView.Adapter<MediaInfoAdapter.View
         public void setData(int position, long date)
         {
             binding.episodeNumber.setText(String.valueOf(position + 1));
-            binding.episodeDate.setText(MediaCounterDB.dateString(date));
+            binding.episodeDate.setText(Util.timestampToString(date));
         }
     }
 }
