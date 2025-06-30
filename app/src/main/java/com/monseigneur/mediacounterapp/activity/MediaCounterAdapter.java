@@ -25,12 +25,13 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
     private List<MediaData> filteredData;
     private boolean showAll;
 
-    public MediaCounterAdapter(List<MediaData> mdl, View.OnClickListener itemClickListener)
+    public MediaCounterAdapter(View.OnClickListener itemClickListener)
     {
         onItemClickListener = itemClickListener;
         showAll = true;
 
-        update(mdl);
+        originalData = new ArrayList<>();
+        filteredData = new ArrayList<>();
     }
 
     @NonNull

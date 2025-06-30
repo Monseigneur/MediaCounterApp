@@ -92,6 +92,29 @@ public class MediaCounterActivity extends AppCompatActivity
                 setLockState(true);
             });
 
+    private final View.OnClickListener onClickListener = view -> {
+        MediaCounterAdapter.ViewHolder vh = (MediaCounterAdapter.ViewHolder) view.getTag();
+        int position = vh.getAbsoluteAdapterPosition();
+
+        if (view.getId() == R.id.name_label)
+        {
+            MediaData md = adapter.getItem(position);
+            viewMediaInfo(md);
+        }
+        else if (view.getId() == R.id.inc_button)
+        {
+            changeCount(position, true);
+        }
+        else if (view.getId() == R.id.dec_button)
+        {
+            changeCount(position, false);
+        }
+        else
+        {
+            Log.i("onClickListener", "Unknown view click, id: " + view.getId());
+        }
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -105,30 +128,8 @@ public class MediaCounterActivity extends AppCompatActivity
 
         repository = new MediaCounterRepository(new MediaCounterDB(this), new IonMediaDataSerializer(false));
 
-        View.OnClickListener onClickListener = view -> {
-            MediaCounterAdapter.ViewHolder vh = (MediaCounterAdapter.ViewHolder) view.getTag();
-            int position = vh.getAbsoluteAdapterPosition();
-
-            if (view.getId() == R.id.name_label)
-            {
-                MediaData md = adapter.getItem(position);
-                viewMediaInfo(md);
-            }
-            else if (view.getId() == R.id.inc_button)
-            {
-                changeCount(position, true);
-            }
-            else if (view.getId() == R.id.dec_button)
-            {
-                changeCount(position, false);
-            }
-            else
-            {
-                Log.i("onClickListener", "Unknown view click, id: " + view.getId());
-            }
-        };
-
-        adapter = new MediaCounterAdapter(repository.getAllMedia(), onClickListener, callback);
+        adapter = new MediaCounterAdapter(onClickListener);
+        adapter.update(repository.getAllMedia());
         binding.mediaList.setAdapter(adapter);
         binding.mediaList.setLayoutManager(new LinearLayoutManager(this));
 
