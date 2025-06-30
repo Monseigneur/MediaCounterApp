@@ -1,13 +1,16 @@
 package com.monseigneur.mediacounterapp.viewmodel;
 
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
+import com.monseigneur.mediacounterapp.model.MediaData;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
 // This is to pass data from the Main Activity to the Media Info View Activity
 public class MediaInfoViewModel implements Serializable
 {
+    @Serial
     private static final long serialVersionUID = 0L;
 
     // What do I need to send to the other view?
@@ -20,12 +23,12 @@ public class MediaInfoViewModel implements Serializable
     public final long addedDate;
     public final List<Long> epDates;
 
-    public MediaInfoViewModel(String n, MediaCounterStatus s, long ad, List<Long> ed)
+    public MediaInfoViewModel(MediaData media)
     {
-        mediaName = n;
-        status = s;
-        addedDate = ad;
-        epDates = ed;
+        mediaName = media.getMediaName();
+        status = media.getStatus();
+        addedDate = media.getAddedDate();
+        epDates = media.getEpDates();
     }
 
     @Override

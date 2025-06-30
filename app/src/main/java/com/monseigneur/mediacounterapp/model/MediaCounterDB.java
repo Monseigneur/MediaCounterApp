@@ -111,13 +111,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
     // - Delete a media counter
     // - Change a media counter's state
 
-    /**
-     * Adds a new Media to the database
-     *
-     * @param md the MediaData to add
-     * @return true if successfully added
-     */
-    public boolean addMedia(MediaData md)
+    private boolean addMedia(MediaData md)
     {
         if (md == null)
         {
@@ -142,15 +136,27 @@ public class MediaCounterDB extends SQLiteOpenHelper
     }
 
     /**
-     * Adds a new Episode to an existing Media
+     * Adds a new Media to the database
+     *
+     * @param mediaName the name of the new MediaData
+     * @return true if successfully added
+     */
+    public boolean addNewMedia(String mediaName)
+    {
+        MediaData media = new MediaData(mediaName, getCurrentDate());
+
+        return addMedia(media);
+    }
+
+    /**
+     * Adds a new Episode to an existing Media with time now
      *
      * @param mediaName name of the Media
-     * @param date      date the Episode was completed
      */
-    public void addEpisode(String mediaName, long date)
+    public void addEpisodeNow(String mediaName)
     {
-        int epNum = getNumEpisodes(mediaName) + 1;
-        addEpisode(mediaName, epNum, date);
+        int episodeNumber = getNumEpisodes(mediaName) + 1;
+        addEpisode(mediaName, episodeNumber, getCurrentDate());
     }
 
     /**
@@ -392,7 +398,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
         try (Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, selection.toString(), parameters, null, null, null, null))
         {
-            if (cursor == null || !cursor.moveToFirst())
+            if (!cursor.moveToFirst())
             {
                 return mdList;
             }
@@ -419,7 +425,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
             return new ArrayList<>();
         }
 
-        Collections.sort(mdList, MediaData.BY_LAST_EPISODE);
+        mdList.sort(MediaData.BY_LAST_EPISODE);
 
         return mdList;
     }
@@ -479,7 +485,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
 
         try (Cursor cursor = db.query(TABLE_TITLES, TITLES_COLUMNS, null, null, null, null, null, null))
         {
-            if (cursor == null || !cursor.moveToFirst())
+            if (!cursor.moveToFirst())
             {
                 return data;
             }
@@ -564,7 +570,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
      *
      * @return the current date, in milliseconds
      */
-    public static long getCurrentDate()
+    private static long getCurrentDate()
     {
         Calendar rightNow = Calendar.getInstance();
 

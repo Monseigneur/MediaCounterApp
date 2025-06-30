@@ -106,7 +106,7 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
     {
         originalData.add(md);
 
-        Collections.sort(originalData, MediaData.BY_LAST_EPISODE);
+        originalData.sort(MediaData.BY_LAST_EPISODE);
 
         setFilterMask(showAll);
     }

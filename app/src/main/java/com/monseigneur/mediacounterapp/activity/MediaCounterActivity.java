@@ -22,6 +22,7 @@ import com.monseigneur.mediacounterapp.model.IDataSerializer;
 import com.monseigneur.mediacounterapp.model.IonEpisodeDataSerializer;
 import com.monseigneur.mediacounterapp.model.IonMediaDataSerializer;
 import com.monseigneur.mediacounterapp.model.MediaCounterDB;
+import com.monseigneur.mediacounterapp.model.MediaCounterRepository;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 import com.monseigneur.mediacounterapp.model.MediaData;
 import com.monseigneur.mediacounterapp.viewmodel.MediaInfoViewModel;
@@ -31,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -43,9 +43,10 @@ public class MediaCounterActivity extends AppCompatActivity
 
     private MainActivityBinding binding;
 
-    private IDataSerializer<MediaData> mediaDataSerializer;
     private IDataSerializer<EpisodeData> episodeDataSerializer;
-    private MediaCounterDB db;
+
+    private MediaCounterRepository repository;
+
     private MediaCounterAdapter adapter;
 
     private boolean incLocked;
@@ -84,7 +85,7 @@ public class MediaCounterActivity extends AppCompatActivity
 
                 if (importSuccess)
                 {
-                    List<MediaData> media = db.getMediaCounters();
+                    List<MediaData> media = repository.getAllMedia();
                     adapter.update(media);
                 }
 
@@ -100,12 +101,9 @@ public class MediaCounterActivity extends AppCompatActivity
 
         defaultButtonBg = binding.lockButton.getBackground();
 
-        mediaDataSerializer = new IonMediaDataSerializer(false);
         episodeDataSerializer = new IonEpisodeDataSerializer(MediaStatsActivity.STATS_USE_BINARY_SERIALIZATION);
-        db = new MediaCounterDB(this);
 
-        List<MediaData> mdList = db.getMediaCounters();
-        Log.i("onCreate", "list = " + mdList);
+        repository = new MediaCounterRepository(new MediaCounterDB(this), new IonMediaDataSerializer(false));
 
         View.OnClickListener onClickListener = view -> {
             MediaCounterAdapter.ViewHolder vh = (MediaCounterAdapter.ViewHolder) view.getTag();
@@ -130,7 +128,7 @@ public class MediaCounterActivity extends AppCompatActivity
             }
         };
 
-        adapter = new MediaCounterAdapter(mdList, onClickListener);
+        adapter = new MediaCounterAdapter(repository.getAllMedia(), onClickListener, callback);
         binding.mediaList.setAdapter(adapter);
         binding.mediaList.setLayoutManager(new LinearLayoutManager(this));
 
@@ -141,7 +139,7 @@ public class MediaCounterActivity extends AppCompatActivity
         });
 
         binding.exportDataButton.setOnClickListener(_ -> {
-            if (db.isEmpty())
+            if (repository.isEmpty())
             {
                 showToast(getString(R.string.export_empty));
 
@@ -188,8 +186,7 @@ public class MediaCounterActivity extends AppCompatActivity
             return;
         }
 
-        String name = md.getMediaName();
-        MediaInfoViewModel viewModel = new MediaInfoViewModel(name, md.getStatus(), md.getAddedDate(), db.getEpDates(name));
+        MediaInfoViewModel viewModel = new MediaInfoViewModel(md);
 
         b.putSerializable(MediaInfoActivity.MEDIA_INFO, viewModel);
         intent.putExtras(b);
@@ -247,33 +244,31 @@ public class MediaCounterActivity extends AppCompatActivity
 
         Log.i("changeCount", "increment " + increment + " " + md);
 
-        boolean removed = false;
+        boolean refresh = false;
         if (increment)
         {
-            long now = MediaCounterDB.getCurrentDate();
-            if (md.addEpisode(now))
+            if (repository.addEpisode(md.getMediaName()))
             {
-                db.addEpisode(md.getMediaName(), now);
-                db.setStatus(md.getMediaName(), md.getStatus());
+                refresh = true;
             }
         }
         else
         {
-            db.deleteEpisode(md.getMediaName());
-            if (md.removeEpisode())
-            {
-                db.setStatus(md.getMediaName(), md.getStatus());
-            }
-            else
+            int result = repository.removeEpisode(md.getMediaName());
+            if (result == 2)
             {
                 adapter.remove(position);
-                removed = true;
+            }
+
+            if (result != 2)
+            {
+                refresh = true;
             }
         }
 
-        if (!removed)
+        if (refresh)
         {
-            adapter.notifyItemChanged(position);
+            adapter.update(repository.getAllMedia());
         }
     }
 
@@ -286,17 +281,18 @@ public class MediaCounterActivity extends AppCompatActivity
 
         String name = newMediaIntent.getStringExtra(MEDIA_COUNTER_NAME);
 
+        Log.i("handleNewMedia", "new media [" + name + "]");
+
         if (name == null || name.isEmpty())
         {
             showToast("Invalid name");
             return;
         }
 
-        MediaData newMedia = new MediaData(name, MediaCounterDB.getCurrentDate());
-
-        if (db.addMedia(newMedia))
+        if (repository.addNewMedia(name))
         {
-            adapter.add(newMedia);
+            MediaData media = repository.getMedia(name);
+            adapter.add(media);
         }
         else
         {
@@ -316,7 +312,7 @@ public class MediaCounterActivity extends AppCompatActivity
         String name = statusChangeIntent.getStringExtra(MediaCounterActivity.MEDIA_COUNTER_NAME);
 
         Log.i("handleStatusChange", "media info status change " + newStatus + " for media [" + name + "]");
-        db.setStatus(name, newStatus);
+        repository.changeStatus(name, newStatus);
 
         adapter.updateStatus(name, newStatus);
     }
@@ -347,7 +343,7 @@ public class MediaCounterActivity extends AppCompatActivity
 
     private void getRandomMedia()
     {
-        String randomMedia = db.getRandomMedia();
+        String randomMedia = repository.getRandomMediaName();
 
         if (randomMedia != null)
         {
@@ -361,7 +357,7 @@ public class MediaCounterActivity extends AppCompatActivity
 
     private void showStats()
     {
-        List<EpisodeData> epData = db.getEpisodeData();
+        List<EpisodeData> epData = repository.getAllEpisodes();
         Log.i("showStats", "epData size " + epData.size());
 
         if (epData.isEmpty())
@@ -419,21 +415,17 @@ public class MediaCounterActivity extends AppCompatActivity
 
         Log.i("importData", "uri " + uri.getPath());
 
-        List<MediaData> mdList = new ArrayList<>();
+        boolean success = false;
         try (InputStream is = getContentResolver().openInputStream(uri))
         {
-            if (!mediaDataSerializer.deserialize(is, mdList))
-            {
-                return false;
-            }
+            success = repository.importData(is);
         }
         catch (IOException e)
         {
             Log.e("importData", "caught exception " + e);
-            return false;
         }
 
-        return db.importData(mdList);
+        return success;
     }
 
     private boolean exportData(Uri uri)
@@ -445,17 +437,10 @@ public class MediaCounterActivity extends AppCompatActivity
 
         Log.i("exportData", "uri " + uri.getPath());
 
-        List<MediaData> mdList = db.getMediaCounters();
-
-        if (mdList == null || mdList.isEmpty())
-        {
-            return false;
-        }
-
         boolean success = false;
         try (OutputStream os = getContentResolver().openOutputStream(uri))
         {
-            success = mediaDataSerializer.serialize(os, mdList);
+            success = repository.exportData(os);
         }
         catch (IOException e)
         {
