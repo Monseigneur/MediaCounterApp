@@ -1,7 +1,6 @@
 package com.monseigneur.mediacounterapp.activity;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -18,12 +17,12 @@ import java.util.List;
 
 public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapter.ViewHolder>
 {
-    private final View.OnClickListener onItemClickListener;
+    private final ListItemClickCallback listItemCallback;
     private List<MediaData> mediaList;
 
-    public MediaCounterAdapter(View.OnClickListener itemClickListener)
+    public MediaCounterAdapter(ListItemClickCallback listItemClickCallback)
     {
-        onItemClickListener = itemClickListener;
+        listItemCallback = listItemClickCallback;
 
         mediaList = new ArrayList<>();
     }
@@ -34,7 +33,7 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
     {
         MediaCounterListEntryBinding binding = MediaCounterListEntryBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
 
-        return new ViewHolder(binding, onItemClickListener);
+        return new ViewHolder(binding);
     }
 
     @Override
@@ -42,7 +41,7 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
     {
         MediaData md = mediaList.get(position);
 
-        holder.setData(md);
+        holder.setData(md, listItemCallback);
     }
 
     @Override
@@ -106,31 +105,30 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
     public static class ViewHolder extends RecyclerView.ViewHolder
     {
         private final MediaCounterListEntryBinding binding;
+        private MediaData media;
 
-        ViewHolder(@NonNull MediaCounterListEntryBinding b, View.OnClickListener onItemClickListener)
+        ViewHolder(@NonNull MediaCounterListEntryBinding b)
         {
             super(b.getRoot());
 
             binding = b;
-
-            setOnClickListener(binding.nameLabel, onItemClickListener);
-            setOnClickListener(binding.incButton, onItemClickListener);
-            setOnClickListener(binding.decButton, onItemClickListener);
         }
 
-        public void setData(MediaData md)
+        public void setData(MediaData md, ListItemClickCallback listItemCallback)
         {
+            media = md;
+
             int statusAppearance = Util.getStatusAppearance(md.getStatus());
 
             binding.nameLabel.setTextAppearance(statusAppearance);
             binding.nameLabel.setText(md.getMediaName());
             binding.countLabel.setText(String.valueOf(md.getCount()));
-        }
 
-        private void setOnClickListener(View view, View.OnClickListener onItemClickListener)
-        {
-            view.setTag(this);
-            view.setOnClickListener(onItemClickListener);
+            binding.nameLabel.setOnClickListener(_ -> listItemCallback.onClick(media, ListItemClickCallback.ItemClickType.INFO));
+            binding.countLabel.setOnClickListener(_ -> listItemCallback.onClick(media, ListItemClickCallback.ItemClickType.INFO));
+            binding.incButton.setOnClickListener(_ -> listItemCallback.onClick(media, ListItemClickCallback.ItemClickType.INCREMENT));
+            binding.decButton.setOnClickListener(_ -> listItemCallback.onClick(media, ListItemClickCallback.ItemClickType.DECREMENT));
+
         }
     }
 }

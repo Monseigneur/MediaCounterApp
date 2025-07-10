@@ -88,26 +88,14 @@ public class MediaCounterActivity extends AppCompatActivity
                 setLockState(true);
             });
 
-    private final View.OnClickListener onClickListener = view -> {
-        MediaCounterAdapter.ViewHolder vh = (MediaCounterAdapter.ViewHolder) view.getTag();
-        int position = vh.getAbsoluteAdapterPosition();
+    private final ListItemClickCallback listItemCallback = (mediaData, clickType) -> {
+        Log.i("listItemCallback", "got a click on md " + mediaData.getMediaName() + " type " + clickType);
 
-        if (view.getId() == R.id.name_label)
+        switch (clickType)
         {
-            MediaData md = adapter.getItem(position);
-            viewMediaInfo(md);
-        }
-        else if (view.getId() == R.id.inc_button)
-        {
-            changeCount(position, true);
-        }
-        else if (view.getId() == R.id.dec_button)
-        {
-            changeCount(position, false);
-        }
-        else
-        {
-            Log.i("onClickListener", "Unknown view click, id: " + view.getId());
+            case ListItemClickCallback.ItemClickType.INFO -> viewMediaInfo(mediaData);
+            case ListItemClickCallback.ItemClickType.INCREMENT -> changeCount(mediaData, true);
+            case ListItemClickCallback.ItemClickType.DECREMENT -> changeCount(mediaData, false);
         }
     };
 
@@ -122,7 +110,7 @@ public class MediaCounterActivity extends AppCompatActivity
 
         episodeDataSerializer = new IonEpisodeDataSerializer(MediaStatsActivity.STATS_USE_BINARY_SERIALIZATION);
 
-        adapter = new MediaCounterAdapter(onClickListener);
+        adapter = new MediaCounterAdapter(listItemCallback);
         binding.mediaList.setAdapter(adapter);
         binding.mediaList.setLayoutManager(new LinearLayoutManager(this));
 
@@ -224,10 +212,10 @@ public class MediaCounterActivity extends AppCompatActivity
     /**
      * Change the count of a tapped Media
      *
-     * @param position  the position of the tapped view
+     * @param media     the media tapped on
      * @param increment true to increment, false to decrement
      */
-    private void changeCount(int position, boolean increment)
+    private void changeCount(MediaData media, boolean increment)
     {
         if (incLocked)
         {
@@ -235,23 +223,21 @@ public class MediaCounterActivity extends AppCompatActivity
             return;
         }
 
-        MediaData md = adapter.getItem(position);
-
-        if (md == null)
+        if (media == null)
         {
-            Log.w("changeCount", "MediaData in view at position " + position + " is null!");
+            Log.w("changeCount", "MediaData is null!");
             return;
         }
 
-        Log.i("changeCount", "increment " + increment + " " + md);
+        Log.i("changeCount", "increment " + increment + " " + media);
 
         if (increment)
         {
-            mediaViewModel.addEpisode(md.getMediaName());
+            mediaViewModel.addEpisode(media.getMediaName());
         }
         else
         {
-            mediaViewModel.removeEpisode(md.getMediaName());
+            mediaViewModel.removeEpisode(media.getMediaName());
         }
     }
 
