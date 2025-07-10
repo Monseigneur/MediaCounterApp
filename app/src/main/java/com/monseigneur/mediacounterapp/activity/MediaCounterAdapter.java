@@ -4,7 +4,6 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -48,12 +47,6 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
     public int getItemCount()
     {
         return mediaList.size();
-    }
-
-    @Nullable
-    public MediaData getItem(int position)
-    {
-        return mediaList.get(position);
     }
 
     public void setMedia(List<MediaData> newMediaList)
