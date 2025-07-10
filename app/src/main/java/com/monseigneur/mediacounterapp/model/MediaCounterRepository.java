@@ -25,7 +25,7 @@ public class MediaCounterRepository
         return mediaList;
     }
 
-    public MediaData getMedia(String mediaName)
+    private MediaData getMedia(String mediaName)
     {
         return mediaList.stream().filter(md -> md.getMediaName().equals(mediaName)).findFirst().orElse(null);
     }
@@ -76,27 +76,21 @@ public class MediaCounterRepository
         return true;
     }
 
-    public int removeEpisode(String mediaName)
+    public boolean removeEpisode(String mediaName)
     {
         MediaData media = getMedia(mediaName);
 
         if (media == null)
         {
-            return 0;
+            return false;
         }
 
         int originalEpisodeCount = media.getCount();
 
-        int result = 1;
         MediaCounterStatus newStatus = MediaCounterStatus.ONGOING;
         if (originalEpisodeCount == 1)
         {
             newStatus = MediaCounterStatus.NEW;
-        }
-        else if (originalEpisodeCount == 0)
-        {
-            // This part is a hack for now
-            result = 2;
         }
 
         db.deleteEpisode(mediaName);
@@ -108,7 +102,7 @@ public class MediaCounterRepository
 
         updateCache();
 
-        return result;
+        return true;
     }
 
     public void changeStatus(String mediaName, MediaCounterStatus newStatus)

@@ -434,18 +434,6 @@ public class MediaCounterDB extends SQLiteOpenHelper
     }
 
     /**
-     * Checks if the database is empty or not
-     *
-     * @return if there are any MediaData present in the database.
-     */
-    public boolean isEmpty()
-    {
-        List<MediaData> mdList = getMediaCounters();
-
-        return mdList.isEmpty();
-    }
-
-    /**
      * Chooses a random Media that is not Complete or Dropped
      *
      * @return a random Media, or null if none available

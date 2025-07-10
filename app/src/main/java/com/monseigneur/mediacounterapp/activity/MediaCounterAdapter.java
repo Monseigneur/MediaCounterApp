@@ -6,32 +6,26 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.monseigneur.mediacounterapp.databinding.MediaCounterListEntryBinding;
-import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 import com.monseigneur.mediacounterapp.model.MediaData;
 import com.monseigneur.mediacounterapp.model.Util;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 
 public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapter.ViewHolder>
 {
     private final View.OnClickListener onItemClickListener;
-    private List<MediaData> originalData;
-    private List<MediaData> filteredData;
-    private boolean showAll;
+    private List<MediaData> mediaList;
 
     public MediaCounterAdapter(View.OnClickListener itemClickListener)
     {
         onItemClickListener = itemClickListener;
-        showAll = true;
 
-        originalData = new ArrayList<>();
-        filteredData = new ArrayList<>();
+        mediaList = new ArrayList<>();
     }
 
     @NonNull
@@ -46,7 +40,7 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
-        MediaData md = filteredData.get(position);
+        MediaData md = mediaList.get(position);
 
         holder.setData(md);
     }
@@ -54,87 +48,58 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
     @Override
     public int getItemCount()
     {
-        return filteredData.size();
+        return mediaList.size();
     }
 
     @Nullable
     public MediaData getItem(int position)
     {
-        return filteredData.get(position);
+        return mediaList.get(position);
     }
 
-    public void updateStatus(String mediaName, MediaCounterStatus newStatus)
+    public void setMedia(List<MediaData> newMediaList)
     {
-        int foundIndex = -1;
-        for (int i = 0; i < originalData.size(); i++)
+        if (mediaList == null || mediaList.isEmpty())
         {
-            if (originalData.get(i).getMediaName().equals(mediaName))
-            {
-                foundIndex = i;
-                break;
-            }
-        }
+            mediaList = newMediaList;
 
-        if (foundIndex == -1)
-        {
+            notifyItemRangeChanged(0, mediaList.size());
+
             return;
         }
 
-        MediaData md = originalData.get(foundIndex);
-        md.setStatus(newStatus);
-
-        setFilterMask(showAll);
-    }
-
-    public void setFilterMask(boolean filterShowAll)
-    {
-        EnumSet<MediaCounterStatus> filterMask = filterShowAll ? MediaCounterStatus.ALL_STATUSES : MediaCounterStatus.WATCHABLE_STATUSES;
-
-        showAll = filterShowAll;
-        filteredData.clear();
-        for (MediaData md : originalData)
+        DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback()
         {
-            if (filterMask.contains(md.getStatus()))
+            @Override
+            public int getOldListSize()
             {
-                filteredData.add(md);
+                return mediaList.size();
             }
-        }
 
-        notifyDataSetChanged();
-    }
-
-    public void add(MediaData md)
-    {
-        originalData.add(md);
-
-        originalData.sort(MediaData.BY_LAST_EPISODE);
-
-        setFilterMask(showAll);
-    }
-
-    public void remove(int position)
-    {
-        // If an element is removed from the filtered view, it needs to be removed from the original data as well.
-        MediaData md = filteredData.remove(position);
-
-        for (int i = 0; i < originalData.size(); i++)
-        {
-            if (originalData.get(i).getMediaName().equals(md.getMediaName()))
+            @Override
+            public int getNewListSize()
             {
-                originalData.remove(i);
-                break;
+                return newMediaList.size();
             }
-        }
 
-        notifyItemRemoved(position);
-    }
+            @Override
+            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition)
+            {
+                return mediaList.get(oldItemPosition).getMediaName().equals(newMediaList.get(newItemPosition).getMediaName());
+            }
 
-    public void update(List<MediaData> newMdList)
-    {
-        originalData = newMdList;
-        filteredData = new ArrayList<>(newMdList);
+            @Override
+            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition)
+            {
+                MediaData oldMedia = mediaList.get(oldItemPosition);
+                MediaData newMedia = newMediaList.get(newItemPosition);
 
-        notifyItemRangeChanged(0, originalData.size());
+                return oldMedia.equals(newMedia);
+            }
+        });
+
+        mediaList = newMediaList;
+        result.dispatchUpdatesTo(this);
     }
 
     // ViewHolder pattern to increase Adapter performance
@@ -159,7 +124,6 @@ public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapte
 
             binding.nameLabel.setTextAppearance(statusAppearance);
             binding.nameLabel.setText(md.getMediaName());
-
             binding.countLabel.setText(String.valueOf(md.getCount()));
         }
 

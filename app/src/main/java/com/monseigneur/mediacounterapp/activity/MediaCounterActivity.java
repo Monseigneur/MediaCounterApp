@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.monseigneur.mediacounterapp.R;
@@ -26,6 +27,7 @@ import com.monseigneur.mediacounterapp.model.MediaCounterRepository;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 import com.monseigneur.mediacounterapp.model.MediaData;
 import com.monseigneur.mediacounterapp.viewmodel.MediaInfoViewModel;
+import com.monseigneur.mediacounterapp.viewmodel.MediaViewModel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -45,7 +47,7 @@ public class MediaCounterActivity extends AppCompatActivity
 
     private IDataSerializer<EpisodeData> episodeDataSerializer;
 
-    private MediaCounterRepository repository;
+    private MediaViewModel mediaViewModel;
 
     private MediaCounterAdapter adapter;
 
@@ -82,12 +84,6 @@ public class MediaCounterActivity extends AppCompatActivity
                 boolean importSuccess = importData(uri);
 
                 showToast(importSuccess, getString(R.string.import_succeeded), getString(R.string.import_failed));
-
-                if (importSuccess)
-                {
-                    List<MediaData> media = repository.getAllMedia();
-                    adapter.update(media);
-                }
 
                 setLockState(true);
             });
@@ -126,21 +122,25 @@ public class MediaCounterActivity extends AppCompatActivity
 
         episodeDataSerializer = new IonEpisodeDataSerializer(MediaStatsActivity.STATS_USE_BINARY_SERIALIZATION);
 
-        repository = new MediaCounterRepository(new MediaCounterDB(this), new IonMediaDataSerializer(false));
-
         adapter = new MediaCounterAdapter(onClickListener);
-        adapter.update(repository.getAllMedia());
         binding.mediaList.setAdapter(adapter);
         binding.mediaList.setLayoutManager(new LinearLayoutManager(this));
 
-        binding.viewCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> adapter.setFilterMask(!isChecked));
+        mediaViewModel = new ViewModelProvider(this).get(MediaViewModel.class);
+        mediaViewModel.setRepository(new MediaCounterRepository(new MediaCounterDB(this), new IonMediaDataSerializer(false)));
+        mediaViewModel.getAllMedia().observe(this, mediaData -> {
+            adapter.setMedia(mediaData);
+        });
+
+        binding.viewCheckBox.setOnCheckedChangeListener((_, _) -> showToast("Not implemented"));
+
 
         binding.importDataButton.setOnClickListener(_ -> {
             importLauncher.launch(new String[]{"text/plain"});
         });
 
         binding.exportDataButton.setOnClickListener(_ -> {
-            if (repository.isEmpty())
+            if (mediaViewModel.isEmpty())
             {
                 showToast(getString(R.string.export_empty));
 
@@ -245,31 +245,13 @@ public class MediaCounterActivity extends AppCompatActivity
 
         Log.i("changeCount", "increment " + increment + " " + md);
 
-        boolean refresh = false;
         if (increment)
         {
-            if (repository.addEpisode(md.getMediaName()))
-            {
-                refresh = true;
-            }
+            mediaViewModel.addEpisode(md.getMediaName());
         }
         else
         {
-            int result = repository.removeEpisode(md.getMediaName());
-            if (result == 2)
-            {
-                adapter.remove(position);
-            }
-
-            if (result != 2)
-            {
-                refresh = true;
-            }
-        }
-
-        if (refresh)
-        {
-            adapter.update(repository.getAllMedia());
+            mediaViewModel.removeEpisode(md.getMediaName());
         }
     }
 
@@ -290,12 +272,7 @@ public class MediaCounterActivity extends AppCompatActivity
             return;
         }
 
-        if (repository.addNewMedia(name))
-        {
-            MediaData media = repository.getMedia(name);
-            adapter.add(media);
-        }
-        else
+        if (!mediaViewModel.addNewMedia(name))
         {
             // Media already exists, show a toast
             showToast(getString(R.string.duplicate_media));
@@ -313,9 +290,7 @@ public class MediaCounterActivity extends AppCompatActivity
         String name = statusChangeIntent.getStringExtra(MediaCounterActivity.MEDIA_COUNTER_NAME);
 
         Log.i("handleStatusChange", "media info status change " + newStatus + " for media [" + name + "]");
-        repository.changeStatus(name, newStatus);
-
-        adapter.updateStatus(name, newStatus);
+        mediaViewModel.changeStatus(name, newStatus);
     }
 
     /**
@@ -344,7 +319,7 @@ public class MediaCounterActivity extends AppCompatActivity
 
     private void getRandomMedia()
     {
-        String randomMedia = repository.getRandomMediaName();
+        String randomMedia = mediaViewModel.getRandomMediaName();
 
         if (randomMedia != null)
         {
@@ -358,7 +333,7 @@ public class MediaCounterActivity extends AppCompatActivity
 
     private void showStats()
     {
-        List<EpisodeData> epData = repository.getAllEpisodes();
+        List<EpisodeData> epData = mediaViewModel.getAllEpisodes();
         Log.i("showStats", "epData size " + epData.size());
 
         if (epData.isEmpty())
@@ -419,7 +394,7 @@ public class MediaCounterActivity extends AppCompatActivity
         boolean success = false;
         try (InputStream is = getContentResolver().openInputStream(uri))
         {
-            success = repository.importData(is);
+            success = mediaViewModel.importData(is);
         }
         catch (IOException e)
         {
@@ -441,7 +416,7 @@ public class MediaCounterActivity extends AppCompatActivity
         boolean success = false;
         try (OutputStream os = getContentResolver().openOutputStream(uri))
         {
-            success = repository.exportData(os);
+            success = mediaViewModel.exportData(os);
         }
         catch (IOException e)
         {
