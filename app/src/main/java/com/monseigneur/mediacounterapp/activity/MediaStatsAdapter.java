@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.monseigneur.mediacounterapp.databinding.MediaStatsListEntryBinding;
 import com.monseigneur.mediacounterapp.model.EpisodeData;
-import com.monseigneur.mediacounterapp.model.MediaCounterDB;
 import com.monseigneur.mediacounterapp.model.Util;
 
 import java.util.List;

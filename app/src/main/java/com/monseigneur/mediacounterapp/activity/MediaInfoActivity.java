@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.databinding.MediaInfoActivityBinding;
-import com.monseigneur.mediacounterapp.model.MediaCounterDB;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 import com.monseigneur.mediacounterapp.model.Util;
 import com.monseigneur.mediacounterapp.viewmodel.MediaInfoViewModel;

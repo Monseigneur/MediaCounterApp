@@ -5,20 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Environment;
 import android.util.Log;
 
-import com.monseigneur.mediacounterapp.R;
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
@@ -52,9 +46,8 @@ public class MediaCounterDB extends SQLiteOpenHelper
     private static final String SQL_OR = " or ";
 
     private static final int UNKNOWN_MEDIA = -1;
-    private static final long UNKNOWN_DATE = 0;
 
-    private SQLiteDatabase db;
+    private final SQLiteDatabase db;
 
     public MediaCounterDB(Context context)
     {
