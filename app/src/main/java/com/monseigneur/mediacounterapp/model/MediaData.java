@@ -1,5 +1,7 @@
 package com.monseigneur.mediacounterapp.model;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -8,10 +10,13 @@ import java.util.Objects;
 /**
  * Created by Milan on 5/21/2016.
  */
-public class MediaData
+public class MediaData implements Serializable
 {
+    @Serial
+    private static final long serialVersionUID = 0L;
+
     private final String mediaName;
-    private MediaCounterStatus status;
+    private final MediaCounterStatus status;
     private final long addedDate;
     private final List<Long> epDates;
 
@@ -73,45 +78,6 @@ public class MediaData
     }
 
     /**
-     * Add the latest episode
-     *
-     * @param date Date of the episode to add.
-     * @return true if add was successful.
-     */
-    public boolean addEpisode(long date)
-    {
-        boolean updated = false;
-
-        if (status != MediaCounterStatus.COMPLETE)
-        {
-            epDates.add(date);
-            updateStatus();
-            updated = true;
-        }
-
-        return updated;
-    }
-
-    /**
-     * Remove the latest episode
-     *
-     * @return true if there was an episode to remove
-     */
-    public boolean removeEpisode()
-    {
-        boolean updated = false;
-
-        if (!epDates.isEmpty())
-        {
-            epDates.remove(epDates.size() - 1);
-            updateStatus();
-            updated = true;
-        }
-
-        return updated;
-    }
-
-    /**
      * Get the date the Media was added
      *
      * @return the date the Media was added
@@ -151,36 +117,10 @@ public class MediaData
         return status;
     }
 
-    /**
-     * Set the status of the Media
-     *
-     * @param status the new status of the Media
-     */
-    public void setStatus(MediaCounterStatus status)
-    {
-        this.status = status;
-    }
-
     @Override
     public String toString()
     {
         return "[" + mediaName + ": " + epDates.size() + " (" + status + ")]";
-    }
-
-    /**
-     * Update the status of the Media
-     */
-    private void updateStatus()
-    {
-        // TODO Want to do some extra checks to not allow any illegal status transitions?
-        if (epDates.isEmpty())
-        {
-            status = MediaCounterStatus.NEW;
-        }
-        else
-        {
-            status = MediaCounterStatus.ONGOING;
-        }
     }
 
     /**

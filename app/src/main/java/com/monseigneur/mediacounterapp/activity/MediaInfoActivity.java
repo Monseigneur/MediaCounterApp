@@ -12,8 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.databinding.MediaInfoActivityBinding;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
+import com.monseigneur.mediacounterapp.model.MediaData;
 import com.monseigneur.mediacounterapp.model.Util;
-import com.monseigneur.mediacounterapp.viewmodel.MediaInfoViewModel;
 
 public class MediaInfoActivity extends AppCompatActivity
 {
@@ -37,25 +37,25 @@ public class MediaInfoActivity extends AppCompatActivity
         Intent i = getIntent();
         Bundle b = i.getExtras();
 
-        MediaInfoViewModel viewModel = b.getSerializable(MEDIA_INFO, MediaInfoViewModel.class);
+        MediaData media = b.getSerializable(MEDIA_INFO, MediaData.class);
 
-        Log.i(TAG, "onCreate: " + viewModel.toString());
+        Log.i(TAG, "onCreate: " + media.toString());
 
-        name = viewModel.mediaName;
+        name = media.getMediaName();
         binding.mediaInfoName.setText(name);
 
-        String addedDate = Util.timestampToString(viewModel.addedDate);
+        String addedDate = Util.timestampToString(media.getAddedDate());
         binding.mediaInfoAddedDate.setText("Added: " + addedDate);
 
-        binding.mediaInfoCount.setText(String.valueOf(viewModel.epDates.size()));
+        binding.mediaInfoCount.setText(String.valueOf(media.getCount()));
 
         binding.mediaInfoStatusButton.setOnClickListener(this::changeStatus);
 
-        currentStatus = viewModel.status;
+        currentStatus = media.getStatus();
         // Set the initial state
         setButtonText();
 
-        MediaInfoAdapter adapter = new MediaInfoAdapter(viewModel.epDates);
+        MediaInfoAdapter adapter = new MediaInfoAdapter(media.getEpDates());
 
         binding.mediaInfoEpList.setAdapter(adapter);
         binding.mediaInfoEpList.setLayoutManager(new LinearLayoutManager(this));
@@ -66,23 +66,13 @@ public class MediaInfoActivity extends AppCompatActivity
      */
     private void setButtonText()
     {
-        int textId;
-        switch (currentStatus)
+        int textId = switch (currentStatus)
         {
-            default:
-            case NEW:
-                textId = R.string.new_text;
-                break;
-            case ONGOING:
-                textId = R.string.ongoing_text;
-                break;
-            case COMPLETE:
-                textId = R.string.complete_text;
-                break;
-            case DROPPED:
-                textId = R.string.dropped_text;
-                break;
-        }
+            case ONGOING -> R.string.ongoing_text;
+            case COMPLETE -> R.string.complete_text;
+            case DROPPED -> R.string.dropped_text;
+            default -> R.string.new_text;
+        };
 
         binding.mediaInfoStatusButton.setText(textId);
     }
@@ -92,24 +82,14 @@ public class MediaInfoActivity extends AppCompatActivity
         Log.i(TAG, "changeStatus: changing status");
 
         // Cycle through the statuses
-        MediaCounterStatus newStatus;
-        switch (currentStatus)
+        currentStatus = switch (currentStatus)
         {
-            default:
-            case NEW:
-                newStatus = MediaCounterStatus.ONGOING;
-                break;
-            case ONGOING:
-                newStatus = MediaCounterStatus.COMPLETE;
-                break;
-            case COMPLETE:
-                newStatus = MediaCounterStatus.DROPPED;
-                break;
-            case DROPPED:
-                newStatus = MediaCounterStatus.NEW;
-                break;
-        }
-        currentStatus = newStatus;
+            case ONGOING -> MediaCounterStatus.COMPLETE;
+            case COMPLETE -> MediaCounterStatus.DROPPED;
+            case DROPPED -> MediaCounterStatus.NEW;
+            default -> MediaCounterStatus.ONGOING;
+        };
+
         setButtonText();
     }
 

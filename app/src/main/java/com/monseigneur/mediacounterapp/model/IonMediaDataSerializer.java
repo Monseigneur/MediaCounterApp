@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class IonMediaDataSerializer implements IDataSerializer<MediaData>
 {
@@ -101,32 +102,24 @@ public class IonMediaDataSerializer implements IDataSerializer<MediaData>
             for (IonValue iv : elements)
             {
                 IonStruct val = (IonStruct) iv;
+
                 String mediaName = ((IonText) val.get(DATA_FIELD_TITLE)).stringValue();
                 int statusVal = ((IonInt) val.get(DATA_FIELD_STATUS)).intValue();
                 MediaCounterStatus status = MediaCounterStatus.from(statusVal);
                 long addedDate = ((IonInt) val.get(DATA_FIELD_ADDED)).longValue();
 
-                // Don't set status initially so that episodes can be added without being blocked.
-                MediaData md = new MediaData(mediaName, addedDate);
+                IonList episodesDates = (IonList) val.get(DATA_FIELD_EPISODES);
 
-                IonList episodes = (IonList) val.get(DATA_FIELD_EPISODES);
-                for (IonValue epIv : episodes)
-                {
-                    long epDate = ((IonInt) epIv).longValue();
-                    if (!md.addEpisode(epDate))
-                    {
-                        return false;
-                    }
-                }
+                List<Long> episodes = episodesDates.stream().map(epIv -> ((IonInt) epIv).longValue()).collect(Collectors.toList());
 
-                md.setStatus(status);
+                MediaData media = new MediaData(mediaName, status, addedDate, episodes);
 
                 if (VERBOSE)
                 {
-                    Log.i("deserialize", "imported " + md);
+                    Log.i("deserialize", "imported " + media);
                 }
 
-                itemList.add(md);
+                itemList.add(media);
             }
         }
         catch (Exception e)

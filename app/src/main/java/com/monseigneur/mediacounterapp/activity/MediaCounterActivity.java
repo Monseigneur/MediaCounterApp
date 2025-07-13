@@ -26,7 +26,6 @@ import com.monseigneur.mediacounterapp.model.MediaCounterDB;
 import com.monseigneur.mediacounterapp.model.MediaCounterRepository;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 import com.monseigneur.mediacounterapp.model.MediaData;
-import com.monseigneur.mediacounterapp.viewmodel.MediaInfoViewModel;
 import com.monseigneur.mediacounterapp.viewmodel.MediaViewModel;
 
 import java.io.ByteArrayOutputStream;
@@ -116,16 +115,12 @@ public class MediaCounterActivity extends AppCompatActivity
 
         mediaViewModel = new ViewModelProvider(this).get(MediaViewModel.class);
         mediaViewModel.setRepository(new MediaCounterRepository(new MediaCounterDB(this), new IonMediaDataSerializer(false)));
-        mediaViewModel.getAllMedia().observe(this, mediaData -> {
-            adapter.setMedia(mediaData);
-        });
+        mediaViewModel.getAllMedia().observe(this, mediaData -> adapter.setMedia(mediaData));
 
         binding.viewCheckBox.setOnCheckedChangeListener((_, _) -> showToast("Not implemented"));
 
 
-        binding.importDataButton.setOnClickListener(_ -> {
-            importLauncher.launch(new String[]{"text/plain"});
-        });
+        binding.importDataButton.setOnClickListener(_ -> importLauncher.launch(new String[]{"text/plain"}));
 
         binding.exportDataButton.setOnClickListener(_ -> {
             if (mediaViewModel.isEmpty())
@@ -138,15 +133,13 @@ public class MediaCounterActivity extends AppCompatActivity
             exportLauncher.launch(getDefaultExportFilename());
         });
 
-        binding.randomMediaButton.setOnClickListener(view -> getRandomMedia());
+        binding.randomMediaButton.setOnClickListener(_ -> getRandomMedia());
 
-        binding.statsButton.setOnClickListener(view -> showStats());
+        binding.statsButton.setOnClickListener(_ -> showStats());
 
-        binding.lockButton.setOnClickListener(view -> setLockState(!incLocked));
+        binding.lockButton.setOnClickListener(_ -> setLockState(!incLocked));
 
-        binding.newMediaButton.setOnClickListener(view -> {
-            newMediaLauncher.launch(new Intent(this, MediaCounterAddActivity.class));
-        });
+        binding.newMediaButton.setOnClickListener(_ -> newMediaLauncher.launch(new Intent(this, MediaCounterAddActivity.class)));
 
         incLocked = true;
         setLockState(true);
@@ -161,23 +154,21 @@ public class MediaCounterActivity extends AppCompatActivity
     /**
      * Start the Media Info view for a selected Media view
      *
-     * @param md the MediaData in the tapped view
+     * @param media the MediaData in the tapped view
      */
-    public void viewMediaInfo(MediaData md)
+    public void viewMediaInfo(MediaData media)
     {
         Intent intent = new Intent(this, MediaInfoActivity.class);
 
         Bundle b = new Bundle();
 
-        if (md == null)
+        if (media == null)
         {
             Log.w("viewMediaInfo", "tapped MediaData in view is null!");
             return;
         }
 
-        MediaInfoViewModel viewModel = new MediaInfoViewModel(md);
-
-        b.putSerializable(MediaInfoActivity.MEDIA_INFO, viewModel);
+        b.putSerializable(MediaInfoActivity.MEDIA_INFO, media);
         intent.putExtras(b);
 
         showInfoLauncher.launch(intent);
@@ -350,7 +341,7 @@ public class MediaCounterActivity extends AppCompatActivity
         Intent statsIntent = new Intent(this, MediaStatsActivity.class);
         Bundle b = new Bundle();
 
-        b.putSerializable(MediaStatsActivity.EPISODE_DATA, (Serializable) bos.toByteArray());
+        b.putSerializable(MediaStatsActivity.EPISODE_DATA, bos.toByteArray());
 
         statsIntent.putExtras(b);
         showDataSize(b);
