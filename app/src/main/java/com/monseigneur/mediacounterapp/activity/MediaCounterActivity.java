@@ -7,7 +7,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.util.Log;
-import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -32,7 +33,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -117,21 +117,7 @@ public class MediaCounterActivity extends AppCompatActivity
         mediaViewModel.setRepository(new MediaCounterRepository(new MediaCounterDB(this), new IonMediaDataSerializer(false)));
         mediaViewModel.getAllMedia().observe(this, mediaData -> adapter.setMedia(mediaData));
 
-        binding.viewCheckBox.setOnCheckedChangeListener((_, _) -> showToast("Not implemented"));
-
-
-        binding.importDataButton.setOnClickListener(_ -> importLauncher.launch(new String[]{"text/plain"}));
-
-        binding.exportDataButton.setOnClickListener(_ -> {
-            if (mediaViewModel.isEmpty())
-            {
-                showToast(getString(R.string.export_empty));
-
-                return;
-            }
-
-            exportLauncher.launch(getDefaultExportFilename());
-        });
+        binding.viewCheckBox.setOnCheckedChangeListener((_, _) -> showToast("Not yet implemented"));
 
         binding.randomMediaButton.setOnClickListener(_ -> getRandomMedia());
 
@@ -139,10 +125,49 @@ public class MediaCounterActivity extends AppCompatActivity
 
         binding.lockButton.setOnClickListener(_ -> setLockState(!incLocked));
 
-        binding.newMediaButton.setOnClickListener(_ -> newMediaLauncher.launch(new Intent(this, MediaCounterAddActivity.class)));
+        binding.fab.setOnClickListener(_ -> newMediaLauncher.launch(new Intent(this, MediaCounterAddActivity.class)));
 
         incLocked = true;
         setLockState(true);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        int id = item.getItemId();
+
+        if (id == R.id.action_import)
+        {
+            importLauncher.launch(new String[]{"text/plain"});
+            return true;
+        }
+        else if (id == R.id.action_export)
+        {
+            if (!mediaViewModel.isEmpty())
+            {
+                exportLauncher.launch(getDefaultExportFilename());
+            }
+            else
+            {
+                showToast(getString(R.string.export_empty));
+            }
+
+            return true;
+        }
+        else if (id == R.id.action_settings)
+        {
+            showToast("Not yet implemented");
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -186,17 +211,11 @@ public class MediaCounterActivity extends AppCompatActivity
         {
             binding.lockButton.setText(R.string.unlock_inc);
             binding.lockButton.setBackground(defaultButtonBg);
-
-            binding.importDataButton.setVisibility(View.GONE);
-            binding.exportDataButton.setVisibility(View.GONE);
         }
         else
         {
             binding.lockButton.setText(R.string.lock_inc);
             binding.lockButton.setBackgroundColor(Color.RED);
-
-            binding.importDataButton.setVisibility(View.VISIBLE);
-            binding.exportDataButton.setVisibility(View.VISIBLE);
         }
     }
 

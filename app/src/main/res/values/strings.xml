@@ -4,7 +4,6 @@
     <string name="media_name_hint">Media Name</string>
     <string name="increment">+</string>
     <string name="decrement">-</string>
-    <string name="new_media_name">New Media</string>
     <string name="unlock_inc">Unlock</string>
     <string name="lock_inc">Lock</string>
     <string name="random_button_name">Random Selection</string>
@@ -18,9 +17,10 @@
     <string name="not_complete">Not Complete</string>
     <string name="add_new_media_button">Add</string>
     <string name="add_new_media_label">Add a New Media Counter</string>
-    <string name="import_data">I</string>
-    <string name="export_data">E</string>
 
+    <string name="action_settings">Settings</string>
+    <string name="action_import">Import</string>
+    <string name="action_export">Export</string>
 
     <string name="duplicate_media">Media already exists!</string>
     <string name="export_empty">Nothing to export</string>
