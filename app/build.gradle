@@ -1,3 +1,8 @@
+def versionMajor = 1
+def versionMinor = 1
+def versionPatch = 0
+def versionBuild = 0
+
 apply plugin: 'com.android.application'
 
 android {
@@ -6,8 +11,8 @@ android {
         applicationId "com.example.MediaCounterApp"
         minSdkVersion 35
         targetSdkVersion 35
-        versionCode 1
-        versionName "1.0"
+        versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -19,6 +24,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
     namespace 'com.monseigneur.mediacounterapp'
 

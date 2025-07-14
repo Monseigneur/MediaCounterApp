@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.monseigneur.mediacounterapp.BuildConfig;
 import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.databinding.MainActivityBinding;
 import com.monseigneur.mediacounterapp.model.EpisodeData;
@@ -164,6 +165,11 @@ public class MediaCounterActivity extends AppCompatActivity
         else if (id == R.id.action_settings)
         {
             showToast("Not yet implemented");
+            return true;
+        }
+        else if (id == R.id.action_version)
+        {
+            showToast(BuildConfig.VERSION_NAME);
             return true;
         }
 
