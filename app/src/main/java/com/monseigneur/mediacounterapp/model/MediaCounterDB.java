@@ -546,6 +546,12 @@ public class MediaCounterDB extends SQLiteOpenHelper
         }
     }
 
+    private void deleteAll()
+    {
+        db.execSQL("DELETE from " + TABLE_TITLES);
+        db.execSQL("DELETE from " + TABLE_EPISODES);
+    }
+
     /**
      * Imports data into the database
      *
@@ -560,14 +566,18 @@ public class MediaCounterDB extends SQLiteOpenHelper
             return false;
         }
 
+        db.beginTransaction();
+
+        deleteAll();
+
+        boolean importFailed = false;
         for (MediaData md : importList)
         {
-            // Remove the original one. Probably want to change to some kind of merging scheme.
-            deleteMedia(md.getMediaName());
-
             if (!addMedia(md))
             {
                 Log.e("readData", "Failed to add MediaData " + md);
+                importFailed = true;
+                break;
             }
 
             int i = 1;
@@ -576,10 +586,15 @@ public class MediaCounterDB extends SQLiteOpenHelper
                 addEpisode(md.getMediaName(), i, epDate);
                 i++;
             }
-
-            Log.i("importData", "Imported " + md);
         }
 
-        return true;
+        if (!importFailed)
+        {
+            db.setTransactionSuccessful();
+        }
+
+        db.endTransaction();
+
+        return !importFailed;
     }
 }
