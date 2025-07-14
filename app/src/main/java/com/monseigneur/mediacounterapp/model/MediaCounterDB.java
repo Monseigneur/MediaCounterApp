@@ -552,6 +552,16 @@ public class MediaCounterDB extends SQLiteOpenHelper
         db.execSQL("DELETE from " + TABLE_EPISODES);
     }
 
+    public void deleteAllMedia()
+    {
+        db.beginTransaction();
+
+        deleteAll();
+
+        db.setTransactionSuccessful();
+        db.endTransaction();
+    }
+
     /**
      * Imports data into the database
      *

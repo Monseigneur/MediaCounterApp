@@ -150,6 +150,13 @@ public class MediaCounterRepository
         return mediaDataSerializer.serialize(os, mdList);
     }
 
+    public void deleteAllMedia()
+    {
+        db.deleteAllMedia();
+
+        updateCache();
+    }
+
     private void updateCache()
     {
         mediaList = db.getMediaCounters();

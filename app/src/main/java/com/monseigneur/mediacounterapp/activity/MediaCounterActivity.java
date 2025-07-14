@@ -140,14 +140,21 @@ public class MediaCounterActivity extends AppCompatActivity
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu)
+    {
+        menu.findItem(R.id.action_delete_all).setVisible(!incLocked);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
         int id = item.getItemId();
+        boolean handled = true;
 
         if (id == R.id.action_import)
         {
             importLauncher.launch(new String[]{"text/plain"});
-            return true;
         }
         else if (id == R.id.action_export)
         {
@@ -159,21 +166,29 @@ public class MediaCounterActivity extends AppCompatActivity
             {
                 showToast(getString(R.string.export_empty));
             }
+        }
+        else if (id == R.id.action_delete_all)
+        {
+            mediaViewModel.deleteAllMedia();
 
-            return true;
+            showToast(getString(R.string.all_media_deleted));
+
+            setLockState(true);
         }
         else if (id == R.id.action_settings)
         {
             showToast("Not yet implemented");
-            return true;
         }
         else if (id == R.id.action_version)
         {
             showToast(BuildConfig.VERSION_NAME);
-            return true;
+        }
+        else
+        {
+            handled = super.onOptionsItemSelected(item);
         }
 
-        return super.onOptionsItemSelected(item);
+        return handled;
     }
 
     @Override

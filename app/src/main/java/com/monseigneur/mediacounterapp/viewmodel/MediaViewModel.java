@@ -110,6 +110,13 @@ public class MediaViewModel extends ViewModel
         return success;
     }
 
+    public void deleteAllMedia()
+    {
+        repository.deleteAllMedia();
+
+        updateLive();
+    }
+
     private void updateLive()
     {
         mediaData.setValue(repository.getAllMedia());
