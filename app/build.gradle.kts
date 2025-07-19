@@ -1,26 +1,27 @@
+val versionMajor = 1
+val versionMinor = 2
+val versionPatch = 0
+val versionBuild = 0
+
 plugins {
-    alias libs.plugins.android.application
+    alias(libs.plugins.android.application)
 }
 
-def versionMajor = 1
-def versionMinor = 2
-def versionPatch = 0
-def versionBuild = 0
-
 android {
+    namespace = "com.monseigneur.mediacounterapp"
     compileSdkVersion(35)
     defaultConfig {
         applicationId = "com.monseigneur.MediaCounterApp"
-        minSdkVersion(35)
-        targetSdkVersion(35)
+        minSdk = 35
+        targetSdk = 35
         versionCode = versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
         versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
-        testInstrumentationRunner("androidx.test.runner.AndroidJUnitRunner")
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
-            minifyEnabled(false)
-            proguardFiles(getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro')
+            isMinifyEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
     }
 
@@ -28,11 +29,10 @@ android {
         viewBinding = true
         buildConfig = true
     }
-    namespace 'com.monseigneur.mediacounterapp'
 
     testOptions {
         unitTests.all {
-            useJUnitPlatform()
+            it.useJUnitPlatform()
         }
     }
 }
@@ -46,11 +46,11 @@ java {
 // Found in https://stackoverflow.com/questions/75274720/a-failure-occurred-while-executing-appcheckdebugduplicateclasses/75315276#75315276 after
 // upgrading to new gradle and SDK.
 configurations.implementation {
-    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+    exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk8")
 }
 
 dependencies {
-    implementation(files('libs/ion-java-1.9.5.jar'))
+    implementation(files("libs/ion-java-1.9.5.jar"))
     implementation(libs.androidx.recyclerview)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.appcompat)

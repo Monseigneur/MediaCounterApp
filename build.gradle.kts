@@ -9,5 +9,5 @@ plugins {
      * see Applying external plugins with same version to subprojects.
      */
 
-    alias libs.plugins.android.application apply false
+    alias(libs.plugins.android.application) apply false
 }

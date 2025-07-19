@@ -38,4 +38,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "MediaCounterApp"
-include(':app')
+include(":app")
