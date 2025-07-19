@@ -1,24 +1,26 @@
+plugins {
+    alias libs.plugins.android.application
+}
+
 def versionMajor = 1
 def versionMinor = 2
 def versionPatch = 0
 def versionBuild = 0
 
-apply plugin: 'com.android.application'
-
 android {
-    compileSdkVersion 35
+    compileSdkVersion(35)
     defaultConfig {
-        applicationId "com.monseigneur.MediaCounterApp"
-        minSdkVersion 35
-        targetSdkVersion 35
-        versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
-        versionName "${versionMajor}.${versionMinor}.${versionPatch}"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        applicationId = "com.monseigneur.MediaCounterApp"
+        minSdkVersion(35)
+        targetSdkVersion(35)
+        versionCode = versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
+        versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
+        testInstrumentationRunner("androidx.test.runner.AndroidJUnitRunner")
     }
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled(false)
+            proguardFiles(getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro')
         }
     }
 
@@ -48,14 +50,11 @@ configurations.implementation {
 }
 
 dependencies {
-    implementation files('libs/ion-java-1.9.5.jar')
-    implementation 'androidx.recyclerview:recyclerview:1.4.0'
-    androidTestImplementation('androidx.test.espresso:espresso-core:3.6.1', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    implementation 'androidx.appcompat:appcompat:1.7.1'
-    //noinspection GradleDependency
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
+    implementation(files('libs/ion-java-1.9.5.jar'))
+    implementation(libs.androidx.recyclerview)
+    androidTestImplementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.appcompat)
+    testImplementation(libs.junit.jupiter)
 
-    implementation 'com.google.android.material:material:1.12.0'
+    implementation(libs.material)
 }
