@@ -50,7 +50,7 @@ configurations.implementation {
 }
 
 dependencies {
-    implementation(files("libs/ion-java-1.9.5.jar"))
+    implementation(libs.ion.java)
     implementation(libs.androidx.recyclerview)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.appcompat)
