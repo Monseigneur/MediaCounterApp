@@ -58,7 +58,8 @@ public class MediaStatsActivity extends AppCompatActivity
         String text = "Total episodes: " + edList.size();
         binding.mediaStatsTotalLabel.setText(text);
 
-        MediaStatsAdapter adapter = new MediaStatsAdapter(edList);
+        MediaStatsAdapter adapter = new MediaStatsAdapter();
+        adapter.setData(edList);
 
         binding.mediaStatsList.setAdapter(adapter);
         binding.mediaStatsList.setLayoutManager(new LinearLayoutManager(this));

@@ -1,16 +1,17 @@
 package com.monseigneur.mediacounterapp.activity;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.monseigneur.mediacounterapp.databinding.MediaStatsListEntryBinding;
 import com.monseigneur.mediacounterapp.model.EpisodeData;
 import com.monseigneur.mediacounterapp.model.Util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,15 +19,11 @@ import java.util.List;
  */
 public class MediaStatsAdapter extends RecyclerView.Adapter<MediaStatsAdapter.ViewHolder>
 {
-    private final String TAG = "MediaStatsAdapter";
+    private List<EpisodeData> episodes;
 
-    private final List<EpisodeData> edList;
-
-    public MediaStatsAdapter(List<EpisodeData> edl)
+    public MediaStatsAdapter()
     {
-        edList = edl;
-
-        Log.i(TAG, "Constructor: episode count " + edList.size());
+        episodes = new ArrayList<>();
     }
 
     @NonNull
@@ -41,7 +38,7 @@ public class MediaStatsAdapter extends RecyclerView.Adapter<MediaStatsAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
-        EpisodeData ed = edList.get(position);
+        EpisodeData ed = episodes.get(position);
 
         holder.setData(ed);
     }
@@ -49,7 +46,52 @@ public class MediaStatsAdapter extends RecyclerView.Adapter<MediaStatsAdapter.Vi
     @Override
     public int getItemCount()
     {
-        return edList.size();
+        return episodes.size();
+    }
+
+    public void setData(List<EpisodeData> newEpisodes)
+    {
+        if (episodes == null || episodes.isEmpty())
+        {
+            episodes = newEpisodes;
+
+            notifyItemRangeChanged(0, episodes.size());
+
+            return;
+        }
+
+        DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback()
+        {
+            @Override
+            public int getOldListSize()
+            {
+                return episodes.size();
+            }
+
+            @Override
+            public int getNewListSize()
+            {
+                return newEpisodes.size();
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition)
+            {
+                return episodes.get(oldItemPosition).getMediaName().equals(newEpisodes.get(newItemPosition).getMediaName());
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition)
+            {
+                EpisodeData oldEpisode = episodes.get(oldItemPosition);
+                EpisodeData newEpisode = newEpisodes.get(newItemPosition);
+
+                return oldEpisode.equals(newEpisode);
+            }
+        });
+
+        episodes = newEpisodes;
+        result.dispatchUpdatesTo(this);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder
