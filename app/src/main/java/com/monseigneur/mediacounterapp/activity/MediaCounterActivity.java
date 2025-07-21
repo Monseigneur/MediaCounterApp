@@ -52,7 +52,6 @@ public class MediaCounterActivity extends AppCompatActivity
     private MediaCounterAdapter adapter;
 
     private boolean incLocked;
-    private Drawable defaultButtonBg;
 
     private final ActivityResultLauncher<Intent> newMediaLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -105,8 +104,6 @@ public class MediaCounterActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         binding = MainActivityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        defaultButtonBg = binding.lockButton.getBackground();
 
         episodeDataSerializer = new IonEpisodeDataSerializer(MediaStatsActivity.STATS_USE_BINARY_SERIALIZATION);
 
@@ -231,7 +228,7 @@ public class MediaCounterActivity extends AppCompatActivity
         if (lock)
         {
             binding.lockButton.setText(R.string.unlock_inc);
-            binding.lockButton.setBackground(defaultButtonBg);
+            binding.lockButton.setBackgroundColor(0);
         }
         else
         {
