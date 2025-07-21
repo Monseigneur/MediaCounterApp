@@ -19,7 +19,7 @@ import java.util.Random;
 /**
  * Created by Milan on 6/19/2016.
  */
-public class MediaCounterDB extends SQLiteOpenHelper
+public class MediaCounterDB extends SQLiteOpenHelper implements IDataSource
 {
     private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME = "media_counter_db";
@@ -212,43 +212,6 @@ public class MediaCounterDB extends SQLiteOpenHelper
     }
 
     /**
-     * Removes a Media from the database
-     *
-     * @param mediaName name of the Media to remove
-     */
-    private void deleteMedia(String mediaName)
-    {
-        int tid = getIdForMedia(mediaName);
-
-        if (tid == UNKNOWN_MEDIA)
-        {
-            Log.e("deleteMedia", "media does not exist");
-            return;
-        }
-
-        int numEpisodes = getNumEpisodes(mediaName);
-
-        for (int i = 0; i < numEpisodes; i++)
-        {
-            deleteEpisode(mediaName);
-        }
-
-        db.beginTransaction();
-        int rowsDeleted = db.delete(TABLE_TITLES, KEY_TID + SQL_PARAMETER, new String[]{String.valueOf(tid)});
-
-        if (rowsDeleted == 1)
-        {
-            db.setTransactionSuccessful();
-        }
-        else
-        {
-            Log.e("deleteMedia", "Deleting media counter removed more than 1 row! rows deleted = " + rowsDeleted);
-        }
-
-        db.endTransaction();
-    }
-
-    /**
      * Removes the latest Episode for a Media
      *
      * @param mediaName the name of the Media to remove from
@@ -428,7 +391,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
      *
      * @return a List of all Medias
      */
-    public List<MediaData> getMediaCounters()
+    public List<MediaData> getAllMedia()
     {
         return getMediaCounters(MediaCounterStatus.ALL_STATUSES);
     }
@@ -458,7 +421,7 @@ public class MediaCounterDB extends SQLiteOpenHelper
      *
      * @return a List of all Episodes
      */
-    public List<EpisodeData> getEpisodeData()
+    public List<EpisodeData> getAllEpisodes()
     {
         List<EpisodeData> data = new ArrayList<>();
 

@@ -7,12 +7,12 @@ import java.util.List;
 
 public class MediaCounterRepository
 {
-    private final MediaCounterDB db;
+    private final IDataSource db;
     private final IDataSerializer<MediaData> mediaDataSerializer;
 
     private List<MediaData> mediaList = new ArrayList<>();
 
-    public MediaCounterRepository(MediaCounterDB db, IDataSerializer<MediaData> serializer)
+    public MediaCounterRepository(IDataSource db, IDataSerializer<MediaData> serializer)
     {
         this.db = db;
         this.mediaDataSerializer = serializer;
@@ -32,7 +32,7 @@ public class MediaCounterRepository
 
     public List<EpisodeData> getAllEpisodes()
     {
-        return db.getEpisodeData();
+        return db.getAllEpisodes();
     }
 
     public String getRandomMediaName()
@@ -49,7 +49,10 @@ public class MediaCounterRepository
     {
         boolean success = db.addNewMedia(mediaName);
 
-        updateCache();
+        if (success)
+        {
+            updateCache();
+        }
 
         return success;
     }
@@ -159,6 +162,6 @@ public class MediaCounterRepository
 
     private void updateCache()
     {
-        mediaList = db.getMediaCounters();
+        mediaList = db.getAllMedia();
     }
 }
