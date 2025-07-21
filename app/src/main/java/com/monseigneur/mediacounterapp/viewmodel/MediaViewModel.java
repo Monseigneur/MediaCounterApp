@@ -19,10 +19,16 @@ public class MediaViewModel extends ViewModel
     private MediaCounterRepository repository;
 
     private final MutableLiveData<List<MediaData>> mediaData = new MutableLiveData<>(new ArrayList<>());
+    private final MutableLiveData<List<EpisodeData>> episodeData = new MutableLiveData<>(new ArrayList<>());
 
     public LiveData<List<MediaData>> getAllMedia()
     {
         return mediaData;
+    }
+
+    public LiveData<List<EpisodeData>> getAllEpisodes()
+    {
+        return episodeData;
     }
 
     public void setRepository(MediaCounterRepository repo)
@@ -30,11 +36,6 @@ public class MediaViewModel extends ViewModel
         repository = repo;
 
         updateLive();
-    }
-
-    public List<EpisodeData> getAllEpisodes()
-    {
-        return repository.getAllEpisodes();
     }
 
     public String getRandomMediaName()
@@ -120,5 +121,6 @@ public class MediaViewModel extends ViewModel
     private void updateLive()
     {
         mediaData.setValue(repository.getAllMedia());
+        episodeData.setValue(repository.getAllEpisodes());
     }
 }

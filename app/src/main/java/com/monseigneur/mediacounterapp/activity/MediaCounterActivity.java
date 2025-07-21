@@ -1,11 +1,7 @@
 package com.monseigneur.mediacounterapp.activity;
 
-import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,27 +11,23 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 
 import com.monseigneur.mediacounterapp.BuildConfig;
 import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.databinding.MainActivityBinding;
-import com.monseigneur.mediacounterapp.model.EpisodeData;
-import com.monseigneur.mediacounterapp.model.IDataSerializer;
-import com.monseigneur.mediacounterapp.model.IonEpisodeDataSerializer;
 import com.monseigneur.mediacounterapp.model.IonMediaDataSerializer;
 import com.monseigneur.mediacounterapp.model.MediaCounterDB;
 import com.monseigneur.mediacounterapp.model.MediaCounterRepository;
-import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
-import com.monseigneur.mediacounterapp.model.MediaData;
 import com.monseigneur.mediacounterapp.viewmodel.MediaViewModel;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Locale;
 
 public class MediaCounterActivity extends AppCompatActivity
@@ -45,37 +37,13 @@ public class MediaCounterActivity extends AppCompatActivity
 
     private MainActivityBinding binding;
 
-    private IDataSerializer<EpisodeData> episodeDataSerializer;
-
     private MediaViewModel mediaViewModel;
-
-    private MediaCounterAdapter adapter;
-
-    private boolean incLocked;
-
-    private final ActivityResultLauncher<Intent> newMediaLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == AppCompatActivity.RESULT_OK)
-                {
-                    handleNewMedia(result.getData());
-                }
-            });
-
-    private final ActivityResultLauncher<Intent> showInfoLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == AppCompatActivity.RESULT_OK)
-                {
-                    handleStatusChange(result.getData());
-                }
-            });
 
     private final ActivityResultLauncher<String> exportLauncher = registerForActivityResult(new ActivityResultContracts.CreateDocument("text/plain"),
             uri -> {
                 boolean exportSuccess = exportData(uri);
 
                 showToast(exportSuccess, getString(R.string.export_succeeded), getString(R.string.export_failed));
-
-                setLockState(true);
             });
 
     private final ActivityResultLauncher<String[]> importLauncher = registerForActivityResult(new ActivityResultContracts.OpenDocument(),
@@ -83,20 +51,7 @@ public class MediaCounterActivity extends AppCompatActivity
                 boolean importSuccess = importData(uri);
 
                 showToast(importSuccess, getString(R.string.import_succeeded), getString(R.string.import_failed));
-
-                setLockState(true);
             });
-
-    private final ListItemClickCallback listItemCallback = (mediaData, clickType) -> {
-        Log.i("listItemCallback", "got a click on md " + mediaData.getMediaName() + " type " + clickType);
-
-        switch (clickType)
-        {
-            case ListItemClickCallback.ItemClickType.INFO -> viewMediaInfo(mediaData);
-            case ListItemClickCallback.ItemClickType.INCREMENT -> changeCount(mediaData, true);
-            case ListItemClickCallback.ItemClickType.DECREMENT -> changeCount(mediaData, false);
-        }
-    };
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -105,28 +60,20 @@ public class MediaCounterActivity extends AppCompatActivity
         binding = MainActivityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        episodeDataSerializer = new IonEpisodeDataSerializer(MediaStatsActivity.STATS_USE_BINARY_SERIALIZATION);
-
-        adapter = new MediaCounterAdapter(listItemCallback);
-        binding.mediaList.setAdapter(adapter);
-        binding.mediaList.setLayoutManager(new LinearLayoutManager(this));
-
         mediaViewModel = new ViewModelProvider(this).get(MediaViewModel.class);
         mediaViewModel.setRepository(new MediaCounterRepository(new MediaCounterDB(this), new IonMediaDataSerializer(false)));
-        mediaViewModel.getAllMedia().observe(this, mediaData -> adapter.setMedia(mediaData));
 
-        binding.viewCheckBox.setOnCheckedChangeListener((_, _) -> showToast("Not yet implemented"));
+        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.navigation_media, R.id.navigation_stats)
+                .build();
 
-        binding.randomMediaButton.setOnClickListener(_ -> getRandomMedia());
+        // Workaround from https://stackoverflow.com/questions/58320487/using-fragmentcontainerview-with-navigation-component
+        // NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_activity_main);
+        NavController navController = navHostFragment.getNavController();
 
-        binding.statsButton.setOnClickListener(_ -> showStats());
-
-        binding.lockButton.setOnClickListener(_ -> setLockState(!incLocked));
-
-        binding.fab.setOnClickListener(_ -> newMediaLauncher.launch(new Intent(this, MediaCounterAddActivity.class)));
-
-        incLocked = true;
-        setLockState(true);
+        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+        NavigationUI.setupWithNavController(binding.navView, navController);
     }
 
     @Override
@@ -139,7 +86,7 @@ public class MediaCounterActivity extends AppCompatActivity
     @Override
     public boolean onPrepareOptionsMenu(Menu menu)
     {
-        menu.findItem(R.id.action_delete_all).setVisible(!incLocked);
+        menu.findItem(R.id.action_delete_all).setVisible(false);
         return true;
     }
 
@@ -169,8 +116,6 @@ public class MediaCounterActivity extends AppCompatActivity
             mediaViewModel.deleteAllMedia();
 
             showToast(getString(R.string.all_media_deleted));
-
-            setLockState(true);
         }
         else if (id == R.id.action_settings)
         {
@@ -195,119 +140,6 @@ public class MediaCounterActivity extends AppCompatActivity
     }
 
     /**
-     * Start the Media Info view for a selected Media view
-     *
-     * @param media the MediaData in the tapped view
-     */
-    public void viewMediaInfo(MediaData media)
-    {
-        Intent intent = new Intent(this, MediaInfoActivity.class);
-
-        Bundle b = new Bundle();
-
-        if (media == null)
-        {
-            Log.w("viewMediaInfo", "tapped MediaData in view is null!");
-            return;
-        }
-
-        b.putSerializable(MediaInfoActivity.MEDIA_INFO, media);
-        intent.putExtras(b);
-
-        showInfoLauncher.launch(intent);
-    }
-
-    /**
-     * Change the update lock state
-     *
-     * @param lock true to lock, false to unlock
-     */
-    private void setLockState(boolean lock)
-    {
-        incLocked = lock;
-        if (lock)
-        {
-            binding.lockButton.setText(R.string.unlock_inc);
-            binding.lockButton.setBackgroundColor(0);
-        }
-        else
-        {
-            binding.lockButton.setText(R.string.lock_inc);
-            binding.lockButton.setBackgroundColor(Color.RED);
-        }
-    }
-
-    /**
-     * Change the count of a tapped Media
-     *
-     * @param media     the media tapped on
-     * @param increment true to increment, false to decrement
-     */
-    private void changeCount(MediaData media, boolean increment)
-    {
-        if (incLocked)
-        {
-            Log.i("changeCount", "Locked for increment, exit early. increment = " + increment);
-            return;
-        }
-
-        if (media == null)
-        {
-            Log.w("changeCount", "MediaData is null!");
-            return;
-        }
-
-        Log.i("changeCount", "increment " + increment + " " + media);
-
-        if (increment)
-        {
-            mediaViewModel.addEpisode(media.getMediaName());
-        }
-        else
-        {
-            mediaViewModel.removeEpisode(media.getMediaName());
-        }
-    }
-
-    private void handleNewMedia(Intent newMediaIntent)
-    {
-        if (newMediaIntent == null)
-        {
-            return;
-        }
-
-        String name = newMediaIntent.getStringExtra(MEDIA_COUNTER_NAME);
-
-        Log.i("handleNewMedia", "new media [" + name + "]");
-
-        if (name == null || name.isEmpty())
-        {
-            showToast("Invalid name");
-            return;
-        }
-
-        if (!mediaViewModel.addNewMedia(name))
-        {
-            // Media already exists, show a toast
-            showToast(getString(R.string.duplicate_media));
-        }
-    }
-
-    private void handleStatusChange(Intent statusChangeIntent)
-    {
-        if (statusChangeIntent == null)
-        {
-            return;
-        }
-
-        MediaCounterStatus newStatus = statusChangeIntent.getSerializableExtra(MEDIA_INFO_STATUS, MediaCounterStatus.class);
-        String name = statusChangeIntent.getStringExtra(MediaCounterActivity.MEDIA_COUNTER_NAME);
-
-        Log.i("handleStatusChange", "media info status change " + newStatus + " for media [" + name + "]");
-        mediaViewModel.changeStatus(name, newStatus);
-    }
-
-    /**
      * Show a toast message
      *
      * @param text message to show
@@ -329,71 +161,6 @@ public class MediaCounterActivity extends AppCompatActivity
     private void showToast(boolean condition, String trueText, String falseText)
     {
         showToast(condition ? trueText : falseText);
-    }
-
-    private void getRandomMedia()
-    {
-        String randomMedia = mediaViewModel.getRandomMediaName();
-
-        if (randomMedia != null)
-        {
-            showToast(randomMedia);
-        }
-        else
-        {
-            showToast(getString(R.string.no_random));
-        }
-    }
-
-    private void showStats()
-    {
-        List<EpisodeData> epData = mediaViewModel.getAllEpisodes();
-        Log.i("showStats", "epData size " + epData.size());
-
-        if (epData.isEmpty())
-        {
-            showToast(getString(R.string.no_stats));
-
-            return;
-        }
-
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
-        if (!episodeDataSerializer.serialize(bos, epData))
-        {
-            Log.e("showStats", "failed to serialize episode data");
-            return;
-        }
-
-        try
-        {
-            bos.flush();
-        }
-        catch (IOException e)
-        {
-            Log.e("showStats", "caught exception " + e);
-            return;
-        }
-
-        Intent statsIntent = new Intent(this, MediaStatsActivity.class);
-        Bundle b = new Bundle();
-
-        b.putSerializable(MediaStatsActivity.EPISODE_DATA, bos.toByteArray());
-
-        statsIntent.putExtras(b);
-        showDataSize(b);
-
-        startActivity(statsIntent);
-    }
-
-    private void showDataSize(Bundle b)
-    {
-        Parcel p = Parcel.obtain();
-        p.writeBundle(b);
-
-        Log.i("showDataSize", "data size: " + p.dataSize());
-
-        p.recycle();
     }
 
     private boolean importData(Uri uri)

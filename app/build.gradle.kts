@@ -52,6 +52,8 @@ configurations.implementation {
 dependencies {
     implementation(libs.ion.java)
     implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.navigation.fragment)
+    implementation(libs.androidx.navigation.ui)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.appcompat)
     testImplementation(libs.junit.jupiter)

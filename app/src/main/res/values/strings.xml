@@ -34,4 +34,7 @@
     <string name="no_random">"No media counters to select from!"</string>
     <string name="all_media_deleted">All media counters deleted!</string>
 
+    <string name="title_media">Media</string>
+    <string name="title_stats">Stats</string>
+
 </resources>
