@@ -12,9 +12,9 @@
         tools:layout="@layout/fragment_media" />
 
     <fragment
-        android:id="@+id/navigation_stats"
-        android:name="com.monseigneur.mediacounterapp.activity.StatsFragment"
-        android:label="@string/title_stats"
-        tools:layout="@layout/fragment_stats" />
+        android:id="@+id/navigation_episodes"
+        android:name="com.monseigneur.mediacounterapp.activity.EpisodesFragment"
+        android:label="@string/title_episodes"
+        tools:layout="@layout/fragment_episodes" />
 
 </navigation>

@@ -10,30 +10,29 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.monseigneur.mediacounterapp.databinding.FragmentStatsBinding;
+import com.monseigneur.mediacounterapp.databinding.FragmentEpisodesBinding;
 import com.monseigneur.mediacounterapp.viewmodel.MediaViewModel;
 
-public class StatsFragment extends Fragment
+public class EpisodesFragment extends Fragment
 {
-    private FragmentStatsBinding binding;
-    MediaViewModel mediaViewModel;
-    MediaStatsAdapter adapter;
+    private FragmentEpisodesBinding binding;
+    private EpisodesAdapter adapter;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState)
     {
-        mediaViewModel = new ViewModelProvider(requireActivity()).get(MediaViewModel.class);
+        MediaViewModel mediaViewModel = new ViewModelProvider(requireActivity()).get(MediaViewModel.class);
 
-        binding = FragmentStatsBinding.inflate(inflater, container, false);
+        binding = FragmentEpisodesBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        adapter = new MediaStatsAdapter();
-        binding.mediaStatsList.setAdapter(adapter);
-        binding.mediaStatsList.setLayoutManager(new LinearLayoutManager(getActivity()));
+        adapter = new EpisodesAdapter();
+        binding.episodesList.setAdapter(adapter);
+        binding.episodesList.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         mediaViewModel.getAllEpisodes().observe(getViewLifecycleOwner(), episodes -> {
             String text = "Total episodes: " + episodes.size();
-            binding.mediaStatsTotalLabel.setText(text);
+            binding.episodesTotalLabel.setText(text);
             adapter.setData(episodes);
         });
 

@@ -6,7 +6,7 @@
         android:title="@string/title_media" />
 
     <item
-        android:id="@+id/navigation_stats"
+        android:id="@+id/navigation_episodes"
         android:icon="@android:drawable/ic_menu_camera"
-        android:title="@string/title_stats" />
+        android:title="@string/title_episodes" />
 </menu>

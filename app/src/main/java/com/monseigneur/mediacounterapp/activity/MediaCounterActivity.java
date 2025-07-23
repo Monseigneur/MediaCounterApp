@@ -64,7 +64,7 @@ public class MediaCounterActivity extends AppCompatActivity
         mediaViewModel.setRepository(new MediaCounterRepository(new MediaCounterDB(this), new IonMediaDataSerializer(false)));
 
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_media, R.id.navigation_stats)
+                R.id.navigation_media, R.id.navigation_episodes)
                 .build();
 
         // Workaround from https://stackoverflow.com/questions/58320487/using-fragmentcontainerview-with-navigation-component

@@ -24,9 +24,6 @@
         <activity
             android:name=".activity.MediaInfoActivity"
             android:parentActivityName=".activity.MediaCounterActivity" />
-        <activity
-            android:name=".activity.MediaStatsActivity"
-            android:parentActivityName=".activity.MediaCounterActivity" />
     </application>
 
 </manifest>

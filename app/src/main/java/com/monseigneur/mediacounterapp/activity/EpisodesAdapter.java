@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.monseigneur.mediacounterapp.databinding.MediaStatsListEntryBinding;
+import com.monseigneur.mediacounterapp.databinding.EpisodesListEntryBinding;
 import com.monseigneur.mediacounterapp.model.EpisodeData;
 import com.monseigneur.mediacounterapp.model.Util;
 
@@ -17,11 +17,11 @@ import java.util.List;
 /**
  * Created by Milan on 5/21/2016.
  */
-public class MediaStatsAdapter extends RecyclerView.Adapter<MediaStatsAdapter.ViewHolder>
+public class EpisodesAdapter extends RecyclerView.Adapter<EpisodesAdapter.ViewHolder>
 {
     private List<EpisodeData> episodes;
 
-    public MediaStatsAdapter()
+    public EpisodesAdapter()
     {
         episodes = new ArrayList<>();
     }
@@ -30,7 +30,7 @@ public class MediaStatsAdapter extends RecyclerView.Adapter<MediaStatsAdapter.Vi
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
-        MediaStatsListEntryBinding binding = MediaStatsListEntryBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        EpisodesListEntryBinding binding = EpisodesListEntryBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
 
         return new ViewHolder(binding);
     }
@@ -96,9 +96,9 @@ public class MediaStatsAdapter extends RecyclerView.Adapter<MediaStatsAdapter.Vi
 
     public static class ViewHolder extends RecyclerView.ViewHolder
     {
-        private final MediaStatsListEntryBinding binding;
+        private final EpisodesListEntryBinding binding;
 
-        public ViewHolder(@NonNull MediaStatsListEntryBinding b)
+        public ViewHolder(@NonNull EpisodesListEntryBinding b)
         {
             super(b.getRoot());
 
@@ -109,14 +109,14 @@ public class MediaStatsAdapter extends RecyclerView.Adapter<MediaStatsAdapter.Vi
         {
             int statusAppearance = Util.getStatusAppearance(ed.getMediaStatus());
 
-            binding.statsEpisodeNumber.setText(String.valueOf(ed.getEpNum()));
-            binding.statsEpisodeNumber.setTextAppearance(statusAppearance);
+            binding.episodesEpisodeNumber.setText(String.valueOf(ed.getEpNum()));
+            binding.episodesEpisodeNumber.setTextAppearance(statusAppearance);
 
-            binding.statsMediaName.setText(ed.getMediaName());
-            binding.statsMediaName.setTextAppearance(statusAppearance);
+            binding.episodesMediaName.setText(ed.getMediaName());
+            binding.episodesMediaName.setTextAppearance(statusAppearance);
 
-            binding.statsEpisodeDate.setText(Util.timestampToString(ed.getEpDate()));
-            binding.statsEpisodeDate.setTextAppearance(statusAppearance);
+            binding.episodesEpisodeDate.setText(Util.timestampToString(ed.getEpDate()));
+            binding.episodesEpisodeDate.setTextAppearance(statusAppearance);
         }
     }
 }
