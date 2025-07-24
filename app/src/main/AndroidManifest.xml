@@ -21,9 +21,6 @@
             android:name=".activity.MediaCounterAddActivity"
             android:parentActivityName=".activity.MediaCounterActivity"
             android:windowSoftInputMode="stateVisible" />
-        <activity
-            android:name=".activity.MediaInfoActivity"
-            android:parentActivityName=".activity.MediaCounterActivity" />
     </application>
 
 </manifest>

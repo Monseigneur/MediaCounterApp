@@ -1,35 +1,30 @@
 package com.monseigneur.mediacounterapp.activity;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.monseigneur.mediacounterapp.databinding.MediaInfoListEntryBinding;
+import com.monseigneur.mediacounterapp.databinding.InfoListEntryBinding;
 import com.monseigneur.mediacounterapp.model.Util;
 
 import java.util.List;
 
-public class MediaInfoAdapter extends RecyclerView.Adapter<MediaInfoAdapter.ViewHolder>
+public class InfoAdapter extends RecyclerView.Adapter<InfoAdapter.ViewHolder>
 {
-    private final String TAG = "MediaInfoEpisodeAdapter";
+    private final List<Long> episodeDates;
 
-    private final List<Long> epDates;
-
-    MediaInfoAdapter(List<Long> dates)
+    public InfoAdapter(List<Long> dates)
     {
-        Log.i(TAG, "Constructor: count of dates " + dates.size());
-
-        epDates = dates;
+        episodeDates = dates;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
-        MediaInfoListEntryBinding binding = MediaInfoListEntryBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        InfoListEntryBinding binding = InfoListEntryBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
 
         return new ViewHolder(binding);
     }
@@ -37,7 +32,7 @@ public class MediaInfoAdapter extends RecyclerView.Adapter<MediaInfoAdapter.View
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position)
     {
-        long date = epDates.get(position);
+        long date = episodeDates.get(position);
 
         holder.setData(position, date);
     }
@@ -45,14 +40,14 @@ public class MediaInfoAdapter extends RecyclerView.Adapter<MediaInfoAdapter.View
     @Override
     public int getItemCount()
     {
-        return epDates.size();
+        return episodeDates.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder
     {
-        private final MediaInfoListEntryBinding binding;
+        private final InfoListEntryBinding binding;
 
-        public ViewHolder(@NonNull MediaInfoListEntryBinding b)
+        public ViewHolder(@NonNull InfoListEntryBinding b)
         {
             super(b.getRoot());
 

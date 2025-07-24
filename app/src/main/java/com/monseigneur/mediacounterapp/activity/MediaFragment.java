@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.monseigneur.mediacounterapp.databinding.FragmentMediaBinding;
@@ -81,6 +82,13 @@ public class MediaFragment extends Fragment
 
         binding.fab.setOnClickListener(_ -> newMediaLauncher.launch(new Intent(getActivity(), MediaCounterAddActivity.class)));
 
+        getParentFragmentManager().setFragmentResultListener(InfoFragment.INFO_RESULT, this, (_, result) -> {
+            String mediaName = result.getString(InfoFragment.INFO_RESULT_NAME);
+            MediaCounterStatus status = result.getSerializable(InfoFragment.INFO_RESULT_STATUS, MediaCounterStatus.class);
+
+            mediaViewModel.changeStatus(mediaName, status);
+        });
+
         setLockState(true);
 
         return root;
@@ -121,20 +129,11 @@ public class MediaFragment extends Fragment
 
     public void viewMediaInfo(MediaData media)
     {
-        Intent intent = new Intent(getActivity(), MediaInfoActivity.class);
-
         Bundle b = new Bundle();
+        b.putSerializable(InfoFragment.INFO_MEDIA, media);
 
-        if (media == null)
-        {
-            Log.w("viewMediaInfo", "tapped MediaData in view is null!");
-            return;
-        }
-
-        b.putSerializable(MediaInfoActivity.MEDIA_INFO, media);
-        intent.putExtras(b);
-
-        showInfoLauncher.launch(intent);
+        NavHostFragment.findNavController(MediaFragment.this)
+                .navigate(R.id.action_MediaFragment_to_InfoFragment, b);
     }
 
     private void handleNewMedia(Intent newMediaIntent)

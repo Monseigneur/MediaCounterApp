@@ -12,6 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -36,6 +37,7 @@ public class MediaCounterActivity extends AppCompatActivity
     public static final String MEDIA_INFO_STATUS = "media_info_status";
 
     private MainActivityBinding binding;
+    private AppBarConfiguration appBarConfiguration;
 
     private MediaViewModel mediaViewModel;
 
@@ -63,14 +65,12 @@ public class MediaCounterActivity extends AppCompatActivity
         mediaViewModel = new ViewModelProvider(this).get(MediaViewModel.class);
         mediaViewModel.setRepository(new MediaCounterRepository(new MediaCounterDB(this), new IonMediaDataSerializer(false)));
 
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_media, R.id.navigation_episodes)
-                .build();
-
         // Workaround from https://stackoverflow.com/questions/58320487/using-fragmentcontainerview-with-navigation-component
         // NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_activity_main);
         NavController navController = navHostFragment.getNavController();
+
+        appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
 
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
@@ -137,6 +137,15 @@ public class MediaCounterActivity extends AppCompatActivity
     public void onPause()
     {
         super.onPause();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp()
+    {
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+
+        return NavigationUI.navigateUp(navController, appBarConfiguration)
+                || super.onSupportNavigateUp();
     }
 
     /**

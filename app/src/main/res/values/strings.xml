@@ -36,5 +36,6 @@
 
     <string name="title_media">Media</string>
     <string name="title_episodes">Episodes</string>
+    <string name="title_info">Info</string>
 
 </resources>

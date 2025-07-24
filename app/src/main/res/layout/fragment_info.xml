@@ -1,36 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".activity.InfoFragment">
 
     <TextView
-        android:id="@+id/media_info_name"
-        android:layout_width="fill_parent"
+        android:id="@+id/info_media_name"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="@dimen/edge_padding"
         android:paddingEnd="@dimen/edge_padding"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    <Space
-        android:layout_width="fill_parent"
-        android:layout_height="@dimen/space_height" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/media_info_added_date"
-        android:layout_width="fill_parent"
+        android:id="@+id/info_added_date"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingStart="@dimen/edge_padding"
-        android:paddingEnd="@dimen/edge_padding" />
+        android:paddingEnd="@dimen/edge_padding"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/info_media_name" />
 
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:id="@+id/info_status_linear_layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/info_added_date">
 
         <TextView
-            android:id="@+id/media_info_count"
+            android:id="@+id/info_episode_count"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
@@ -39,7 +45,7 @@
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <Button
-            android:id="@+id/media_info_status_button"
+            android:id="@+id/info_status_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
@@ -50,14 +56,16 @@
             android:textAlignment="center" />
     </LinearLayout>
 
-    <Space
-        android:layout_width="fill_parent"
-        android:layout_height="20dp" />
+    <!--    <include layout="@layout/media_info_list_entry" />-->
 
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:id="@+id/info_list_linear_layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/info_status_linear_layout">
 
         <TextView
             android:layout_width="0dp"
@@ -78,12 +86,13 @@
 
     </LinearLayout>
 
-    <Space
-        android:layout_width="fill_parent"
-        android:layout_height="@dimen/space_height" />
-
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/media_info_ep_list"
+        android:id="@+id/info_episode_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-</LinearLayout>
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/info_list_linear_layout"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

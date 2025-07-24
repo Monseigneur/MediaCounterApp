@@ -3,18 +3,29 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@+id/navigation_media">
+    app:startDestination="@id/navigation_media">
 
     <fragment
         android:id="@+id/navigation_media"
         android:name="com.monseigneur.mediacounterapp.activity.MediaFragment"
         android:label="@string/title_media"
-        tools:layout="@layout/fragment_media" />
+        tools:layout="@layout/fragment_media">
+
+        <action
+            android:id="@+id/action_MediaFragment_to_InfoFragment"
+            app:destination="@id/navigation_info" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_episodes"
         android:name="com.monseigneur.mediacounterapp.activity.EpisodesFragment"
         android:label="@string/title_episodes"
         tools:layout="@layout/fragment_episodes" />
+
+    <fragment
+        android:id="@+id/navigation_info"
+        android:name="com.monseigneur.mediacounterapp.activity.InfoFragment"
+        android:label="@string/title_info"
+        tools:layout="@layout/fragment_info" />
 
 </navigation>
