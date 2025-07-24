@@ -27,20 +27,10 @@ import com.monseigneur.mediacounterapp.viewmodel.MediaViewModel;
 
 public class MediaFragment extends Fragment
 {
-    public static final String MEDIA_COUNTER_NAME = "media_name";
-
     private FragmentMediaBinding binding;
     private MediaCounterAdapter adapter;
     private boolean incLocked;
     private MediaViewModel mediaViewModel;
-
-    private final ActivityResultLauncher<Intent> newMediaLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == AppCompatActivity.RESULT_OK)
-                {
-                    handleNewMedia(result.getData());
-                }
-            });
 
     private final ListItemClickCallback listItemCallback = (mediaData, clickType) -> {
         Log.i("listItemCallback", "got a click on md " + mediaData.getMediaName() + " type " + clickType);
@@ -71,13 +61,22 @@ public class MediaFragment extends Fragment
         binding.randomMediaButton.setOnClickListener(_ -> getRandomMedia());
         binding.lockButton.setOnClickListener(_ -> setLockState(!incLocked));
 
-        binding.fab.setOnClickListener(_ -> newMediaLauncher.launch(new Intent(getActivity(), MediaCounterAddActivity.class)));
+        binding.fab.setOnClickListener(_ -> {
+            NavHostFragment.findNavController(MediaFragment.this)
+                    .navigate(R.id.action_navigation_media_to_addItemDialogFragment);
+        });
 
         getParentFragmentManager().setFragmentResultListener(InfoFragment.INFO_RESULT, this, (_, result) -> {
             String mediaName = result.getString(InfoFragment.INFO_RESULT_NAME);
             MediaCounterStatus newStatus = result.getSerializable(InfoFragment.INFO_RESULT_STATUS, MediaCounterStatus.class);
 
             mediaViewModel.changeStatus(mediaName, newStatus);
+        });
+
+        getParentFragmentManager().setFragmentResultListener(AddItemDialogFragment.ADD_MEDIA_RESULT, this, (_, result) -> {
+            String newMediaName = result.getString(AddItemDialogFragment.ADD_MEDIA_RESULT_NAME);
+
+            handleNewMedia(newMediaName);
         });
 
         setLockState(true);
@@ -127,30 +126,22 @@ public class MediaFragment extends Fragment
                 .navigate(R.id.action_MediaFragment_to_InfoFragment, b);
     }
 
-    private void handleNewMedia(Intent newMediaIntent)
+    private void handleNewMedia(String newMediaName)
     {
-        if (newMediaIntent == null)
-        {
-            return;
-        }
+        Log.i("handleNewMedia", "new media [" + newMediaName + "]");
 
-        String name = newMediaIntent.getStringExtra(MEDIA_COUNTER_NAME);
-
-        Log.i("handleNewMedia", "new media [" + name + "]");
-
-        if (name == null || name.isEmpty())
+        if (newMediaName == null || newMediaName.isEmpty())
         {
             showToast("Invalid name");
             return;
         }
 
-        if (!mediaViewModel.addNewMedia(name))
+        if (!mediaViewModel.addNewMedia(newMediaName))
         {
             // Media already exists, show a toast
             showToast(getString(R.string.duplicate_media));
         }
     }
-
 
     private void getRandomMedia()
     {

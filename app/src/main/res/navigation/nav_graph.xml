@@ -14,6 +14,9 @@
         <action
             android:id="@+id/action_MediaFragment_to_InfoFragment"
             app:destination="@id/navigation_info" />
+        <action
+            android:id="@+id/action_navigation_media_to_addItemDialogFragment"
+            app:destination="@id/addItemDialogFragment" />
     </fragment>
 
     <fragment
@@ -27,5 +30,9 @@
         android:name="com.monseigneur.mediacounterapp.activity.InfoFragment"
         android:label="@string/title_info"
         tools:layout="@layout/fragment_info" />
+    <dialog
+        android:id="@+id/addItemDialogFragment"
+        android:name="com.monseigneur.mediacounterapp.activity.AddItemDialogFragment"
+        android:label="AddItemDialogFragment" />
 
 </navigation>
