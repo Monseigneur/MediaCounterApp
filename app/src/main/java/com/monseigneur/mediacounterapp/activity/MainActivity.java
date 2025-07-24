@@ -31,11 +31,8 @@ import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class MediaCounterActivity extends AppCompatActivity
+public class MainActivity extends AppCompatActivity
 {
-    public static final String MEDIA_COUNTER_NAME = "media_name";
-    public static final String MEDIA_INFO_STATUS = "media_info_status";
-
     private MainActivityBinding binding;
     private AppBarConfiguration appBarConfiguration;
 
@@ -86,6 +83,7 @@ public class MediaCounterActivity extends AppCompatActivity
     @Override
     public boolean onPrepareOptionsMenu(Menu menu)
     {
+        // MJMJ add a way to toggle this
         menu.findItem(R.id.action_delete_all).setVisible(false);
         return true;
     }

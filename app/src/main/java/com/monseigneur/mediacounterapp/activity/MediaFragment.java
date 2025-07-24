@@ -1,6 +1,5 @@
 package com.monseigneur.mediacounterapp.activity;
 
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,10 +10,7 @@ import android.widget.Toast;
 
 import com.monseigneur.mediacounterapp.R;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
@@ -28,7 +24,7 @@ import com.monseigneur.mediacounterapp.viewmodel.MediaViewModel;
 public class MediaFragment extends Fragment
 {
     private FragmentMediaBinding binding;
-    private MediaCounterAdapter adapter;
+    private MediaAdapter adapter;
     private boolean incLocked;
     private MediaViewModel mediaViewModel;
 
@@ -51,7 +47,7 @@ public class MediaFragment extends Fragment
         binding = FragmentMediaBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        adapter = new MediaCounterAdapter(listItemCallback);
+        adapter = new MediaAdapter(listItemCallback);
         binding.mediaList.setAdapter(adapter);
         binding.mediaList.setLayoutManager(new LinearLayoutManager(requireActivity()));
 

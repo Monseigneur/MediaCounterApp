@@ -14,12 +14,12 @@ import com.monseigneur.mediacounterapp.model.Util;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MediaCounterAdapter extends RecyclerView.Adapter<MediaCounterAdapter.ViewHolder>
+public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.ViewHolder>
 {
     private final ListItemClickCallback listItemCallback;
     private List<MediaData> mediaList;
 
-    public MediaCounterAdapter(ListItemClickCallback listItemClickCallback)
+    public MediaAdapter(ListItemClickCallback listItemClickCallback)
     {
         listItemCallback = listItemClickCallback;
 

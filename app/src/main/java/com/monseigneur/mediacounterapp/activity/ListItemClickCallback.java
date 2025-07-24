@@ -4,7 +4,7 @@ import com.monseigneur.mediacounterapp.model.MediaData;
 
 public interface ListItemClickCallback
 {
-    public enum ItemClickType
+    enum ItemClickType
     {
         INFO,
         INCREMENT,
