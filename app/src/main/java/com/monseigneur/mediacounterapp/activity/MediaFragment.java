@@ -28,7 +28,6 @@ import com.monseigneur.mediacounterapp.viewmodel.MediaViewModel;
 public class MediaFragment extends Fragment
 {
     public static final String MEDIA_COUNTER_NAME = "media_name";
-    public static final String MEDIA_INFO_STATUS = "media_info_status";
 
     private FragmentMediaBinding binding;
     private MediaCounterAdapter adapter;
@@ -40,14 +39,6 @@ public class MediaFragment extends Fragment
                 if (result.getResultCode() == AppCompatActivity.RESULT_OK)
                 {
                     handleNewMedia(result.getData());
-                }
-            });
-
-    private final ActivityResultLauncher<Intent> showInfoLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == AppCompatActivity.RESULT_OK)
-                {
-                    handleStatusChange(result.getData());
                 }
             });
 
@@ -84,9 +75,9 @@ public class MediaFragment extends Fragment
 
         getParentFragmentManager().setFragmentResultListener(InfoFragment.INFO_RESULT, this, (_, result) -> {
             String mediaName = result.getString(InfoFragment.INFO_RESULT_NAME);
-            MediaCounterStatus status = result.getSerializable(InfoFragment.INFO_RESULT_STATUS, MediaCounterStatus.class);
+            MediaCounterStatus newStatus = result.getSerializable(InfoFragment.INFO_RESULT_STATUS, MediaCounterStatus.class);
 
-            mediaViewModel.changeStatus(mediaName, status);
+            mediaViewModel.changeStatus(mediaName, newStatus);
         });
 
         setLockState(true);
@@ -160,19 +151,6 @@ public class MediaFragment extends Fragment
         }
     }
 
-    private void handleStatusChange(Intent statusChangeIntent)
-    {
-        if (statusChangeIntent == null)
-        {
-            return;
-        }
-
-        MediaCounterStatus newStatus = statusChangeIntent.getSerializableExtra(MEDIA_INFO_STATUS, MediaCounterStatus.class);
-        String name = statusChangeIntent.getStringExtra(MediaCounterActivity.MEDIA_COUNTER_NAME);
-
-        Log.i("handleStatusChange", "media info status change " + newStatus + " for media [" + name + "]");
-        mediaViewModel.changeStatus(name, newStatus);
-    }
 
     private void getRandomMedia()
     {
