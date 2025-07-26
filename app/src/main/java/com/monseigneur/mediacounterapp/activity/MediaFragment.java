@@ -54,7 +54,6 @@ public class MediaFragment extends Fragment
         mediaViewModel.getAllMedia().observe(getViewLifecycleOwner(), mediaData -> adapter.setMedia(mediaData));
 
         binding.viewCheckBox.setOnCheckedChangeListener((_, _) -> showToast("Not yet implemented"));
-        binding.randomMediaButton.setOnClickListener(_ -> getRandomMedia());
         binding.lockButton.setOnClickListener(_ -> setLockState(!incLocked));
 
         binding.fab.setOnClickListener(_ -> {
@@ -136,20 +135,6 @@ public class MediaFragment extends Fragment
         {
             // Media already exists, show a toast
             showToast(getString(R.string.duplicate_media));
-        }
-    }
-
-    private void getRandomMedia()
-    {
-        String randomMedia = mediaViewModel.getRandomMediaName();
-
-        if (randomMedia != null)
-        {
-            showToast(randomMedia);
-        }
-        else
-        {
-            showToast(getString(R.string.no_random));
         }
     }
 

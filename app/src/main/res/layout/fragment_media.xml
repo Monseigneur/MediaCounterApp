@@ -22,17 +22,9 @@
             android:layout_height="wrap_content" />
 
         <Button
-            android:id="@+id/random_media_button"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:text="@string/random_button_name" />
-
-        <Button
             android:id="@+id/lock_button"
             style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:text="@string/unlock_inc" />

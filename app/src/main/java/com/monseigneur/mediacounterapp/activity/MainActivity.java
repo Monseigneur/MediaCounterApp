@@ -94,7 +94,11 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
         boolean handled = true;
 
-        if (id == R.id.action_import)
+        if (id == R.id.action_random_media)
+        {
+            showRandomMedia();
+        }
+        else if (id == R.id.action_import)
         {
             importLauncher.launch(new String[]{"text/plain"});
         }
@@ -168,6 +172,13 @@ public class MainActivity extends AppCompatActivity
     private void showToast(boolean condition, String trueText, String falseText)
     {
         showToast(condition ? trueText : falseText);
+    }
+
+    private void showRandomMedia()
+    {
+        String randomMedia = mediaViewModel.getRandomMediaName();
+
+        showToast(randomMedia != null, randomMedia, getString(R.string.no_random));
     }
 
     private boolean importData(Uri uri)

@@ -19,6 +19,7 @@
     <string name="cancel_new_media_button">Cancel</string>
     <string name="add_new_media_label">Add a New Media Counter</string>
 
+    <string name="action_random_media">Random Media</string>
     <string name="action_settings">Settings</string>
     <string name="action_import">Import</string>
     <string name="action_export">Export</string>

@@ -1,6 +1,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_random_media"
+        android:icon="@android:drawable/ic_menu_mapmode"
+        android:orderInCategory="75"
+        android:title="@string/action_random_media"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/action_import"
         android:orderInCategory="100"
         android:title="@string/action_import"
