@@ -1,9 +1,11 @@
 package com.monseigneur.mediacounterapp.activity;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -11,7 +13,10 @@ import android.widget.Toast;
 import com.monseigneur.mediacounterapp.R;
 
 import androidx.annotation.NonNull;
+import androidx.core.view.MenuHost;
+import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -53,9 +58,6 @@ public class MediaFragment extends Fragment
 
         mediaViewModel.getAllMedia().observe(getViewLifecycleOwner(), mediaData -> adapter.setMedia(mediaData));
 
-        binding.viewCheckBox.setOnCheckedChangeListener((_, _) -> showToast("Not yet implemented"));
-        binding.lockButton.setOnClickListener(_ -> setLockState(!incLocked));
-
         binding.fab.setOnClickListener(_ -> {
             NavHostFragment.findNavController(MediaFragment.this)
                     .navigate(R.id.action_navigation_media_to_addItemDialogFragment);
@@ -74,7 +76,42 @@ public class MediaFragment extends Fragment
             handleNewMedia(newMediaName);
         });
 
-        setLockState(true);
+        MenuHost menuHost = requireActivity();
+
+        menuHost.addMenuProvider(new MenuProvider()
+        {
+            @Override
+            public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater)
+            {
+                MenuItem filter = menu.findItem(R.id.action_lock);
+                filter.setVisible(true);
+                filter.setTitle(R.string.unlock_inc);
+                incLocked = true;
+            }
+
+            @Override
+            public boolean onMenuItemSelected(@NonNull MenuItem menuItem)
+            {
+                if (menuItem.getItemId() != R.id.action_lock)
+                {
+                    return false;
+                }
+
+                incLocked = !incLocked;
+                if (incLocked)
+                {
+                    menuItem.setTitle(R.string.unlock_inc);
+                }
+                else
+                {
+                    menuItem.setTitle(R.string.lock_inc);
+                }
+
+                return true;
+            }
+        }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
+
+        incLocked = true;
 
         return root;
     }
@@ -143,20 +180,5 @@ public class MediaFragment extends Fragment
         Log.i("showToast", "showing toast [" + text + "]");
         Toast toast = Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT);
         toast.show();
-    }
-
-    private void setLockState(boolean lock)
-    {
-        incLocked = lock;
-        if (lock)
-        {
-            binding.lockButton.setText(R.string.unlock_inc);
-            binding.lockButton.setBackgroundColor(0);
-        }
-        else
-        {
-            binding.lockButton.setText(R.string.lock_inc);
-            binding.lockButton.setBackgroundColor(Color.RED);
-        }
     }
 }
