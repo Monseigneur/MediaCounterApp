@@ -31,8 +31,6 @@ public class EpisodesFragment extends Fragment
         binding.episodesList.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         mediaViewModel.getAllEpisodes().observe(getViewLifecycleOwner(), episodes -> {
-            String text = "Total episodes: " + episodes.size();
-            binding.episodesTotalLabel.setText(text);
             adapter.setData(episodes);
         });
 
