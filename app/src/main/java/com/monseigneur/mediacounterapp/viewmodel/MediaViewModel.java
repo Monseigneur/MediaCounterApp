@@ -8,6 +8,7 @@ import com.monseigneur.mediacounterapp.model.EpisodeData;
 import com.monseigneur.mediacounterapp.model.MediaCounterRepository;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 import com.monseigneur.mediacounterapp.model.MediaData;
+import com.monseigneur.mediacounterapp.model.StatsData;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,6 +21,7 @@ public class MediaViewModel extends ViewModel
 
     private final MutableLiveData<List<MediaData>> mediaData = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<List<EpisodeData>> episodeData = new MutableLiveData<>(new ArrayList<>());
+    private final MutableLiveData<StatsData> statsData = new MutableLiveData<>(new StatsData());
 
     public LiveData<List<MediaData>> getAllMedia()
     {
@@ -29,6 +31,11 @@ public class MediaViewModel extends ViewModel
     public LiveData<List<EpisodeData>> getAllEpisodes()
     {
         return episodeData;
+    }
+
+    public LiveData<StatsData> getStats()
+    {
+        return statsData;
     }
 
     public void setRepository(MediaCounterRepository repo)
@@ -120,7 +127,11 @@ public class MediaViewModel extends ViewModel
 
     private void updateLive()
     {
-        mediaData.setValue(repository.getAllMedia());
+        List<MediaData> mediaList = repository.getAllMedia();
+
+        mediaData.setValue(mediaList);
         episodeData.setValue(repository.getAllEpisodes());
+
+        statsData.setValue(new StatsData(mediaList));
     }
 }

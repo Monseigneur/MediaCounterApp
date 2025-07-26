@@ -7,16 +7,69 @@
     tools:context=".activity.StatsFragment">
 
     <TextView
-        android:id="@+id/stats_media_name"
+        android:id="@+id/stats_media_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="@dimen/edge_padding"
         android:paddingEnd="@dimen/edge_padding"
-        android:text="Not Yet Implemented"
+        android:text="Media count"
         android:textAppearance="?android:attr/textAppearanceLarge"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/stats_media_new"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/edge_padding"
+        android:paddingEnd="@dimen/edge_padding"
+        android:text="New"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/stats_media_count" />
+
+    <TextView
+        android:id="@+id/stats_media_ongoing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/edge_padding"
+        android:paddingEnd="@dimen/edge_padding"
+        android:text="Ongoing"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/stats_media_new" />
+
+    <TextView
+        android:id="@+id/stats_media_complete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/edge_padding"
+        android:paddingEnd="@dimen/edge_padding"
+        android:text="Complete"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/stats_media_ongoing" />
+
+    <TextView
+        android:id="@+id/stats_media_dropped"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/edge_padding"
+        android:paddingEnd="@dimen/edge_padding"
+        android:text="Dropped"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/stats_media_complete" />
+
+    <TextView
+        android:id="@+id/stats_episode_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/edge_padding"
+        android:paddingEnd="@dimen/edge_padding"
+        android:text="Episode count"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/stats_media_dropped" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
