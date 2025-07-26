@@ -9,4 +9,9 @@
         android:id="@+id/navigation_episodes"
         android:icon="@android:drawable/ic_menu_camera"
         android:title="@string/title_episodes" />
+
+    <item
+        android:id="@+id/navigation_stats"
+        android:icon="@android:drawable/ic_menu_compass"
+        android:title="@string/title_stats" />
 </menu>
