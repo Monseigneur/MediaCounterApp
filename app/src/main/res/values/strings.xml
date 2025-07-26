@@ -36,6 +36,13 @@
     <string name="no_random">"No media counters to select from!"</string>
     <string name="all_media_deleted">All media counters deleted!</string>
 
+    <string name="stats_media_count">Media count: %1$d</string>
+    <string name="stats_media_count_new">New: %1$d</string>
+    <string name="stats_media_count_ongoing">Ongoing: %1$d</string>
+    <string name="stats_media_count_complete">Complete: %1$d</string>
+    <string name="stats_media_count_dropped">Dropped: %1$d</string>
+    <string name="stats_episode_count">Episode count: %1$d</string>
+
     <string name="title_media">Media</string>
     <string name="title_episodes">Episodes</string>
     <string name="title_info">Info</string>
