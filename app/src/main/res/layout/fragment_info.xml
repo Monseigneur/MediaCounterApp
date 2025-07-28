@@ -17,74 +17,58 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:id="@+id/info_episode_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/edge_padding"
+        android:paddingRight="@dimen/edge_padding"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBaseline_toBaselineOf="@id/info_media_name"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
         android:id="@+id/info_added_date"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="@dimen/edge_padding"
         android:paddingEnd="@dimen/edge_padding"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/info_media_name" />
+        app:layout_constraintHorizontal_weight="0.75"
+        app:layout_constraintTop_toBottomOf="@id/info_media_name"
+        app:layout_constraintBaseline_toBaselineOf="@id/info_status_button" />
 
-    <LinearLayout
-        android:id="@+id/info_status_linear_layout"
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/info_status_button"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/info_added_date">
+        android:gravity="center_horizontal"
+        android:paddingStart="@dimen/edge_padding"
+        android:paddingEnd="@dimen/edge_padding"
+        android:text="@string/not_complete"
+        android:textAlignment="center"
+        app:layout_constraintTop_toBottomOf="@id/info_media_name"
+        app:layout_constraintHorizontal_weight="0.25"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-        <TextView
-            android:id="@+id/info_episode_count"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:paddingLeft="@dimen/edge_padding"
-            android:paddingRight="@dimen/edge_padding"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-
-        <Button
-            android:id="@+id/info_status_button"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:gravity="center_horizontal"
-            android:paddingStart="@dimen/edge_padding"
-            android:paddingEnd="@dimen/edge_padding"
-            android:text="@string/not_complete"
-            android:textAlignment="center" />
-    </LinearLayout>
-
-    <!--    <include layout="@layout/media_info_list_entry" />-->
-
-    <LinearLayout
-        android:id="@+id/info_list_linear_layout"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/info_list_header"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:paddingStart="@dimen/edge_padding"
+        android:paddingEnd="@dimen/edge_padding"
+        android:text="@string/episode_number"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/info_status_button" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/edge_padding"
+        android:paddingEnd="@dimen/edge_padding"
+        android:text="@string/episode_date"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/info_status_linear_layout">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:paddingStart="@dimen/edge_padding"
-            android:paddingEnd="@dimen/edge_padding"
-            android:text="@string/episode_number" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:gravity="end"
-            android:paddingStart="@dimen/edge_padding"
-            android:paddingEnd="@dimen/edge_padding"
-            android:text="@string/episode_date" />
-
-    </LinearLayout>
+        app:layout_constraintTop_toBottomOf="@id/info_status_button" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/info_episode_list"
@@ -92,7 +76,7 @@
         android:layout_height="0dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/info_list_linear_layout"
+        app:layout_constraintTop_toBottomOf="@id/info_list_header"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -38,7 +38,7 @@ public class InfoFragment extends Fragment
         binding.infoMediaName.setText(mediaName);
 
         String addedDate = Util.timestampToString(media.getAddedDate());
-        binding.infoAddedDate.setText("Added: " + addedDate);
+        binding.infoAddedDate.setText(getString(R.string.info_added_date, addedDate));
 
         binding.infoEpisodeCount.setText(String.valueOf(media.getCount()));
 
