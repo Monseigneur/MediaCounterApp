@@ -77,7 +77,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.ViewHolder>
             @Override
             public boolean areItemsTheSame(int oldItemPosition, int newItemPosition)
             {
-                return mediaList.get(oldItemPosition).getMediaName().equals(newMediaList.get(newItemPosition).getMediaName());
+                return mediaList.get(oldItemPosition).getName().equals(newMediaList.get(newItemPosition).getName());
             }
 
             @Override
@@ -114,7 +114,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.ViewHolder>
             int statusAppearance = Util.getStatusAppearance(md.getStatus());
 
             binding.nameLabel.setTextAppearance(statusAppearance);
-            binding.nameLabel.setText(md.getMediaName());
+            binding.nameLabel.setText(md.getName());
             binding.countLabel.setText(String.valueOf(md.getCount()));
 
             binding.nameLabel.setOnClickListener(_ -> listItemCallback.onClick(media, ListItemClickCallback.ItemClickType.INFO));

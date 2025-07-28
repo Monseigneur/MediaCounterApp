@@ -18,7 +18,8 @@ public class MediaData implements Serializable
     private final String mediaName;
     private final MediaCounterStatus status;
     private final long addedDate;
-    private final List<Long> epDates;
+    private final String addedDateString;
+    private final List<Long> episodeDates;
 
     /**
      * Creates a new Media
@@ -56,14 +57,15 @@ public class MediaData implements Serializable
         this.mediaName = name;
         this.status = status;
         this.addedDate = date;
+        this.addedDateString = Util.timestampToString(this.addedDate);
 
         if (epDates == null)
         {
-            this.epDates = new ArrayList<>();
+            this.episodeDates = new ArrayList<>();
         }
         else
         {
-            this.epDates = epDates;
+            this.episodeDates = epDates;
         }
     }
 
@@ -74,17 +76,27 @@ public class MediaData implements Serializable
      */
     public int getCount()
     {
-        return epDates.size();
+        return episodeDates.size();
+    }
+
+    /**
+     * Get the date the Media was added as an integer
+     *
+     * @return the date the Media was added
+     */
+    public long getAddedDateNumber()
+    {
+        return addedDate;
     }
 
     /**
      * Get the date the Media was added
      *
-     * @return the date the Media was added
+     * @return the date the media was added
      */
-    public long getAddedDate()
+    public String getAddedDate()
     {
-        return addedDate;
+        return addedDateString;
     }
 
     /**
@@ -92,7 +104,7 @@ public class MediaData implements Serializable
      *
      * @return the name of the Media
      */
-    public String getMediaName()
+    public String getName()
     {
         return mediaName;
     }
@@ -102,9 +114,9 @@ public class MediaData implements Serializable
      *
      * @return List of Episode dates
      */
-    public List<Long> getEpDates()
+    public List<Long> getEpisodeDates()
     {
-        return epDates;
+        return episodeDates;
     }
 
     /**
@@ -120,7 +132,7 @@ public class MediaData implements Serializable
     @Override
     public String toString()
     {
-        return "[" + mediaName + ": " + epDates.size() + " (" + status + ")]";
+        return "[" + mediaName + ": " + episodeDates.size() + " (" + status + ")]";
     }
 
     /**
@@ -129,7 +141,7 @@ public class MediaData implements Serializable
     public static final Comparator<MediaData> BY_NAME =
             (o1, o2) -> {
                 String thisName = o1.mediaName.toLowerCase();
-                String otherName = o2.getMediaName().toLowerCase();
+                String otherName = o2.getName().toLowerCase();
 
                 return thisName.compareTo(otherName);
             };
@@ -147,13 +159,13 @@ public class MediaData implements Serializable
                 long o1Date = o1.addedDate;
                 if (o1.getCount() > 0)
                 {
-                    o1Date = o1.getEpDates().get(o1.getCount() - 1);
+                    o1Date = o1.getEpisodeDates().get(o1.getCount() - 1);
                 }
 
                 long o2Date = o2.addedDate;
                 if (o2.getCount() > 0)
                 {
-                    o2Date = o2.getEpDates().get(o2.getCount() - 1);
+                    o2Date = o2.getEpisodeDates().get(o2.getCount() - 1);
                 }
 
                 long delta = o1Date - o2Date;
@@ -186,12 +198,12 @@ public class MediaData implements Serializable
 
         MediaData mediaData = (MediaData) o;
 
-        return addedDate == mediaData.addedDate && Objects.equals(mediaName, mediaData.mediaName) && status == mediaData.status && epDates.equals(mediaData.epDates);
+        return addedDate == mediaData.addedDate && Objects.equals(mediaName, mediaData.mediaName) && status == mediaData.status && episodeDates.equals(mediaData.episodeDates);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(mediaName, status, addedDate, epDates);
+        return Objects.hash(mediaName, status, addedDate, episodeDates);
     }
 }

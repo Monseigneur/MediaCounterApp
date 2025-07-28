@@ -112,16 +112,16 @@ public class MediaCounterDB extends SQLiteOpenHelper implements IDataSource
             return false;
         }
 
-        if (getIdForMedia(md.getMediaName()) != UNKNOWN_MEDIA)
+        if (getIdForMedia(md.getName()) != UNKNOWN_MEDIA)
         {
             Log.e("addMedia", "media already exists!");
             return false;
         }
 
         ContentValues values = new ContentValues();
-        values.put(KEY_TITLE, md.getMediaName());
+        values.put(KEY_TITLE, md.getName());
         values.put(KEY_STATUS, md.getStatus().value);
-        values.put(KEY_ADDED_DATE, md.getAddedDate());
+        values.put(KEY_ADDED_DATE, md.getAddedDateNumber());
 
         db.insert(TABLE_TITLES, null, values);
 
@@ -413,7 +413,7 @@ public class MediaCounterDB extends SQLiteOpenHelper implements IDataSource
         Random rand = new Random();
         int index = rand.nextInt(watchable.size());
 
-        return watchable.get(index).getMediaName();
+        return watchable.get(index).getName();
     }
 
     /**
@@ -554,9 +554,9 @@ public class MediaCounterDB extends SQLiteOpenHelper implements IDataSource
             }
 
             int i = 1;
-            for (long epDate : md.getEpDates())
+            for (long epDate : md.getEpisodeDates())
             {
-                addEpisode(md.getMediaName(), i, epDate);
+                addEpisode(md.getName(), i, epDate);
                 i++;
             }
         }

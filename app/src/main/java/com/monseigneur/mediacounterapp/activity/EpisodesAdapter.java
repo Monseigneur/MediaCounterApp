@@ -109,13 +109,13 @@ public class EpisodesAdapter extends RecyclerView.Adapter<EpisodesAdapter.ViewHo
         {
             int statusAppearance = Util.getStatusAppearance(ed.getMediaStatus());
 
-            binding.episodesEpisodeNumber.setText(String.valueOf(ed.getEpNum()));
+            binding.episodesEpisodeNumber.setText(String.valueOf(ed.getNumber()));
             binding.episodesEpisodeNumber.setTextAppearance(statusAppearance);
 
             binding.episodesMediaName.setText(ed.getMediaName());
             binding.episodesMediaName.setTextAppearance(statusAppearance);
 
-            binding.episodesEpisodeDate.setText(Util.timestampToString(ed.getEpDate()));
+            binding.episodesEpisodeDate.setText(ed.getDate());
             binding.episodesEpisodeDate.setTextAppearance(statusAppearance);
         }
     }

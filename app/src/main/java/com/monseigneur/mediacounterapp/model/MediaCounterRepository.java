@@ -27,7 +27,7 @@ public class MediaCounterRepository
 
     private MediaData getMedia(String mediaName)
     {
-        return mediaList.stream().filter(md -> md.getMediaName().equals(mediaName)).findFirst().orElse(null);
+        return mediaList.stream().filter(md -> md.getName().equals(mediaName)).findFirst().orElse(null);
     }
 
     public List<EpisodeData> getAllEpisodes()

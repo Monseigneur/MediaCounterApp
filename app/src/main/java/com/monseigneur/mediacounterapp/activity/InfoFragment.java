@@ -13,7 +13,6 @@ import com.monseigneur.mediacounterapp.R;
 import com.monseigneur.mediacounterapp.databinding.FragmentInfoBinding;
 import com.monseigneur.mediacounterapp.model.MediaCounterStatus;
 import com.monseigneur.mediacounterapp.model.MediaData;
-import com.monseigneur.mediacounterapp.model.Util;
 
 public class InfoFragment extends Fragment
 {
@@ -34,11 +33,10 @@ public class InfoFragment extends Fragment
 
         MediaData media = getArguments().getSerializable(INFO_MEDIA, MediaData.class);
 
-        mediaName = media.getMediaName();
+        mediaName = media.getName();
         binding.infoMediaName.setText(mediaName);
 
-        String addedDate = Util.timestampToString(media.getAddedDate());
-        binding.infoAddedDate.setText(getString(R.string.info_added_date, addedDate));
+        binding.infoAddedDate.setText(getString(R.string.info_added_date, media.getAddedDate()));
 
         binding.infoEpisodeCount.setText(String.valueOf(media.getCount()));
 
@@ -47,7 +45,7 @@ public class InfoFragment extends Fragment
         currentStatus = media.getStatus();
         setButtonText();
 
-        InfoAdapter adapter = new InfoAdapter(media.getEpDates());
+        InfoAdapter adapter = new InfoAdapter(media.getEpisodeDates());
 
         binding.infoEpisodeList.setAdapter(adapter);
         binding.infoEpisodeList.setLayoutManager(new LinearLayoutManager(getActivity()));

@@ -20,12 +20,12 @@ public class MediaDataTest
 
         assertNotNull(md);
 
-        assertEquals(name, md.getMediaName());
+        assertEquals(name, md.getName());
         assertEquals(0, md.getCount());
-        assertEquals(1, md.getAddedDate());
+        assertEquals(1, md.getAddedDateNumber());
         assertEquals(MediaCounterStatus.NEW, md.getStatus());
 
-        List<Long> dates = md.getEpDates();
+        List<Long> dates = md.getEpisodeDates();
         assertNotNull(dates);
         assertTrue(dates.isEmpty());
     }
@@ -43,12 +43,12 @@ public class MediaDataTest
 
         assertNotNull(md1);
 
-        assertEquals(name, md1.getMediaName());
+        assertEquals(name, md1.getName());
         assertEquals(epDates.size(), md1.getCount());
-        assertEquals(date, md1.getAddedDate());
+        assertEquals(date, md1.getAddedDateNumber());
         assertEquals(status, md1.getStatus());
 
-        List<Long> dates = md1.getEpDates();
+        List<Long> dates = md1.getEpisodeDates();
         assertNotNull(dates);
         assertEquals(epDates.size(), dates.size());
 
@@ -57,12 +57,12 @@ public class MediaDataTest
 
         assertNotNull(md2);
 
-        assertEquals(name, md2.getMediaName());
+        assertEquals(name, md2.getName());
         assertEquals(0, md2.getCount());
-        assertEquals(date, md2.getAddedDate());
+        assertEquals(date, md2.getAddedDateNumber());
         assertEquals(status, md2.getStatus());
 
-        dates = md2.getEpDates();
+        dates = md2.getEpisodeDates();
         assertNotNull(dates);
         assertTrue(dates.isEmpty());
     }

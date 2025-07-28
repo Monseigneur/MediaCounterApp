@@ -34,7 +34,7 @@ public class MediaFragment extends Fragment
     private MediaViewModel mediaViewModel;
 
     private final ListItemClickCallback listItemCallback = (mediaData, clickType) -> {
-        Log.i("listItemCallback", "got a click on md " + mediaData.getMediaName() + " type " + clickType);
+        Log.i("listItemCallback", "got a click on md " + mediaData.getName() + " type " + clickType);
 
         switch (clickType)
         {
@@ -141,11 +141,11 @@ public class MediaFragment extends Fragment
 
         if (increment)
         {
-            mediaViewModel.addEpisode(media.getMediaName());
+            mediaViewModel.addEpisode(media.getName());
         }
         else
         {
-            mediaViewModel.removeEpisode(media.getMediaName());
+            mediaViewModel.removeEpisode(media.getName());
         }
     }
 

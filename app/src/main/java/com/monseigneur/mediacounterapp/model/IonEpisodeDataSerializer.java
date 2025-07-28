@@ -175,9 +175,9 @@ public class IonEpisodeDataSerializer implements IDataSerializer<EpisodeData>
 
             IonStruct episode = ionSys.newNullStruct();
             episode.put(DATA_FIELD_NAME_IDX).newInt(nameIdx);
-            episode.put(DATA_FIELD_EPNUM).newInt(ed.getEpNum());
+            episode.put(DATA_FIELD_EPNUM).newInt(ed.getNumber());
             episode.put(DATA_FIELD_STATUS).newInt(ed.getMediaStatus().value);
-            episode.put(DATA_FIELD_EPDATE).newInt(ed.getEpDate());
+            episode.put(DATA_FIELD_EPDATE).newInt(ed.getDateNumber());
 
             dataList.add(episode);
         }

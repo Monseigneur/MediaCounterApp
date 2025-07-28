@@ -8,15 +8,17 @@ import java.util.Objects;
 public class EpisodeData implements Comparable<EpisodeData>
 {
     private final String mediaName;
-    private final int epNum;
-    private final long epDate;
+    private final int number;
+    private final long date;
+    private final String dateString;
     private final MediaCounterStatus mediaStatus;
 
     public EpisodeData(String name, int num, long date, MediaCounterStatus status)
     {
         mediaName = name;
-        epNum = num;
-        epDate = date;
+        number = num;
+        this.date = date;
+        dateString = Util.timestampToString(this.date);
         mediaStatus = status;
     }
 
@@ -25,14 +27,19 @@ public class EpisodeData implements Comparable<EpisodeData>
         return mediaName;
     }
 
-    public int getEpNum()
+    public int getNumber()
     {
-        return epNum;
+        return number;
     }
 
-    public long getEpDate()
+    public long getDateNumber()
     {
-        return epDate;
+        return date;
+    }
+
+    public String getDate()
+    {
+        return dateString;
     }
 
     public MediaCounterStatus getMediaStatus()
@@ -43,7 +50,7 @@ public class EpisodeData implements Comparable<EpisodeData>
     @Override
     public int compareTo(EpisodeData another)
     {
-        long delta = epDate - another.epDate;
+        long delta = date - another.date;
 
         int result = 0;
         if (delta < 0)
@@ -63,8 +70,8 @@ public class EpisodeData implements Comparable<EpisodeData>
     {
         return "EpisodeData{" +
                 "mediaName='" + mediaName + '\'' +
-                ", epNum=" + epNum +
-                ", epDate=" + epDate +
+                ", epNum=" + number +
+                ", epDate=" + date +
                 ", mediaStatus=" + mediaStatus +
                 '}';
     }
@@ -83,12 +90,12 @@ public class EpisodeData implements Comparable<EpisodeData>
         }
 
         EpisodeData that = (EpisodeData) o;
-        return epNum == that.epNum && epDate == that.epDate && Objects.equals(mediaName, that.mediaName) && mediaStatus == that.mediaStatus;
+        return number == that.number && date == that.date && Objects.equals(mediaName, that.mediaName) && mediaStatus == that.mediaStatus;
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(mediaName, epNum, epDate, mediaStatus);
+        return Objects.hash(mediaName, number, date, mediaStatus);
     }
 }

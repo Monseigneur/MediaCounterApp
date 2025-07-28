@@ -148,11 +148,11 @@ public class IonMediaDataSerializer implements IDataSerializer<MediaData>
         for (MediaData md : itemList)
         {
             IonStruct media = ionSys.newNullStruct();
-            media.put(DATA_FIELD_TITLE).newString(md.getMediaName());
+            media.put(DATA_FIELD_TITLE).newString(md.getName());
             media.put(DATA_FIELD_STATUS).newInt(md.getStatus().value);
-            media.put(DATA_FIELD_ADDED).newInt(md.getAddedDate());
+            media.put(DATA_FIELD_ADDED).newInt(md.getAddedDateNumber());
 
-            List<Long> epDates = md.getEpDates();
+            List<Long> epDates = md.getEpisodeDates();
             IonList epList = ionSys.newEmptyList();
             for (int i = 0; i < epDates.size(); i++)
             {
